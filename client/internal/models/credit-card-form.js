@@ -108,31 +108,31 @@ CreditCardForm.prototype.getCardData = function () {
   var result = {};
   var keys = [];
 
-  if (this._fieldKeys.indexOf('number') !== -1) {
-    keys.push('number');
+  console.log("keys are "+JSON.stringify(this._fieldKeys));
+
+  if (this._fieldKeys.indexOf('cardPan') !== -1) {
+    keys.push('cardPan');
   }
 
-  if (this._fieldKeys.indexOf('cvv') !== -1) {
-    keys.push('cvv');
+  if (this._fieldKeys.indexOf('cardCVV') !== -1) {
+    keys.push('cardCVV');
   }
 
   if (this._fieldKeys.indexOf('postalCode') !== -1) {
     keys.push('postalCode');
   }
 
-  if (this._fieldKeys.indexOf('expirationMonth') !== -1) {
-    keys.push('expirationMonth');
+  if (this._fieldKeys.indexOf('expirationDate') !== -1) {
+    keys.push('expirationDate');
   }
 
-  if (this._fieldKeys.indexOf('expirationYear') !== -1) {
-    keys.push('expirationYear');
-  }
+  
 
   if (this._fieldKeys.indexOf('expirationDate') !== -1) {
-    expirationData = splitDate(this.get('expirationDate.value'));
+    //expirationData = splitDate(this.get('expirationDate.value'));
     console.log(expirationData);
-    result.expirationMonth = expirationData.month;
-    result.expirationYear = expirationData.year;
+    //result.expirationMonth = expirationData.month;
+    //result.expirationYear = expirationData.year;
   }
 
   keys.reduce(function (reducedResult, name) {
@@ -140,6 +140,7 @@ CreditCardForm.prototype.getCardData = function () {
     return reducedResult;
   }.bind(this), result);
 
+  console.log(JSON.stringify(result));
   return result;
 };
 
@@ -155,7 +156,8 @@ function onFieldValueChange(form, fieldKey) {
   
    return function () {
     var isEmpty =  form.get(fieldKey + '.value');
-    form.set(fieldKey + '.isEmpty', isEmpty === '');
+    //console.log("isEmpty is "+isEmpty+" ");
+    form.set(fieldKey + '.isEmpty', isEmpty !== '');
     form._validateField(fieldKey);
   };
 

@@ -26,7 +26,7 @@ var builder = function(conf) {
     });
 
     bus.on("PAY_REQUEST", function(options, reply){
-        console.log("handled the pay request");
+        console.log("handle the pay request");
 
         var payHandler = createPayHandler(cardForm.getCardData());
     });
@@ -43,7 +43,7 @@ var createPayHandler = function(cardForm){
 };
 
 var normalizeFields = function(options){
-
+    return;
 }
 
 var initialize = function(cardForm) {

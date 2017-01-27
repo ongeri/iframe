@@ -27,8 +27,14 @@ EventedModel.prototype.get = function get(compoundKey) {
   return traversal;
 };
 
-
+/**
+ * Set the value to compound key
+ * If there is a change, trigger two events 
+ * one for the change in type and another for
+ * a change of type:field
+ */
 EventedModel.prototype.set = function set(compoundKey, value) {
+  console.log("Setting "+compoundKey+" "+value);
   var i, key, keys;
   var traversal = this._attributes;
 
@@ -52,6 +58,7 @@ EventedModel.prototype.set = function set(compoundKey, value) {
 
     for (i = 1; i <= keys.length; i++) {
       key = keys.slice(0, i).join('.');
+      console.log('change:'+key+"----"+JSON.stringify(this.get(key)));
       this.emit('change:' + key, this.get(key));
     }
   }
@@ -86,7 +93,7 @@ EventedModel.prototype.emit = function emit(event) {
   }
 
   for(i=0;i<listeners.length;i++) {
-    listners[i].apply(self, slice.call(args, 1));
+    listeners[i].apply(self, slice.call(args, 1));
   }
 
 

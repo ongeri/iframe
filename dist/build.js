@@ -69,6 +69,7 @@ var frameInjector = require('./frame-inject.js');
 var $ = require('jquery');
 var bus = require('framebus');
 var EventEmitter = require('../libs/event-emitter.js');
+var noCallback = require('../libs/no-callback.js');
 
 Backbone.$ = $;
 var _ = require('underscore');
@@ -235,6 +236,8 @@ HostedFields.prototype.pay = function (options, callback) {
     options = {};
   }
 
+  noCallback(callback, 'pay');
+
   bus.emit("PAY_REQUEST", options, function (response) {
     callback(null, response);
   });
@@ -242,7 +245,7 @@ HostedFields.prototype.pay = function (options, callback) {
 
 module.exports = HostedFields;
 
-},{"../libs/event-emitter.js":6,"../utilities/iframe/index.js":8,"./frame-inject.js":2,"backbone":37,"framebus":38,"jquery":40,"underscore":41}],4:[function(require,module,exports){
+},{"../libs/event-emitter.js":6,"../libs/no-callback.js":7,"../utilities/iframe/index.js":8,"./frame-inject.js":2,"backbone":37,"framebus":38,"jquery":40,"underscore":41}],4:[function(require,module,exports){
 'use strict';
 
 /**

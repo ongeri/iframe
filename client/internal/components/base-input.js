@@ -77,7 +77,7 @@ BaseInput.prototype._addDOMInputListeners = function(){
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
         console.log("value change is "+valueChanged);
-        //this.updateModel('value', valueChanged);
+        this.updateModel('value', valueChanged);
     }.bind(this), false);
 };
 

@@ -4,6 +4,7 @@ var frameInjector = require('./frame-inject.js');
 var $ = require('jquery');
 var bus = require('framebus');
 var EventEmitter = require('../libs/event-emitter.js');
+var noCallback = require('../libs/no-callback.js');
 
 Backbone.$ = $;
 var _ = require('underscore');
@@ -177,6 +178,8 @@ HostedFields.prototype.pay = function(options, callback){
     callback = options;
     options = {};
   }
+
+  noCallback(callback, 'pay');
 
   bus.emit("PAY_REQUEST", options, function(response){
     callback(null, response);

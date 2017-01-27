@@ -75,7 +75,7 @@ BaseInput.prototype._addDOMInputListeners = function () {
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
         console.log("value change is " + valueChanged);
-        //this.updateModel('value', valueChanged);
+        this.updateModel('value', valueChanged);
     }.bind(this), false);
 };
 
@@ -257,7 +257,7 @@ var builder = function builder(conf) {
     });
 
     bus.on("PAY_REQUEST", function (options, reply) {
-        console.log("handled the pay request");
+        console.log("handle the pay request");
 
         var payHandler = createPayHandler(cardForm.getCardData());
     });
@@ -271,7 +271,9 @@ var createPayHandler = function createPayHandler(cardForm) {
     };
 };
 
-var normalizeFields = function normalizeFields(options) {};
+var normalizeFields = function normalizeFields(options) {
+    return;
+};
 
 var initialize = function initialize(cardForm) {
     var fieldComponent;
@@ -400,31 +402,29 @@ CreditCardForm.prototype.getCardData = function () {
   var result = {};
   var keys = [];
 
-  if (this._fieldKeys.indexOf('number') !== -1) {
-    keys.push('number');
+  console.log("keys are " + JSON.stringify(this._fieldKeys));
+
+  if (this._fieldKeys.indexOf('cardPan') !== -1) {
+    keys.push('cardPan');
   }
 
-  if (this._fieldKeys.indexOf('cvv') !== -1) {
-    keys.push('cvv');
+  if (this._fieldKeys.indexOf('cardCVV') !== -1) {
+    keys.push('cardCVV');
   }
 
   if (this._fieldKeys.indexOf('postalCode') !== -1) {
     keys.push('postalCode');
   }
 
-  if (this._fieldKeys.indexOf('expirationMonth') !== -1) {
-    keys.push('expirationMonth');
-  }
-
-  if (this._fieldKeys.indexOf('expirationYear') !== -1) {
-    keys.push('expirationYear');
+  if (this._fieldKeys.indexOf('expirationDate') !== -1) {
+    keys.push('expirationDate');
   }
 
   if (this._fieldKeys.indexOf('expirationDate') !== -1) {
-    expirationData = splitDate(this.get('expirationDate.value'));
+    //expirationData = splitDate(this.get('expirationDate.value'));
     console.log(expirationData);
-    result.expirationMonth = expirationData.month;
-    result.expirationYear = expirationData.year;
+    //result.expirationMonth = expirationData.month;
+    //result.expirationYear = expirationData.year;
   }
 
   keys.reduce(function (reducedResult, name) {
@@ -432,6 +432,7 @@ CreditCardForm.prototype.getCardData = function () {
     return reducedResult;
   }.bind(this), result);
 
+  console.log(JSON.stringify(result));
   return result;
 };
 
@@ -443,7 +444,8 @@ function onFieldValueChange(form, fieldKey) {
 
   return function () {
     var isEmpty = form.get(fieldKey + '.value');
-    form.set(fieldKey + '.isEmpty', isEmpty === '');
+    //console.log("isEmpty is "+isEmpty+" ");
+    form.set(fieldKey + '.isEmpty', isEmpty !== '');
     form._validateField(fieldKey);
   };
 }
@@ -470,7 +472,7 @@ module.exports = {
 };
 
 },{"../../libs/constants.js":12,"./evented-model":10,"framebus":15}],10:[function(require,module,exports){
-'use strict';
+"use strict";
 
 var slice = Array.prototype.slice;
 
@@ -502,7 +504,14 @@ EventedModel.prototype.get = function get(compoundKey) {
   return traversal;
 };
 
+/**
+ * Set the value to compound key
+ * If there is a change, trigger two events 
+ * one for the change in type and another for
+ * a change of type:field
+ */
 EventedModel.prototype.set = function set(compoundKey, value) {
+  console.log("Setting " + compoundKey + " " + value);
   var i, key, keys;
   var traversal = this._attributes;
 
@@ -526,6 +535,7 @@ EventedModel.prototype.set = function set(compoundKey, value) {
 
     for (i = 1; i <= keys.length; i++) {
       key = keys.slice(0, i).join('.');
+      console.log('change:' + key + "----" + JSON.stringify(this.get(key)));
       this.emit('change:' + key, this.get(key));
     }
   }
@@ -555,7 +565,7 @@ EventedModel.prototype.emit = function emit(event) {
   }
 
   for (i = 0; i < listeners.length; i++) {
-    listners[i].apply(self, slice.call(args, 1));
+    listeners[i].apply(self, slice.call(args, 1));
   }
 };
 
