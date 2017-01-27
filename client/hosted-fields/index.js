@@ -7,10 +7,13 @@
 **/
 var  bus = require('framebus');
 var ISWHostedFields = require('./hosted-fields.js');
+var noCallback = require('../libs/no-callback.js');
 
 var newInstance = function(options, callback) {
 
   var instance;
+
+  noCallback(callback, "newInstance");
 
   try{
     instance = new ISWHostedFields(options);
@@ -21,7 +24,7 @@ var newInstance = function(options, callback) {
   }
 
   //set event listener to do callback when loading is complete
-  bus.on("READY", function(){
+  instance.on("READY", function(){
     callback(null, instance);
     //console.log("ready to roxk and tole");
   });

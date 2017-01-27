@@ -1,6 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var bus = require('framebus');
+var createRestrictedInput = require('../../libs/create-restricted-input.js');
+var ENTER_KEY_CODE = 13;
 function BaseInput(options) {
 
     this.type = options.type;
@@ -12,6 +15,17 @@ function BaseInput(options) {
     if (this.MAX_SIZE) {
         this.element.setAttribute('maxlength', this.MAX_SIZE);
     }
+
+    this.formatter = createRestrictedInput({
+        shouldFormat: false,
+        element: this.element,
+        pattern: ' '
+    });
+
+    this.addDOMEventListeners();
+    this.addModelEventListeners();
+    this.addBusEventListeners();
+    this.render();
 }
 
 BaseInput.prototype.buildElement = function () {
@@ -43,11 +57,95 @@ BaseInput.prototype.buildElement = function () {
     return element;
 };
 
+BaseInput.prototype.addDOMEventListeners = function () {
+    this._addDOMInputListeners();
+    this._addDOMKeypressListeners();
+};
+
+BaseInput.prototype._addDOMKeypressListeners = function () {
+
+    this.element.addEventListener('keypress', function (event) {
+        if (event.keyCode === ENTER_KEY_CODE) {
+            this.model.emitEvent(this.type, 'inputSubmitRequest');
+        }
+    }.bind(this), false);
+};
+
+BaseInput.prototype._addDOMInputListeners = function () {
+    this.element.addEventListener(this._getDOMChangeEvent(), function () {
+        var valueChanged = this.getUnformattedValue();
+        console.log("value change is " + valueChanged);
+        //this.updateModel('value', valueChanged);
+    }.bind(this), false);
+};
+
+BaseInput.prototype._getDOMChangeEvent = function () {
+    return 'input';
+};
+
+BaseInput.prototype.updateModel = function (key, value) {
+    this.model.set(this.type + '.' + key, value);
+};
+
+BaseInput.prototype.getUnformattedValue = function () {
+    return this.formatter.getUnformattedValue();
+};
+
+BaseInput.prototype.addModelEventListeners = function () {
+    this.modelOnChange('isValid', this.render);
+};
+
+BaseInput.prototype.modelOnChange = function (property, callback) {
+    var eventPrefix = 'change:' + this.type;
+    var self = this;
+
+    this.model.on(eventPrefix + '.' + property, function () {
+        callback.apply(self, arguments);
+    });
+};
+
+BaseInput.prototype.render = function () {
+    var modelData = this.model.get(this.type);
+
+    if (this.maxLength) {
+        this.element.setAttribute('maxlength', this.maxLength);
+    }
+};
+
+BaseInput.prototype.addBusEventListeners = function () {
+    //   bus.on(events.TRIGGER_INPUT_FOCUS, function (type) {
+    //     if (type === this.type) { this.element.focus(); }
+    //   }.bind(this));
+
+    bus.on("SET_PLACEHOLDER", this.setPlaceholder.bind(this));
+
+    //   bus.on(events.ADD_CLASS, function (type, classname) {
+    //     if (type === this.type) { classlist.add(this.element, classname); }
+    //   }.bind(this));
+
+    //   global.bus.on(events.REMOVE_CLASS, function (type, classname) {
+    //     if (type === this.type) { classlist.remove(this.element, classname); }
+    //   }.bind(this));
+
+    bus.on("CLEAR_FIELD", function (type) {
+        if (type === this.type) {
+            this.element.value = '';
+            this.updateModel('value', '');
+        }
+    }.bind(this));
+};
+
+BaseInput.prototype.setPlaceholder = function (type, placeholder) {
+    if (type === this.type) {
+        this.element.setAttribute('placeholder', placeholder);
+    }
+};
+
 module.exports = {
     BaseInput: BaseInput
 };
 
-},{}],2:[function(require,module,exports){
+},{"../../libs/create-restricted-input.js":13,"framebus":15}],2:[function(require,module,exports){
 "use strict";
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -191,7 +289,7 @@ module.exports = {
     initialize: initialize
 };
 
-},{"./components/field-component.js":3,"./get-frame-name.js":6,"./models/credit-card-form.js":9,"./pack-iframes.js":11,"framebus":12}],8:[function(require,module,exports){
+},{"./components/field-component.js":3,"./get-frame-name.js":6,"./models/credit-card-form.js":9,"./pack-iframes.js":11,"framebus":15}],8:[function(require,module,exports){
 'use strict';
 
 var hostedFields = require('./hosted-internal-fields.js');
@@ -203,34 +301,46 @@ window.interswitch = {
 'use strict';
 
 var EventedModel = require('./evented-model');
+var constants = require('../../libs/constants.js');
+var externalEvents = constants.externalEvents;
+var bus = require('framebus');
 var CreditCardForm = function CreditCardForm(conf) {
-  console.log("creating credit card form");
 
   // Filter Key options :TODO
+  /**
+   *  returns an array of field keys
+   *  for example
+   *  ["cardCVV", "cardPin", "cardExp"]
+   * 
+   * 
+   */
+
   this._fieldKeys = Object.keys(conf.fields).filter(function (key) {
     return true;
   });
+
+  console.log("creating credit card form " + JSON.stringify(this._fieldKeys));
 
   EventedModel.apply(this, arguments);
 
   this.conf = conf;
 
+  /** 
+   * 
+   * iterate over all the fields
+   * for example 
+   * ["cardCVV", "cardPan"]
+   * 
+   */
+
   this._fieldKeys.forEach(function (field) {
+
     var onFieldChange = onFieldStateChange(this, field);
 
     this.on('change:' + field + '.value', onFieldValueChange(this, field));
-    this.on('change:' + field + '.isFocused', onFieldFocusChange(this, field));
-    this.on('change:' + field + '.isEmpty', onEmptyChange(this, field));
-
-    this.on('change:' + field + '.isValid', onFieldChange);
-    this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
   }.bind(this));
 
   this.on('change:number.value', this._onNumberChange);
-  this.on('change:possibleCardTypes', function () {
-    this._validateField('cvv');
-  }.bind(this));
-  this.on('change:possibleCardTypes', onCardTypeChange(this, 'number'));
 
   //should add event listeners on each of the field :TODO
 };
@@ -238,14 +348,52 @@ var CreditCardForm = function CreditCardForm(conf) {
 CreditCardForm.prototype = Object.create(EventedModel.prototype);
 CreditCardForm.prototype.constructor = CreditCardForm;
 
+CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
+
+  var fields = this._fieldKeys.reduce(function (result, key) {
+    var fieldData = this.get(key);
+
+    result[key] = {};
+    return result;
+  }.bind(this), {});
+
+  bus.emit("INPUT_EVENT", {
+    merchantPayload: {
+      emittedBy: fieldKey,
+      fields: fields
+    },
+    type: eventType
+  });
+};
 /////////////////////////////////////////////////////////////
 CreditCardForm.prototype._onNumberChange = function (number) {
   console.log("number change");
 };
 
-CreditCardForm.prototype._validateField = function (fieldKey) {};
+CreditCardForm.prototype._validateField = function (fieldKey) {
 
-CreditCardForm.prototype._validateCvv = function (value) {};
+  var validationResult;
+  var value = this.get(fieldKey + '.value');
+
+  if (fieldKey === 'cardCVV') {
+    validationResult = this._validateCvv(value);
+  } else if (fieldKey === 'expirationDate') {
+    //validationResult = validate(splitDate(value));
+  } else {
+      //validationResult = validate(value);
+    }
+
+  if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
+    //this._onSplitDateChange();
+  } else {
+      //this.set(fieldKey + '.isValid', validationResult.isValid);
+      //this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
+    }
+};
+
+CreditCardForm.prototype._validateCvv = function (value) {
+  return true; //defer implementation
+};
 
 CreditCardForm.prototype.getCardData = function () {
   var expirationData;
@@ -291,7 +439,14 @@ CreditCardForm.prototype.isEmpty = function () {};
 
 CreditCardForm.prototype.invalidFieldKeys = function () {};
 
-function onFieldValueChange(form, fieldKey) {}
+function onFieldValueChange(form, fieldKey) {
+
+  return function () {
+    var isEmpty = form.get(fieldKey + '.value');
+    form.set(fieldKey + '.isEmpty', isEmpty === '');
+    form._validateField(fieldKey);
+  };
+}
 
 function onFieldFocusChange(form, field) {}
 
@@ -299,7 +454,14 @@ function onCardTypeChange(form, field) {}
 
 function onEmptyChange(form, field) {}
 
-function onFieldStateChange(form, field) {}
+/**
+ * returns a function value for when there is a state change
+ */
+function onFieldStateChange(form, field) {
+  return function () {
+    form.emitEvent(field, externalEvents.VALIDITY_CHANGE);
+  };
+}
 
 function splitDate(date) {}
 
@@ -307,8 +469,8 @@ module.exports = {
   CreditCardForm: CreditCardForm
 };
 
-},{"./evented-model":10}],10:[function(require,module,exports){
-"use strict";
+},{"../../libs/constants.js":12,"./evented-model":10,"framebus":15}],10:[function(require,module,exports){
+'use strict';
 
 var slice = Array.prototype.slice;
 
@@ -318,8 +480,6 @@ function EventedModel() {
 }
 
 EventedModel.prototype.get = function get(compoundKey) {
-
-  console.log("trying to get key " + compoundKey);
   var i, key, keys;
   var traversal = this._attributes;
 
@@ -338,7 +498,7 @@ EventedModel.prototype.get = function get(compoundKey) {
 
     traversal = traversal[key];
   }
-  console.log("returned " + traversal);
+
   return traversal;
 };
 
@@ -361,7 +521,9 @@ EventedModel.prototype.set = function set(compoundKey, value) {
 
   if (traversal[key] !== value) {
     traversal[key] = value;
+    //the value associated with this field has just changed
     this.emit('change');
+
     for (i = 1; i <= keys.length; i++) {
       key = keys.slice(0, i).join('.');
       this.emit('change:' + key, this.get(key));
@@ -370,19 +532,22 @@ EventedModel.prototype.set = function set(compoundKey, value) {
 };
 
 EventedModel.prototype.on = function on(event, handler) {
+
   var listeners = this._listeners[event];
 
   if (!listeners) {
     this._listeners[event] = [handler];
   } else {
-    listeners.push(handler);
+    this._listeners[event].push(handler);
   }
 };
 
 EventedModel.prototype.emit = function emit(event) {
+
   var i;
   var self = this;
   var args = arguments;
+
   var listeners = this._listeners[event];
 
   if (!listeners) {
@@ -390,7 +555,7 @@ EventedModel.prototype.emit = function emit(event) {
   }
 
   for (i = 0; i < listeners.length; i++) {
-    listeners[i].apply(self, slice.call(args, 1));
+    listners[i].apply(self, slice.call(args, 1));
   }
 };
 
@@ -427,6 +592,48 @@ module.exports = {
 };
 
 },{}],12:[function(require,module,exports){
+'use strict';
+
+var constants = {
+
+    externalEvents: {
+        FOCUS: 'focus',
+        BLUR: 'blur',
+        EMPTY: 'empty',
+        NOT_EMPTY: 'notEmpty',
+        VALIDITY_CHANGE: 'validityChange',
+        CARD_TYPE_CHANGE: 'cardTypeChange'
+    }
+
+};
+
+module.exports = constants;
+
+},{}],13:[function(require,module,exports){
+'use strict';
+
+var FakeRestrictedInput = require('./fake-restricted-input');
+module.exports = function (options) {
+
+    return new FakeRestrictedInput(options);
+};
+
+},{"./fake-restricted-input":14}],14:[function(require,module,exports){
+"use strict";
+
+function FakeRestrictedInput(options) {
+  this.inputElement = options.element;
+}
+
+FakeRestrictedInput.prototype.getUnformattedValue = function () {
+  return this.inputElement.value;
+};
+
+FakeRestrictedInput.prototype.setPattern = function () {};
+
+module.exports = FakeRestrictedInput;
+
+},{}],15:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {

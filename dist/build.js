@@ -42,7 +42,7 @@ var ISWClient = function () {
 }();
 module.exports.ISWClient = ISWClient;
 
-},{"axios":10}],2:[function(require,module,exports){
+},{"axios":12}],2:[function(require,module,exports){
 'use strict';
 
 module.exports = function (frame, container) {
@@ -68,14 +68,51 @@ var iFramer = require("../utilities/iframe/index.js");
 var frameInjector = require('./frame-inject.js');
 var $ = require('jquery');
 var bus = require('framebus');
+var EventEmitter = require('../libs/event-emitter.js');
 
 Backbone.$ = $;
 var _ = require('underscore');
 
-var HostedFields = function HostedFields(options) {
+var createInputEventHandler = function createInputEventHandler(fields) {
+  /*
+  *
+  * for example
+  *
+  * fields[cardCVV] = {
+  *    frameElement: frame
+  *    containerElement: container
+  * }
+  *
+  * #remember that container points to the primary div that the merchant passed in initially.
+  *
+  *
+  *
+  *
+  *
+  *
+  **/
 
-  //mixin with backbone event listener
-  _.extend(this, Backbone.Events);
+  return function (eventData) {
+
+    var field;
+    var merchantPayload = eventData.merchantPayload;
+    var emittedBy = merchantPayload.emittedBy;
+    var container = fields[emittedBy].containerElement;
+
+    Object.keys(merchantPayload.fields).forEach(function (key) {
+      merchantPayload.fields[key].container = fields[key].containerElement;
+    });
+
+    field = merchantPayload.fields[emittedBy];
+
+    this._state = {
+      fields: merchantPayload.fields
+    };
+
+    this._emit(eventData.type, merchantPayload);
+  };
+};
+var HostedFields = function HostedFields(options) {
 
   console.log("hosted field has been created");
 
@@ -91,6 +128,10 @@ var HostedFields = function HostedFields(options) {
   if (!options.fields) {
     //throw exception because there should be fields to work with
   }
+
+  EventEmitter.call(this);
+
+  console.log("Location is " + location.href);
 
   this._injectedNodes = [];
 
@@ -115,7 +156,7 @@ var HostedFields = function HostedFields(options) {
 
     container = document.querySelector(field.selector);
 
-    console.log("associated selector " + container);
+    //console.log("associated selector "+container);
 
     if (!container) {
       //bad situation stop execution, this is where
@@ -136,7 +177,7 @@ var HostedFields = function HostedFields(options) {
       }
     });
 
-    console.log("associated frame " + frame);
+    //console.log("associated frame "+frame);
 
     this._injectedNodes = this._injectedNodes.concat(frameInjector(frame, container));
 
@@ -157,9 +198,12 @@ var HostedFields = function HostedFields(options) {
       frame.src = "http://localhost:3000/file"; //load another page with another javascript and we continue from there
     }, 0); //run atleast after 0secs
 
-  }.bind(this)); //end of key interpolation
+  }.bind(this)); //end of key interation
 
-  console.log("The elements in the injection array include " + this._injectedNodes);
+  //console.log("The elements in the injection array include "+this._injectedNodes);
+
+  //implement a timeout mechanism here and also return it to something
+  //if it does not timeout, remember to clearTimeout :) TODO
 
   bus.on("FRAME_SET", function (args, reply) {
 
@@ -168,12 +212,20 @@ var HostedFields = function HostedFields(options) {
       console.log("ready to build the things ");
 
       reply(options);
-      bus.emit("READY");
+      self._emit("READY");
       // reply.contents.callme(options);
     }
   });
+
+  //set up event for inputs :)
+  bus.on("INPUT_EVENT", function () {
+    createInputEventHandler(fields).bind(this);
+  });
 };
 
+HostedFields.prototype = Object.create(EventEmitter.prototype, {
+  constructor: HostedFields
+});
 //HostedFields.constructor = HostedFields;
 
 HostedFields.prototype.pay = function (options, callback) {
@@ -190,7 +242,7 @@ HostedFields.prototype.pay = function (options, callback) {
 
 module.exports = HostedFields;
 
-},{"../utilities/iframe/index.js":6,"./frame-inject.js":2,"backbone":35,"framebus":36,"jquery":38,"underscore":39}],4:[function(require,module,exports){
+},{"../libs/event-emitter.js":6,"../utilities/iframe/index.js":8,"./frame-inject.js":2,"backbone":37,"framebus":38,"jquery":40,"underscore":41}],4:[function(require,module,exports){
 'use strict';
 
 /**
@@ -202,10 +254,13 @@ module.exports = HostedFields;
 **/
 var bus = require('framebus');
 var ISWHostedFields = require('./hosted-fields.js');
+var noCallback = require('../libs/no-callback.js');
 
 var newInstance = function newInstance(options, callback) {
 
   var instance;
+
+  noCallback(callback, "newInstance");
 
   try {
     instance = new ISWHostedFields(options);
@@ -215,7 +270,7 @@ var newInstance = function newInstance(options, callback) {
   }
 
   //set event listener to do callback when loading is complete
-  bus.on("READY", function () {
+  instance.on("READY", function () {
     callback(null, instance);
     //console.log("ready to roxk and tole");
   });
@@ -225,7 +280,7 @@ module.exports = {
   newInstance: newInstance
 };
 
-},{"./hosted-fields.js":3,"framebus":36}],5:[function(require,module,exports){
+},{"../libs/no-callback.js":7,"./hosted-fields.js":3,"framebus":38}],5:[function(require,module,exports){
 'use strict';
 
 /**
@@ -254,6 +309,52 @@ window.interswitch = {
 };
 
 },{"./ISWClient":1,"./hosted-fields/index.js":4}],6:[function(require,module,exports){
+"use strict";
+
+function EventEmitter() {
+  this._events = {};
+}
+
+EventEmitter.prototype.on = function (event, callback) {
+  if (this._events[event]) {
+    this._events[event].push(callback);
+  } else {
+    this._events[event] = [callback];
+  }
+};
+
+EventEmitter.prototype._emit = function (event) {
+  var i, args;
+  var callbacks = this._events[event];
+
+  if (!callbacks) {
+    return;
+  }
+
+  //the first argument to _emit is the event name so
+  //remove it, that is why the index starts at one.
+  args = Array.prototype.slice.call(arguments, 1);
+
+  for (i = 0; i < callbacks.length; i++) {
+    callbacks[i].apply(null, args);
+  }
+};
+
+module.exports = EventEmitter;
+
+},{}],7:[function(require,module,exports){
+'use strict';
+
+//throws an error if the callback is not a function
+module.exports = function (callback, functionName) {
+  if (typeof callback !== 'function') {
+    throw new Error({
+      message: functionName + ' must include a callback function.'
+    });
+  }
+};
+
+},{}],8:[function(require,module,exports){
 'use strict';
 
 var setAttributes = require('./lib/set-attributes');
@@ -281,7 +382,7 @@ module.exports = function createFrame(options) {
   return iframe;
 };
 
-},{"./lib/assign":7,"./lib/default-attributes":8,"./lib/set-attributes":9}],7:[function(require,module,exports){
+},{"./lib/assign":9,"./lib/default-attributes":10,"./lib/set-attributes":11}],9:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -302,7 +403,7 @@ module.exports = function assign(target) {
   return target;
 };
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -312,7 +413,7 @@ module.exports = {
   scrolling: 'no'
 };
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = function setAttributes(element, attributes) {
@@ -331,9 +432,9 @@ module.exports = function setAttributes(element, attributes) {
   }
 };
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":12}],11:[function(require,module,exports){
+},{"./lib/axios":14}],13:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -514,7 +615,7 @@ module.exports = function xhrAdapter(config) {
 };
 
 }).call(this,require('_process'))
-},{"../core/createError":18,"./../core/settle":21,"./../helpers/btoa":25,"./../helpers/buildURL":26,"./../helpers/cookies":28,"./../helpers/isURLSameOrigin":30,"./../helpers/parseHeaders":32,"./../utils":34,"_process":37}],12:[function(require,module,exports){
+},{"../core/createError":20,"./../core/settle":23,"./../helpers/btoa":27,"./../helpers/buildURL":28,"./../helpers/cookies":30,"./../helpers/isURLSameOrigin":32,"./../helpers/parseHeaders":34,"./../utils":36,"_process":39}],14:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -568,7 +669,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":13,"./cancel/CancelToken":14,"./cancel/isCancel":15,"./core/Axios":16,"./defaults":23,"./helpers/bind":24,"./helpers/spread":33,"./utils":34}],13:[function(require,module,exports){
+},{"./cancel/Cancel":15,"./cancel/CancelToken":16,"./cancel/isCancel":17,"./core/Axios":18,"./defaults":25,"./helpers/bind":26,"./helpers/spread":35,"./utils":36}],15:[function(require,module,exports){
 'use strict';
 
 /**
@@ -589,7 +690,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -648,14 +749,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":13}],15:[function(require,module,exports){
+},{"./Cancel":15}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var defaults = require('./../defaults');
@@ -742,7 +843,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"./../defaults":23,"./../helpers/combineURLs":27,"./../helpers/isAbsoluteURL":29,"./../utils":34,"./InterceptorManager":17,"./dispatchRequest":19}],17:[function(require,module,exports){
+},{"./../defaults":25,"./../helpers/combineURLs":29,"./../helpers/isAbsoluteURL":31,"./../utils":36,"./InterceptorManager":19,"./dispatchRequest":21}],19:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -796,7 +897,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":34}],18:[function(require,module,exports){
+},{"./../utils":36}],20:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -815,7 +916,7 @@ module.exports = function createError(message, config, code, response) {
   return enhanceError(error, config, code, response);
 };
 
-},{"./enhanceError":20}],19:[function(require,module,exports){
+},{"./enhanceError":22}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -896,7 +997,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":15,"../defaults":23,"./../utils":34,"./transformData":22}],20:[function(require,module,exports){
+},{"../cancel/isCancel":17,"../defaults":25,"./../utils":36,"./transformData":24}],22:[function(require,module,exports){
 'use strict';
 
 /**
@@ -917,7 +1018,7 @@ module.exports = function enhanceError(error, config, code, response) {
   return error;
 };
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -944,7 +1045,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":18}],22:[function(require,module,exports){
+},{"./createError":20}],24:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -966,7 +1067,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":34}],23:[function(require,module,exports){
+},{"./../utils":36}],25:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1063,7 +1164,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":11,"./adapters/xhr":11,"./helpers/normalizeHeaderName":31,"./utils":34,"_process":37}],24:[function(require,module,exports){
+},{"./adapters/http":13,"./adapters/xhr":13,"./helpers/normalizeHeaderName":33,"./utils":36,"_process":39}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1076,7 +1177,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 // btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
@@ -1114,7 +1215,7 @@ function btoa(input) {
 
 module.exports = btoa;
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1184,7 +1285,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":34}],27:[function(require,module,exports){
+},{"./../utils":36}],29:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1198,7 +1299,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
   return baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '');
 };
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1253,7 +1354,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":34}],29:[function(require,module,exports){
+},{"./../utils":36}],31:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1269,7 +1370,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1339,7 +1440,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":34}],31:[function(require,module,exports){
+},{"./../utils":36}],33:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1353,7 +1454,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":34}],32:[function(require,module,exports){
+},{"../utils":36}],34:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1392,7 +1493,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":34}],33:[function(require,module,exports){
+},{"./../utils":36}],35:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1421,7 +1522,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -1722,7 +1823,7 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":24}],35:[function(require,module,exports){
+},{"./helpers/bind":26}],37:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -3646,7 +3747,7 @@ module.exports = {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":38,"underscore":39}],36:[function(require,module,exports){
+},{"jquery":40,"underscore":41}],38:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -3924,7 +4025,7 @@ module.exports = {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -3984,7 +4085,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.1.1
  * https://jquery.com/
@@ -14206,7 +14307,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

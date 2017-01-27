@@ -1,3 +1,4 @@
+
 var slice = Array.prototype.slice;
 
 function EventedModel() {
@@ -6,8 +7,6 @@ function EventedModel() {
 }
 
 EventedModel.prototype.get = function get(compoundKey) {
-
-  console.log("trying to get key "+compoundKey);
   var i, key, keys;
   var traversal = this._attributes;
 
@@ -24,9 +23,10 @@ EventedModel.prototype.get = function get(compoundKey) {
 
     traversal = traversal[key];
   }
-  console.log("returned "+traversal);
+
   return traversal;
 };
+
 
 EventedModel.prototype.set = function set(compoundKey, value) {
   var i, key, keys;
@@ -47,7 +47,9 @@ EventedModel.prototype.set = function set(compoundKey, value) {
 
   if (traversal[key] !== value) {
     traversal[key] = value;
+    //the value associated with this field has just changed
     this.emit('change');
+
     for (i = 1; i <= keys.length; i++) {
       key = keys.slice(0, i).join('.');
       this.emit('change:' + key, this.get(key));
@@ -55,31 +57,44 @@ EventedModel.prototype.set = function set(compoundKey, value) {
   }
 };
 
-EventedModel.prototype.on = function on(event, handler) {
+
+EventedModel.prototype.on = function on(event, handler){
+
   var listeners = this._listeners[event];
 
-  if (!listeners) {
+  if(!listeners) {
     this._listeners[event] = [handler];
-  } else {
-    listeners.push(handler);
   }
+  else {
+    this._listeners[event].push(handler);
+  }
+
 };
+
+
 
 EventedModel.prototype.emit = function emit(event) {
+
   var i;
-  var self = this;
+  var self=this;
   var args = arguments;
+
   var listeners = this._listeners[event];
 
-  if (!listeners) { return; }
-
-  for (i = 0; i < listeners.length; i++) {
-    listeners[i].apply(self, slice.call(args, 1));
+  if(!listeners) {
+    return;
   }
-};
 
-EventedModel.prototype.resetAttributes = function resetAttributes() {
+  for(i=0;i<listeners.length;i++) {
+    listners[i].apply(self, slice.call(args, 1));
+  }
+
+
+}
+
+EventedModel.prototype.resetAttributes = function resetAttributes(){
   return {};
 };
+
 
 module.exports = EventedModel;
