@@ -9,6 +9,8 @@
 **/
 var ISWClient = require('./ISWClient').ISWClient;
 var ISWContainerFields=require('./hosted-fields/index.js');
+var client=require('./webrobot');
+var request = require('./request');
 // var Backbone = require('backbone');
 // var $ = require('jquery');
 // Backbone.$ = $;
@@ -19,6 +21,7 @@ var ISWContainerFields=require('./hosted-fields/index.js');
 // }
 
 window.interswitch = {
-  client: ISWClient,
-  hostedFields: ISWContainerFields
+  client: client,
+  hostedFields: ISWContainerFields,
+  request : request
 };

@@ -39,6 +39,11 @@ var createPayHandler = function(cardForm){
     return function(options, reply) {
 
         var creditCardDetails = normalizeFields(cardForm.getCardData());
+
+        options = options || {};
+
+        //post response
+        
     };
 };
 

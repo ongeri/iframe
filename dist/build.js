@@ -42,7 +42,7 @@ var ISWClient = function () {
 }();
 module.exports.ISWClient = ISWClient;
 
-},{"axios":12}],2:[function(require,module,exports){
+},{"axios":20}],2:[function(require,module,exports){
 'use strict';
 
 module.exports = function (frame, container) {
@@ -245,7 +245,7 @@ HostedFields.prototype.pay = function (options, callback) {
 
 module.exports = HostedFields;
 
-},{"../libs/event-emitter.js":6,"../libs/no-callback.js":7,"../utilities/iframe/index.js":8,"./frame-inject.js":2,"backbone":37,"framebus":38,"jquery":40,"underscore":41}],4:[function(require,module,exports){
+},{"../libs/event-emitter.js":6,"../libs/no-callback.js":7,"../utilities/iframe/index.js":13,"./frame-inject.js":2,"backbone":45,"framebus":46,"jquery":48,"underscore":49}],4:[function(require,module,exports){
 'use strict';
 
 /**
@@ -283,7 +283,7 @@ module.exports = {
   newInstance: newInstance
 };
 
-},{"../libs/no-callback.js":7,"./hosted-fields.js":3,"framebus":38}],5:[function(require,module,exports){
+},{"../libs/no-callback.js":7,"./hosted-fields.js":3,"framebus":46}],5:[function(require,module,exports){
 'use strict';
 
 /**
@@ -297,6 +297,8 @@ module.exports = {
 **/
 var ISWClient = require('./ISWClient').ISWClient;
 var ISWContainerFields = require('./hosted-fields/index.js');
+var client = require('./webrobot');
+var request = require('./request');
 // var Backbone = require('backbone');
 // var $ = require('jquery');
 // Backbone.$ = $;
@@ -307,11 +309,12 @@ var ISWContainerFields = require('./hosted-fields/index.js');
 // }
 
 window.interswitch = {
-  client: ISWClient,
-  hostedFields: ISWContainerFields
+  client: client,
+  hostedFields: ISWContainerFields,
+  request: request
 };
 
-},{"./ISWClient":1,"./hosted-fields/index.js":4}],6:[function(require,module,exports){
+},{"./ISWClient":1,"./hosted-fields/index.js":4,"./request":11,"./webrobot":18}],6:[function(require,module,exports){
 "use strict";
 
 function EventEmitter() {
@@ -358,6 +361,78 @@ module.exports = function (callback, functionName) {
 };
 
 },{}],8:[function(require,module,exports){
+"use strict";
+
+module.exports = function (fn) {
+    var called = false;
+    return function () {
+        if (!called) {
+            called = true;
+            fn.apply(null, arguments);
+        }
+    };
+};
+
+},{}],9:[function(require,module,exports){
+"use strict";
+
+},{}],10:[function(require,module,exports){
+(function (global){
+"use strict";
+
+module.exports = function () {
+    return global.navigator.userAgent;
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],11:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var once = require('../libs/once.js');
+var isHTTP = require('./is-http.js');
+var getUserAgent = require('./get-user-agent.js');
+var AjaxDriver = require('./ajax-driver.js');
+var ajaxIsAvailable;
+
+var ajaxAvailable = function ajaxAvailable() {
+
+    if (ajaxIsAvailable == null) {
+        console.log(global.navigator.userAgent);
+        ajaxIsAvailable = !(isHTTP() && /MSIE\s(8|9)/.test(getUserAgent()));
+    }
+
+    return ajaxIsAvailable;
+};
+module.exports = function (options, callback) {
+
+    callback = once(callback);
+    options.method = (options.method || 'GET').toUpperCase();
+    options.timeout = options.timeout == null ? 60000 : options.timeout;
+    options.data = options.data || {};
+
+    if (ajaxAvailable()) {
+        //IE more likely
+        console.log("use IE");
+    } else {
+        //use jsondriver
+        console.log("make request for me");
+    }
+
+    // callback(null,{});
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../libs/once.js":8,"./ajax-driver.js":9,"./get-user-agent.js":10,"./is-http.js":12}],12:[function(require,module,exports){
+(function (global){
+"use strict";
+
+module.exports = function () {
+    return global.location.protocol === "http:";
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var setAttributes = require('./lib/set-attributes');
@@ -385,7 +460,7 @@ module.exports = function createFrame(options) {
   return iframe;
 };
 
-},{"./lib/assign":9,"./lib/default-attributes":10,"./lib/set-attributes":11}],9:[function(require,module,exports){
+},{"./lib/assign":14,"./lib/default-attributes":15,"./lib/set-attributes":16}],14:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -406,7 +481,7 @@ module.exports = function assign(target) {
   return target;
 };
 
-},{}],10:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -416,7 +491,7 @@ module.exports = {
   scrolling: 'no'
 };
 
-},{}],11:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 module.exports = function setAttributes(element, attributes) {
@@ -435,9 +510,98 @@ module.exports = function setAttributes(element, attributes) {
   }
 };
 
-},{}],12:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
+"use strict";
+
+var Client = function Client(configuration) {
+  /**
+   * important urls are to be returned back to client from the server
+   * 
+   */
+  console.log("constructed client instance");
+  this._configuration = configuration;
+  this._request = null;
+  this._baseUrl = null;
+};
+
+Client.prototype.request = function (options, callback) {};
+
+module.exports = Client;
+
+},{}],18:[function(require,module,exports){
+'use strict';
+
+var noCallback = require('../libs/no-callback.js');
+var processConfiguration = require('./processConfiguration.js');
+var Client = require('./client.js');
+/**
+ * This module is the entry point to create
+ * a client that communicates with interswitch 
+ * servers
+ * @param options. Options object.
+ * @param options.authorizationKey. The merchantId. This is used to uniquely identify each merchant.
+ * @param callback. Callback containing the client.
+ */
+var newInstance = function newInstance(options, callback) {
+
+    //check for no callback
+    noCallback(callback, "newInstance");
+
+    //check for deferred :TODO
+
+    //create instance
+    if (!options.authorizationKey) {
+        callback(new Error({
+            message: "Authorization Key is not set"
+        }));
+        return;
+    }
+
+    processConfiguration(options, function (err, configuration) {
+        var client;
+
+        if (err) {
+            callback(err);
+            return;
+        }
+
+        try {
+            //create client here
+            client = new Client(configuration);
+        } catch (e) {
+            callback(e);
+            return;
+        }
+
+        //client created correctly
+        callback(null, client);
+    });
+};
+
+module.exports = {
+    newInstance: newInstance
+};
+
+},{"../libs/no-callback.js":7,"./client.js":17,"./processConfiguration.js":19}],19:[function(require,module,exports){
+"use strict";
+
+/**
+ * Makes a request to the base server to process authorizationKey
+ */
+var processConfiguration = function processConfiguration(options, callback) {
+
+    var configuration = {
+        authorizationKey: options.authorizationKey
+    };
+
+    callback(null, configuration);
+};
+
+module.exports = processConfiguration;
+
+},{}],20:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":14}],13:[function(require,module,exports){
+},{"./lib/axios":22}],21:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -618,7 +782,7 @@ module.exports = function xhrAdapter(config) {
 };
 
 }).call(this,require('_process'))
-},{"../core/createError":20,"./../core/settle":23,"./../helpers/btoa":27,"./../helpers/buildURL":28,"./../helpers/cookies":30,"./../helpers/isURLSameOrigin":32,"./../helpers/parseHeaders":34,"./../utils":36,"_process":39}],14:[function(require,module,exports){
+},{"../core/createError":28,"./../core/settle":31,"./../helpers/btoa":35,"./../helpers/buildURL":36,"./../helpers/cookies":38,"./../helpers/isURLSameOrigin":40,"./../helpers/parseHeaders":42,"./../utils":44,"_process":47}],22:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -672,7 +836,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":15,"./cancel/CancelToken":16,"./cancel/isCancel":17,"./core/Axios":18,"./defaults":25,"./helpers/bind":26,"./helpers/spread":35,"./utils":36}],15:[function(require,module,exports){
+},{"./cancel/Cancel":23,"./cancel/CancelToken":24,"./cancel/isCancel":25,"./core/Axios":26,"./defaults":33,"./helpers/bind":34,"./helpers/spread":43,"./utils":44}],23:[function(require,module,exports){
 'use strict';
 
 /**
@@ -693,7 +857,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],16:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -752,14 +916,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":15}],17:[function(require,module,exports){
+},{"./Cancel":23}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],18:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 var defaults = require('./../defaults');
@@ -846,7 +1010,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"./../defaults":25,"./../helpers/combineURLs":29,"./../helpers/isAbsoluteURL":31,"./../utils":36,"./InterceptorManager":19,"./dispatchRequest":21}],19:[function(require,module,exports){
+},{"./../defaults":33,"./../helpers/combineURLs":37,"./../helpers/isAbsoluteURL":39,"./../utils":44,"./InterceptorManager":27,"./dispatchRequest":29}],27:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -900,7 +1064,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":36}],20:[function(require,module,exports){
+},{"./../utils":44}],28:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -919,7 +1083,7 @@ module.exports = function createError(message, config, code, response) {
   return enhanceError(error, config, code, response);
 };
 
-},{"./enhanceError":22}],21:[function(require,module,exports){
+},{"./enhanceError":30}],29:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1000,7 +1164,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":17,"../defaults":25,"./../utils":36,"./transformData":24}],22:[function(require,module,exports){
+},{"../cancel/isCancel":25,"../defaults":33,"./../utils":44,"./transformData":32}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1021,7 +1185,7 @@ module.exports = function enhanceError(error, config, code, response) {
   return error;
 };
 
-},{}],23:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -1048,7 +1212,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":20}],24:[function(require,module,exports){
+},{"./createError":28}],32:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1070,7 +1234,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":36}],25:[function(require,module,exports){
+},{"./../utils":44}],33:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1167,7 +1331,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":13,"./adapters/xhr":13,"./helpers/normalizeHeaderName":33,"./utils":36,"_process":39}],26:[function(require,module,exports){
+},{"./adapters/http":21,"./adapters/xhr":21,"./helpers/normalizeHeaderName":41,"./utils":44,"_process":47}],34:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1180,7 +1344,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],27:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 // btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
@@ -1218,7 +1382,7 @@ function btoa(input) {
 
 module.exports = btoa;
 
-},{}],28:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1288,7 +1452,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":36}],29:[function(require,module,exports){
+},{"./../utils":44}],37:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1302,7 +1466,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
   return baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '');
 };
 
-},{}],30:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1357,7 +1521,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":36}],31:[function(require,module,exports){
+},{"./../utils":44}],39:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1373,7 +1537,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],32:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1443,7 +1607,7 @@ module.exports = (
   })()
 );
 
-},{"./../utils":36}],33:[function(require,module,exports){
+},{"./../utils":44}],41:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1457,7 +1621,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":36}],34:[function(require,module,exports){
+},{"../utils":44}],42:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1496,7 +1660,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":36}],35:[function(require,module,exports){
+},{"./../utils":44}],43:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1525,7 +1689,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],36:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -1826,7 +1990,7 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":26}],37:[function(require,module,exports){
+},{"./helpers/bind":34}],45:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -3750,7 +3914,7 @@ module.exports = {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":40,"underscore":41}],38:[function(require,module,exports){
+},{"jquery":48,"underscore":49}],46:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -4028,7 +4192,7 @@ module.exports = {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -4088,7 +4252,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],40:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.1.1
  * https://jquery.com/
@@ -14310,7 +14474,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],41:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

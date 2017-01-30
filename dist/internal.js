@@ -268,6 +268,10 @@ var createPayHandler = function createPayHandler(cardForm) {
     return function (options, reply) {
 
         var creditCardDetails = normalizeFields(cardForm.getCardData());
+
+        options = options || {};
+
+        //post response
     };
 };
 

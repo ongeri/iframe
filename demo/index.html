@@ -78,62 +78,77 @@
   //console.log(window);
 
        jQuery(document).ready(function(){
-        // var client=new Interswitch.client({
-        //   authorization:"387864876819698686283434"
-        // });
-        var submit = document.querySelector('button[type="submit"]');
-        interswitch.hostedFields.newInstance({
-          client: null, /**defer till implementation **/
-          fields: {
-            cardPan: {
-              selector: '#card-pan',
-              placeholder: '1111 1111 1111 1111'
-            },
-            cardCVV: {
-              selector: '#card-cvv',
-              placeholder: '111'
-            },
-            expirationDate: {
-              selector: '#expiration-date',
-              placeholder: 'MM/YY'
-            },
-            cardPIN:{
-              selector:'#card-pin',
-              placeholder:'PIN'
-            }
-          }
-        },
-        function(err, hostedFieldInstance){
-          console.log("hosted instance in place");
-          //callback function after instance has been created
+         
+          // var client=new Interswitch.client({
+          //   authorization:"387864876819698686283434"
+          // });
+          var submit = document.querySelector('button[type="submit"]');
+          interswitch.request({}, function(){});
+      //     interswitch.client.newInstance({
+      //       authorizationKey:"387864876819698686283434"
+      //     }, function(err, client){
+            
+      //       if(err) {
+      //         console.log(err);
+      //         //throw some kind of error event
+      //         return;
+      //       }
+      //       interswitch.hostedFields.newInstance({
+      //         client: null, /**defer till implementation **/
+      //       fields: {
+      //         cardPan: {
+      //           selector: '#card-pan',
+      //           placeholder: '1111 1111 1111 1111'
+      //         },
+      //         cardCVV: {
+      //           selector: '#card-cvv',
+      //           placeholder: '111'
+      //         },
+      //         expirationDate: {
+      //           selector: '#expiration-date',
+      //           placeholder: 'MM/YY'
+      //         },
+      //         cardPIN:{
+      //           selector:'#card-pin',
+      //           placeholder:'PIN'
+      //         }
+      //       }
+      //     },
+      //     function(err, hostedFieldInstance){
+      //       console.log("hosted instance in place");
+      //       //callback function after instance has been created
 
-          //attach events for handling validation error
+      //       //attach events for handling validation error
 
-          //attach events for paying and we return a nonce for you
-          /**
-          *e.g hostedFieldInstance.pay(function(err, payload){
-          *        //access the payment reference and do something with it.
-          *    });
-          *
-          *
-          *
-          **/
+      //       //attach events for paying and we return a nonce for you
+      //       /**
+      //       *e.g hostedFieldInstance.pay(function(err, payload){
+      //       *        //access the payment reference and do something with it.
+      //       *    });
+      //       *
+      //       *
+      //       *
+      //       **/
 
-            submit.addEventListener('click', function(evt){
+      //         submit.addEventListener('click', function(evt){
 
-              evt.preventDefault();
-              evt.stopPropagation();
+      //           evt.preventDefault();
+      //           evt.stopPropagation();
 
-               hostedFieldInstance.pay(function(err, payload){
+      //           hostedFieldInstance.pay(function(err, payload){
 
-              //   //submit your nonce to your server
-               });
-              console.log(hostedFieldInstance);
-              //hostedFieldInstance.pay();
-            }, false)
-        });
+      //           //   //submit your nonce to your server
+      //           });
+      //           console.log(hostedFieldInstance);
+      //           //hostedFieldInstance.pay();
+      //         }, false)
+      //     });
 
-      });
+      // });
+            
+         
+       });
+        
     </script>
 
 </body>
