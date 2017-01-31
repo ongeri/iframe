@@ -2,6 +2,7 @@ var once = require('../libs/once.js');
 var isHTTP = require('./is-http.js');
 var getUserAgent = require('./get-user-agent.js');
 var AjaxDriver = require('./ajax-driver.js');
+var JSONPDriver  =  require('./jsonp-driver.js');
 var ajaxIsAvailable;
 
 var ajaxAvailable = function(){
@@ -22,11 +23,39 @@ module.exports = function(options, callback) {
 
     if(ajaxAvailable()) {
         //IE more likely
-        console.log("use IE");
+        console.log("normal browser or IE");
+        // var root = {
+        //     name: {
+        //         first: "arthur",
+        //         last: "okeke"
+        //     },
+        //     age: [1,2,3]
+        // };
+        // //AjaxDriver.request(options, callback);
+        // var out = AjaxDriver.queryString.stringify(root);
+        //console.log(out);
+
+        var conf = {
+            method: "GET",
+            timeout: "60000",
+            data: "",
+            url:"http://localhost:3000/status"
+        };
+
+        AjaxDriver.request(conf, function(err, res, status){
+            if(err) {
+                console.log("error "+err);
+            }else {
+                console.log(status);
+                console.log(res);
+            }
+        });
+
     }
     else {
         //use jsondriver
-        console.log("make request for me");
+        console.log("use IE");
+        JSONPDriver.request(options, callback);
     }
 
     // callback(null,{});
