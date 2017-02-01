@@ -4,7 +4,7 @@ var querify = function(url, params) {
 
     if(params != null && typeof params === 'object' && _notEmpty(params)) {
         url += url.indexOf("?") === -1 ? "?" : "";
-        url += url.indexOf("=") === -1 ? "&" : "";
+        url += url.indexOf("=") !== -1 ? "&" : "";
         url += stringify(params);
     }
 
@@ -52,7 +52,7 @@ var stringify = function(obj, namespace) {
             query.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
         }
     }
-
+    console.log("final query "+query.join("&"));
     return query.join("&");
 };
 

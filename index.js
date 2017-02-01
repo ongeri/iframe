@@ -31,7 +31,10 @@ app.set('view engine', 'handlebars');
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(multer());
+
+//allow cross origin request
 app.use(function(req, res, next) {
+  console.log("It hit the server");
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
@@ -40,7 +43,7 @@ app.use(function(req, res, next) {
 // app.use(methodOverride());
 
 app.get('/status', function(req, res){
-  res.status(200).json({message: "Hi There!!!"});
+  res.status(200).jsonp({message: "Hi There!!!", status: 200});
 });
 //send simple file back
 

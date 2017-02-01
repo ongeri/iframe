@@ -37,14 +37,14 @@ module.exports = function(options, callback) {
 
         var conf = {
             method: "GET",
-            timeout: "60000",
+            timeout: "5000",
             data: "",
             url:"http://localhost:3000/status"
         };
 
-        AjaxDriver.request(conf, function(err, res, status){
+        JSONPDriver.request(conf, function(err, res, status){
             if(err) {
-                console.log("error "+err);
+                console.log("error "+JSON.stringify(err));
             }else {
                 console.log(status);
                 console.log(res);
