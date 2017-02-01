@@ -49,7 +49,7 @@ app.get('/status', function(req, res){
 
 app.get('/api/v1/configuration', function(req, res){
 	res.status(200).json({
-		clienturl: '/api/v1/pay'
+		clienturl: 'http://localhost:3000/api/'
 	});
 });
 

@@ -22,6 +22,7 @@ var processConfiguration = function(options, callback){
         }
         else {
             console.log("configuration response "+JSON.stringify(res));
+            configuration.Urls = res
             callback(null, configuration);
         }
     });
