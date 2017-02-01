@@ -13,9 +13,7 @@ var querify = function(url, params) {
 
 
 //recursive DFS on a json string with O(N) memory
-//and O(N+M) time processing.
-//we can achieve O(N+M) time with O(1) memory : TODO
-//
+// O(N+M) time processing function. Fast enough
 var stringify = function(obj, namespace) {
     var k,v,p;
     var query = [];

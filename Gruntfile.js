@@ -20,21 +20,21 @@ module.exports = function(grunt) {
                     transform: [['babelify', {presets: ['es2015']}]]
                 }
             },
-            test: {
-                src: ['test/test.js'],
-                dest: 'build/test.js',
-                options: {
-                    transform: ['hbsfy'],
-                    external: ['Backbone', 'Marionette']
-                }
-            },
             internal: {
                 src: ['client/internal/index.js'],
                 dest: 'dist/internal.js',
                 options: {
                     transform: [['babelify', {presets: ['es2015']}]]
                 }
+            },
+            client: {
+                src: ['client/webrobot/index.js'],
+                dest: 'dist/client.js',
+                options: {
+                    transform: [['babelify', {presets: ['es2015']}]]
+                }
             }
+            
         },
         less: {
             transpile: {
@@ -110,7 +110,7 @@ module.exports = function(grunt) {
         watch: {
             scripts: {
                 files: ['client/*.js', 'client/**/*.js'],
-                tasks: ['clean:dev','jshint:all','browserify:vendor', 'browserify:internal']
+                tasks: ['clean:dev','jshint:all','browserify:vendor', 'browserify:internal', 'browserify:client']
             }
         },
 
@@ -144,7 +144,7 @@ module.exports = function(grunt) {
     grunt.registerTask('init:dev', ['clean:dev', 'npm install', 'browserify:vendor']);
 
 
-    grunt.registerTask('build:dev', ['clean:dev',  'jshint:all', 'browserify:vendor', 'browserify:internal']);
+    grunt.registerTask('build:dev', ['clean:dev',  'jshint:all', 'browserify:vendor', 'browserify:internal','browserify:client']);
 
 
     grunt.registerTask('server', ['build:dev', 'concurrent:dev']);

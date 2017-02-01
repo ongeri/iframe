@@ -35,28 +35,28 @@ module.exports = function(options, callback) {
         // var out = AjaxDriver.queryString.stringify(root);
         //console.log(out);
 
-        var conf = {
-            method: "GET",
-            timeout: "5000",
-            data: "",
-            url:"http://localhost:3000/status"
-        };
+        // var conf = {
+        //     method: "GET",
+        //     timeout: "5000",
+        //     data: "",
+        //     url:"http://localhost:3000/status"
+        // };
 
-        JSONPDriver.request(conf, function(err, res, status){
-            if(err) {
-                console.log("error "+JSON.stringify(err));
-            }else {
-                console.log(status);
-                console.log(res);
-            }
-        });
+        // JSONPDriver.request(conf, function(err, res, status){
+        //     if(err) {
+        //         console.log("error "+JSON.stringify(err));
+        //     }else {
+        //         console.log(status);
+        //         console.log(res);
+        //     }
+        // });
+        AjaxDriver.request(options, callback);
 
     }
     else {
         //use jsondriver
-        console.log("use IE");
+        console.log("use jsonp");
         JSONPDriver.request(options, callback);
     }
 
-    // callback(null,{});
 };

@@ -1,13 +1,11 @@
 var Backbone = require('backbone');
 var iFramer = require("../utilities/iframe/index.js");
 var frameInjector = require('./frame-inject.js');
-var $ = require('jquery');
 var bus = require('framebus');
 var EventEmitter = require('../libs/event-emitter.js');
 var noCallback = require('../libs/no-callback.js');
 
-Backbone.$ = $;
-var _ = require('underscore');
+
 
 
 var createInputEventHandler = function(fields) {
@@ -52,7 +50,7 @@ var createInputEventHandler = function(fields) {
 };
 var HostedFields = function(options){
 
-  console.log("hosted field has been created");
+  //console.log("hosted field has been created");
 
   var self = this;
   var fields = {};
@@ -88,7 +86,7 @@ var HostedFields = function(options){
   Object.keys(options.fields).forEach(function(key){
     var field, container, frame;
 
-    console.log("Value of key "+key);
+    //console.log("Value of key "+key);
 
     //validate the field name : TODO
 
@@ -136,6 +134,7 @@ var HostedFields = function(options){
     };
 
     setTimeout(function(){
+      console.log(key+"--frame");
       frame.src="http://localhost:3000/file";//load another page with another javascript and we continue from there
     }, 0); //run atleast after 0secs
 
@@ -150,12 +149,12 @@ var HostedFields = function(options){
   bus.on("FRAME_SET", function(args,reply){
     
     fieldCount -= 1; //reduce the counter and build the frame once all is loaded
+    
     if(fieldCount === 0) {
       console.log("ready to build the things ");
       
       reply(options);
       self._emit("READY");
-     // reply.contents.callme(options);
     }
   });
 
@@ -163,7 +162,6 @@ var HostedFields = function(options){
   bus.on("INPUT_EVENT" ,function(){
     createInputEventHandler(fields).bind(this);
   });
-
 
 };
 

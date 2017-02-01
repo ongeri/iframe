@@ -34,7 +34,7 @@ app.set('view engine', 'handlebars');
 
 //allow cross origin request
 app.use(function(req, res, next) {
-  console.log("It hit the server");
+  //console.log("It hit the server");
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
@@ -47,7 +47,13 @@ app.get('/status', function(req, res){
 });
 //send simple file back
 
-app.get('*', function(req,res){
+app.get('/api/v1/configuration', function(req, res){
+	res.status(200).json({
+		clienturl: '/api/v1/pay'
+	});
+});
+
+app.get('/file', function(req,res){
 
 	//req.log.info({session : req.session, req : req});
 	//res.render('index');
