@@ -3,18 +3,25 @@ var CreditCardForm = require('./models/credit-card-form.js').CreditCardForm;
 var packIframes = require('./pack-iframes.js');
 var frameName = require('./get-frame-name.js');
 var FieldComponent = require('./components/field-component.js').FieldComponent;
+var events = require('../hosted-fields/events.js');
+var request = require('../request');
+
+
 var create = function(){
 
-    console.log("created internal hosted fields ");
+    console.log("-send event back to merchant of successful loading>>> ");
     
-    bus.emit('FRAME_SET', {
-        hello:"Is it me you are calling"
+    bus.emit(events.FRAME_SET, {
     }, builder);
     
 };
 
 var builder = function(conf) {
-    console.log("calling builder");
+
+    console.log("---> building started>>>");
+
+    var client = conf.client;
+    //console.log("client object in builder "+JSON.stringify(conf));
 
     var cardForm = new CreditCardForm(conf);
 
@@ -28,21 +35,45 @@ var builder = function(conf) {
     bus.on("PAY_REQUEST", function(options, reply){
         console.log("handle the pay request");
 
-        var payHandler = createPayHandler(cardForm.getCardData());
+        var payHandler = createPayHandler(client, cardForm);
+
+        payHandler(options, reply);
     });
     
 
 };
 
-var createPayHandler = function(cardForm){
+var createPayHandler = function(client, cardForm){
 
     return function(options, reply) {
 
-        var creditCardDetails = normalizeFields(cardForm.getCardData());
+        var creditCardDetails = cardForm.getCardData();
 
         options = options || {};
 
         //post response
+        console.log("credit card details is "+JSON.stringify(client));
+        console.log(client);
+        console.log(creditCardDetails);
+
+        request({
+            method: "POST",
+            data: {
+                creditCardDetails
+            },
+            url: "http://localhost:3000/api/v1/payment/hosted"
+        }, function(err, res, status){
+            if(err) {
+                console.log("error paying "+err);
+                reply(err);
+                return;
+            }else {
+                console.log("response from server "+res.message);
+                bus.emit("PAY_DONE", {res});
+            }
+        });
+
+
         
     };
 };
@@ -59,6 +90,7 @@ var initialize = function(cardForm) {
         type: frameName.getFrameName()
     });
 
+    //here a document is the one inside the frame
     document.body.appendChild(fieldComponent.element);
 };
 

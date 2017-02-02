@@ -4,6 +4,9 @@ var frameInjector = require('./frame-inject.js');
 var bus = require('framebus');
 var EventEmitter = require('../libs/event-emitter.js');
 var noCallback = require('../libs/no-callback.js');
+var uuid = require('../libs/uuid.js');
+var constants = require('../libs/constants.js');
+var events = require('./events.js');
 
 
 
@@ -50,12 +53,16 @@ var createInputEventHandler = function(fields) {
 };
 var HostedFields = function(options){
 
-  //console.log("hosted field has been created");
+  var failureTimeout;
+
+  
+
+  console.log("Constructing Hosted Field Object >>>");
 
   var self = this;
   var fields = {};
   var fieldCount = 0;
-  var componentId = 1;
+  var componentId = uuid();
 
   if(!options.client){
     //throw exception because we need client for certain https calls
@@ -73,12 +80,13 @@ var HostedFields = function(options){
 
   this._fields = fields;
 
+  //we need to know the state
+  //of each  field at any point in time
   this._state = {
     fields: {}
   };
 
   //when we tear this down, we also want to teardown all backbone listener :TODO
-
   this._client = options.client;
 
 
@@ -86,9 +94,10 @@ var HostedFields = function(options){
   Object.keys(options.fields).forEach(function(key){
     var field, container, frame;
 
-    //console.log("Value of key "+key);
-
-    //validate the field name : TODO
+    /**
+     * we can validate on fields
+     * pan cvv exp pin
+     */
 
     field = options.fields[key];
 
@@ -97,26 +106,22 @@ var HostedFields = function(options){
     //console.log("associated selector "+container);
 
     if(!container) {
-      //bad situation stop execution, this is where
-      //we should insert the iframe so nothing happens
+      throw new Error({
+        message: "The Field "+field.selector+" does not exist."
+      });
     }
-    else if(container.querySelector('iframe')) {
-      //bad situation there is a duplicate element
-      //throw exception
+    else if(container.querySelector('iframe[name^="isw-"]')) {
+      throw new Error({
+        message: "Duplicate "+field.selector+" already contains an iframe."
+      });
     }
 
     frame = iFramer({
       type: key,
       name: 'isw-hosted-field-' + key,
-      style: {
-          border: 'none',
-          width: '100%',
-          height: '50px',
-          'float': 'left'
-      }
+      style: constants.DEFAULTIFRAMESTYLE
     });
 
-    //console.log("associated frame "+frame);
 
     this._injectedNodes = this._injectedNodes.concat(frameInjector(frame, container));
 
@@ -126,40 +131,42 @@ var HostedFields = function(options){
       frameElement: frame,
       containerElement: container
     };
+
     fieldCount+=1;
 
     this._state.fields[key] = {
       isEmpty: true,
+      isValid: false,
+      isFocused: false,
+      isPotentiallyValid: true,
       container: container
     };
 
+    //run atleast after 0secs
     setTimeout(function(){
-      console.log(key+"--frame");
-      frame.src="http://localhost:3000/file";//load another page with another javascript and we continue from there
-    }, 0); //run atleast after 0secs
+      frame.src="http://localhost:3000/file";
+    }, 0); 
 
+  }.bind(this));
 
-  }.bind(this));//end of key interation
+  failureTimeout = setTimeout(function(){
+    //notify analytics that there was a timeout
+  }, constants.INTEGRATION_TIMEOUT_MS);
 
-  //console.log("The elements in the injection array include "+this._injectedNodes);
-
-  //implement a timeout mechanism here and also return it to something
-  //if it does not timeout, remember to clearTimeout :) TODO
-
-  bus.on("FRAME_SET", function(args,reply){
+  bus.on(events.FRAME_SET, function(args,reply){
     
-    fieldCount -= 1; //reduce the counter and build the frame once all is loaded
+    fieldCount -= 1; 
     
     if(fieldCount === 0) {
-      console.log("ready to build the things ");
-      
+      console.log("-first point to create-frames>>>");
+      clearTimeout(failureTimeout);
       reply(options);
-      self._emit("READY");
+      console.log("-finished creating frames-callback to merchant-site>>>");
+      self._emit(events.READY);
     }
   });
 
-  //set up event for inputs :)
-  bus.on("INPUT_EVENT" ,function(){
+  bus.on(events.INPUT_EVENT ,function(){
     createInputEventHandler(fields).bind(this);
   });
 
@@ -179,8 +186,17 @@ HostedFields.prototype.pay = function(options, callback){
 
   noCallback(callback, 'pay');
 
-  bus.emit("PAY_REQUEST", options, function(response){
-    callback(null, response);
+  bus.emit("PAY_REQUEST", options, function(err,response){
+    if(err) {
+      callback(err);
+      return;
+    }
+    
+    
+  });
+
+  bus.on("PAY_DONE", function(options, reply){
+      callback(null, options);
   });
 
 };

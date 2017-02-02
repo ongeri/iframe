@@ -53,6 +53,12 @@ app.get('/api/v1/configuration', function(req, res){
 	});
 });
 
+app.post('/api/v1/payment/hosted', function(req, res){
+	res.status(200).json({
+		message: "Payment Successful"
+	});
+});
+
 app.get('/file', function(req,res){
 
 	//req.log.info({session : req.session, req : req});

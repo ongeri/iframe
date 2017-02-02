@@ -1,12 +1,10 @@
 var BaseInput = require('./base-input.js').BaseInput;
-var MAX_SIZE = 4;
+var MAX_SIZE = 3;
 
 
 var cvvInput = function(options) {
 
     this.MAX_SIZE = MAX_SIZE;
-
-    console.log("cvv input");
 
     BaseInput.apply(this, arguments);
 

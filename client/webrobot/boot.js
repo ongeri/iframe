@@ -42,6 +42,7 @@ var newInstanceValue = function(options, callback){
         try{
             //create client here
             client = new Client(configuration);
+            //console.log("first client created "+client.request());
         }
         catch(e) {
             callback(e);

@@ -1,6 +1,7 @@
 
 var LabelComponent = require('./label.js');
-var InputLabelComponent = require('./input-components.js').cvv;
+var InputLabelComponent = require('./input-components.js');
+var constants = require('../../libs/constants');
 
 var fieldComponent = function(options) {
 
@@ -8,12 +9,11 @@ var fieldComponent = function(options) {
 
     this.element = document.createDocumentFragment();
 
-    this.element.appendChild(new LabelComponent({
-        name: 'cvv',
-        label: 'CVV'
-    }).element);
+    var formMap = constants.formMap[type];
 
-    var inputElem = new InputLabelComponent.CVVINPUT({
+    this.element.appendChild(new LabelComponent(formMap).element);
+    console.log("type is "+type);
+    var inputElem = new InputLabelComponent[type]({
         model: options.model,
         type: type
     });

@@ -40,7 +40,7 @@ var request = function(options, cb){
             resBody = parseBody(req.responseText);
 
             if(status >= 400 || status < 200) {//non-200
-                console.log("an error occured in http request");
+                console.log("an error occured in http request "+status);
                 callback(resBody||'error', null, status||500);
             }
             else {

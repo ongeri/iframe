@@ -1,6 +1,7 @@
 
 var bus = require('framebus');
 var createRestrictedInput = require('../../libs/create-restricted-input.js');
+var constants = require('../../libs/constants');
 var ENTER_KEY_CODE = 13;
 function BaseInput(options){
 
@@ -32,11 +33,15 @@ BaseInput.prototype.buildElement = function(){
 
     var type = this.type;
 
+    var inputType = this.getConfiguration().type || 'tel';
+
     var element = document.createElement('input');
 
-    var placeHolder = "CVV";
+    var placeHolder = this.getConfiguration().placeholder;
 
-    var name = "cvv";
+    var formMap = constants.formMap[type];
+
+    var name = formMap.name;
 
     var attributes = {
         type: type,
@@ -45,7 +50,7 @@ BaseInput.prototype.buildElement = function(){
         autocapitalize: 'none',
         spellcheck: 'false',
         'class': type,
-        'data-interswitch-name': type,
+        'data-isw-name': type,
         name: name,
         id: name
   };
@@ -56,6 +61,10 @@ BaseInput.prototype.buildElement = function(){
 
   return element;
 
+};
+
+BaseInput.prototype.getConfiguration = function(){
+  return this.model.conf.fields[this.type];
 };
 
 BaseInput.prototype.addDOMEventListeners = function(){
@@ -76,7 +85,7 @@ BaseInput.prototype._addDOMKeypressListeners = function(){
 BaseInput.prototype._addDOMInputListeners = function(){
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
-        console.log("value change is "+valueChanged);
+        //console.log("value change is "+valueChanged);
         this.updateModel('value', valueChanged);
     }.bind(this), false);
 };

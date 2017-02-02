@@ -179,7 +179,7 @@ var request = function request(options, cb) {
 
             if (status >= 400 || status < 200) {
                 //non-200
-                console.log("an error occured in http request");
+                console.log("an error occured in http request " + status);
                 callback(resBody || 'error', null, status || 500);
             } else {
                 console.log(" a good response came back");
@@ -528,6 +528,7 @@ var newInstanceValue = function newInstanceValue(options, callback) {
         try {
             //create client here
             client = new Client(configuration);
+            //console.log("first client created "+client.request());
         } catch (e) {
             callback(e);
             return;

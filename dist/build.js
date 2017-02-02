@@ -1,4 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+
+    READY: "READY",
+    FRAME_SET: "FRAME_SET",
+    INPUT_EVENT: "INPUT_EVENT"
+};
+
+},{}],2:[function(require,module,exports){
 'use strict';
 
 module.exports = function (frame, container) {
@@ -16,7 +26,7 @@ module.exports = function (frame, container) {
   return [frame, container];
 };
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 var Backbone = require('backbone');
@@ -25,6 +35,9 @@ var frameInjector = require('./frame-inject.js');
 var bus = require('framebus');
 var EventEmitter = require('../libs/event-emitter.js');
 var noCallback = require('../libs/no-callback.js');
+var uuid = require('../libs/uuid.js');
+var constants = require('../libs/constants.js');
+var events = require('./events.js');
 
 var createInputEventHandler = function createInputEventHandler(fields) {
   /*
@@ -67,12 +80,14 @@ var createInputEventHandler = function createInputEventHandler(fields) {
 };
 var HostedFields = function HostedFields(options) {
 
-  //console.log("hosted field has been created");
+  var failureTimeout;
+
+  console.log("Constructing Hosted Field Object >>>");
 
   var self = this;
   var fields = {};
   var fieldCount = 0;
-  var componentId = 1;
+  var componentId = uuid();
 
   if (!options.client) {
     //throw exception because we need client for certain https calls
@@ -90,20 +105,22 @@ var HostedFields = function HostedFields(options) {
 
   this._fields = fields;
 
+  //we need to know the state
+  //of each  field at any point in time
   this._state = {
     fields: {}
   };
 
   //when we tear this down, we also want to teardown all backbone listener :TODO
-
   this._client = options.client;
 
   Object.keys(options.fields).forEach(function (key) {
     var field, container, frame;
 
-    //console.log("Value of key "+key);
-
-    //validate the field name : TODO
+    /**
+     * we can validate on fields
+     * pan cvv exp pin
+     */
 
     field = options.fields[key];
 
@@ -112,25 +129,20 @@ var HostedFields = function HostedFields(options) {
     //console.log("associated selector "+container);
 
     if (!container) {
-      //bad situation stop execution, this is where
-      //we should insert the iframe so nothing happens
-    } else if (container.querySelector('iframe')) {
-      //bad situation there is a duplicate element
-      //throw exception
+      throw new Error({
+        message: "The Field " + field.selector + " does not exist."
+      });
+    } else if (container.querySelector('iframe[name^="isw-"]')) {
+      throw new Error({
+        message: "Duplicate " + field.selector + " already contains an iframe."
+      });
     }
 
     frame = iFramer({
       type: key,
       name: 'isw-hosted-field-' + key,
-      style: {
-        border: 'none',
-        width: '100%',
-        height: '50px',
-        'float': 'left'
-      }
+      style: constants.DEFAULTIFRAMESTYLE
     });
-
-    //console.log("associated frame "+frame);
 
     this._injectedNodes = this._injectedNodes.concat(frameInjector(frame, container));
 
@@ -140,39 +152,41 @@ var HostedFields = function HostedFields(options) {
       frameElement: frame,
       containerElement: container
     };
+
     fieldCount += 1;
 
     this._state.fields[key] = {
       isEmpty: true,
+      isValid: false,
+      isFocused: false,
+      isPotentiallyValid: true,
       container: container
     };
 
+    //run atleast after 0secs
     setTimeout(function () {
-      console.log(key + "--frame");
-      frame.src = "http://localhost:3000/file"; //load another page with another javascript and we continue from there
-    }, 0); //run atleast after 0secs
+      frame.src = "http://localhost:3000/file";
+    }, 0);
+  }.bind(this));
 
-  }.bind(this)); //end of key interation
+  failureTimeout = setTimeout(function () {
+    //notify analytics that there was a timeout
+  }, constants.INTEGRATION_TIMEOUT_MS);
 
-  //console.log("The elements in the injection array include "+this._injectedNodes);
+  bus.on(events.FRAME_SET, function (args, reply) {
 
-  //implement a timeout mechanism here and also return it to something
-  //if it does not timeout, remember to clearTimeout :) TODO
-
-  bus.on("FRAME_SET", function (args, reply) {
-
-    fieldCount -= 1; //reduce the counter and build the frame once all is loaded
+    fieldCount -= 1;
 
     if (fieldCount === 0) {
-      console.log("ready to build the things ");
-
+      console.log("-first point to create-frames>>>");
+      clearTimeout(failureTimeout);
       reply(options);
-      self._emit("READY");
+      console.log("-finished creating frames-callback to merchant-site>>>");
+      self._emit(events.READY);
     }
   });
 
-  //set up event for inputs :)
-  bus.on("INPUT_EVENT", function () {
+  bus.on(events.INPUT_EVENT, function () {
     createInputEventHandler(fields).bind(this);
   });
 };
@@ -191,14 +205,21 @@ HostedFields.prototype.pay = function (options, callback) {
 
   noCallback(callback, 'pay');
 
-  bus.emit("PAY_REQUEST", options, function (response) {
-    callback(null, response);
+  bus.emit("PAY_REQUEST", options, function (err, response) {
+    if (err) {
+      callback(err);
+      return;
+    }
+  });
+
+  bus.on("PAY_DONE", function (options, reply) {
+    callback(null, options);
   });
 };
 
 module.exports = HostedFields;
 
-},{"../libs/event-emitter.js":5,"../libs/no-callback.js":6,"../utilities/iframe/index.js":17,"./frame-inject.js":1,"backbone":21,"framebus":22}],3:[function(require,module,exports){
+},{"../libs/constants.js":6,"../libs/event-emitter.js":8,"../libs/no-callback.js":9,"../libs/uuid.js":12,"../utilities/iframe/index.js":20,"./events.js":1,"./frame-inject.js":2,"backbone":24,"framebus":25}],4:[function(require,module,exports){
 'use strict';
 
 /**
@@ -211,6 +232,8 @@ module.exports = HostedFields;
 var bus = require('framebus');
 var ISWHostedFields = require('./hosted-fields.js');
 var noCallback = require('../libs/no-callback.js');
+var deferred = require('../libs/deferred.js');
+var events = require('./events.js');
 
 var newInstance = function newInstance(options, callback) {
 
@@ -221,14 +244,13 @@ var newInstance = function newInstance(options, callback) {
   try {
     instance = new ISWHostedFields(options);
   } catch (err) {
+    callback = deferred(callback);
     callback(err);
     return;
   }
 
-  //set event listener to do callback when loading is complete
-  instance.on("READY", function () {
+  instance.on(events.READY, function () {
     callback(null, instance);
-    //console.log("ready to roxk and tole");
   });
 };
 
@@ -236,7 +258,7 @@ module.exports = {
   newInstance: newInstance
 };
 
-},{"../libs/no-callback.js":6,"./hosted-fields.js":2,"framebus":22}],4:[function(require,module,exports){
+},{"../libs/deferred.js":7,"../libs/no-callback.js":9,"./events.js":1,"./hosted-fields.js":3,"framebus":25}],5:[function(require,module,exports){
 'use strict';
 
 /**
@@ -263,7 +285,72 @@ window.interswitch = window.interswitch || {};
 window.interswitch.hostedFields = ISWContainerFields;
 window.interswitch.request = request;
 
-},{"./hosted-fields/index.js":3,"./request":12}],5:[function(require,module,exports){
+},{"./hosted-fields/index.js":4,"./request":15}],6:[function(require,module,exports){
+'use strict';
+
+var constants = {
+
+  externalEvents: {
+    FOCUS: 'focus',
+    BLUR: 'blur',
+    EMPTY: 'empty',
+    NOT_EMPTY: 'notEmpty',
+    VALIDITY_CHANGE: 'validityChange',
+    CARD_TYPE_CHANGE: 'cardTypeChange'
+  },
+
+  DEFAULTIFRAMESTYLE: {
+    border: 'none',
+    width: '100%',
+    height: '100%',
+    'float': 'left'
+  },
+  formMap: {
+    pan: {
+      name: "Pan",
+      label: "PAN"
+    },
+    cvv: {
+      name: "cvv",
+      label: "CVV"
+    },
+    pin: {
+      name: "pin",
+      label: "PIN"
+    },
+    exp: {
+      name: "expiration",
+      label: "Expiration Date"
+    },
+    expMonth: {
+      name: "expirationMonth",
+      label: "Expiration Month"
+    },
+    expYear: {
+      name: "expirationYear",
+      label: "Expiration Year"
+    }
+
+  }
+
+};
+
+module.exports = constants;
+
+},{}],7:[function(require,module,exports){
+"use strict";
+
+module.exports = function (fn) {
+    return function () {
+
+        var args = arguments;
+        setTimeout(function () {
+            fn.apply(null, args);
+        }, 1);
+    };
+};
+
+},{}],8:[function(require,module,exports){
 "use strict";
 
 function EventEmitter() {
@@ -297,7 +384,7 @@ EventEmitter.prototype._emit = function (event) {
 
 module.exports = EventEmitter;
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 //throws an error if the callback is not a function
@@ -309,7 +396,7 @@ module.exports = function (callback, functionName) {
   }
 };
 
-},{}],7:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -322,7 +409,7 @@ module.exports = function (fn) {
     };
 };
 
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -401,7 +488,7 @@ module.exports = {
     stringify: stringify
 };
 
-},{}],9:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 /**
@@ -418,7 +505,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -465,7 +552,7 @@ var request = function request(options, cb) {
 
             if (status >= 400 || status < 200) {
                 //non-200
-                console.log("an error occured in http request");
+                console.log("an error occured in http request " + status);
                 callback(resBody || 'error', null, status || 500);
             } else {
                 console.log(" a good response came back");
@@ -525,7 +612,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":8,"./parse-body.js":15,"./prep-body.js":16}],11:[function(require,module,exports){
+},{"../libs/query-string.js":11,"./parse-body.js":18,"./prep-body.js":19}],14:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -534,7 +621,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -599,7 +686,7 @@ module.exports = function (options, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/once.js":7,"./ajax-driver.js":10,"./get-user-agent.js":11,"./is-http.js":13,"./jsonp-driver.js":14}],13:[function(require,module,exports){
+},{"../libs/once.js":10,"./ajax-driver.js":13,"./get-user-agent.js":14,"./is-http.js":16,"./jsonp-driver.js":17}],16:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -608,7 +695,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -739,7 +826,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":8,"../libs/uuid.js":9}],15:[function(require,module,exports){
+},{"../libs/query-string.js":11,"../libs/uuid.js":12}],18:[function(require,module,exports){
 "use strict";
 
 /**
@@ -753,7 +840,7 @@ module.exports = function (body) {
     return body;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -767,7 +854,7 @@ module.exports = function (method, body) {
     return body;
 };
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var setAttributes = require('./lib/set-attributes');
@@ -795,7 +882,7 @@ module.exports = function createFrame(options) {
   return iframe;
 };
 
-},{"./lib/assign":18,"./lib/default-attributes":19,"./lib/set-attributes":20}],18:[function(require,module,exports){
+},{"./lib/assign":21,"./lib/default-attributes":22,"./lib/set-attributes":23}],21:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -816,7 +903,7 @@ module.exports = function assign(target) {
   return target;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -826,7 +913,7 @@ module.exports = {
   scrolling: 'no'
 };
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = function setAttributes(element, attributes) {
@@ -845,7 +932,7 @@ module.exports = function setAttributes(element, attributes) {
   }
 };
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -2769,7 +2856,7 @@ module.exports = function setAttributes(element, attributes) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":23,"underscore":24}],22:[function(require,module,exports){
+},{"jquery":26,"underscore":27}],25:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -3047,7 +3134,7 @@ module.exports = function setAttributes(element, attributes) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.1.1
  * https://jquery.com/
@@ -13269,7 +13356,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -14819,4 +14906,4 @@ return jQuery;
   }
 }.call(this));
 
-},{}]},{},[4]);
+},{}]},{},[5]);

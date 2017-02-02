@@ -3,6 +3,7 @@ var EventedModel = require('./evented-model');
 var constants = require('../../libs/constants.js');
 var externalEvents = constants.externalEvents;
 var bus = require('framebus');
+
 var CreditCardForm = function(conf){
     
 
@@ -10,7 +11,7 @@ var CreditCardForm = function(conf){
     /**
      *  returns an array of field keys
      *  for example
-     *  ["cardCVV", "cardPin", "cardExp"]
+     *  ["pan", "pin", "exp"]
      * 
      * 
      */
@@ -19,7 +20,7 @@ var CreditCardForm = function(conf){
         return true;
     });
 
-    console.log("creating credit card form "+JSON.stringify(this._fieldKeys));
+    console.log("Keys for fields "+JSON.stringify(this._fieldKeys)+">>>");
 
     EventedModel.apply(this, arguments);
 
@@ -29,13 +30,13 @@ var CreditCardForm = function(conf){
      * 
      * iterate over all the fields
      * for example 
-     * ["cardCVV", "cardPan"]
+     * ["cvv", "pan"]
      * 
      */
 
     this._fieldKeys.forEach(function(field){
 
-      var onFieldChange = onFieldStateChange(this, field);
+      var onFieldChange = onFieldStateChange(this, field);//pass the entire form state to be processed
 
       this.on('change:' + field + '.value', onFieldValueChange(this, field));
 
@@ -110,20 +111,24 @@ CreditCardForm.prototype.getCardData = function () {
 
   console.log("keys are "+JSON.stringify(this._fieldKeys));
 
-  if (this._fieldKeys.indexOf('cardPan') !== -1) {
-    keys.push('cardPan');
+  if (this._fieldKeys.indexOf('pan') !== -1) {
+    keys.push('pan');
   }
 
-  if (this._fieldKeys.indexOf('cardCVV') !== -1) {
-    keys.push('cardCVV');
+  if (this._fieldKeys.indexOf('cvv') !== -1) {
+    keys.push('cvv');
   }
 
   if (this._fieldKeys.indexOf('postalCode') !== -1) {
     keys.push('postalCode');
   }
 
-  if (this._fieldKeys.indexOf('expirationDate') !== -1) {
-    keys.push('expirationDate');
+  if (this._fieldKeys.indexOf('exp') !== -1) {
+    keys.push('exp');
+  }
+
+  if (this._fieldKeys.indexOf('pin') !== -1) {
+    keys.push('pin');
   }
 
   
@@ -140,7 +145,7 @@ CreditCardForm.prototype.getCardData = function () {
     return reducedResult;
   }.bind(this), result);
 
-  console.log(JSON.stringify(result));
+  //console.log(JSON.stringify(result));
   return result;
 };
 
@@ -157,8 +162,8 @@ function onFieldValueChange(form, fieldKey) {
    return function () {
     var isEmpty =  form.get(fieldKey + '.value');
     //console.log("isEmpty is "+isEmpty+" ");
-    form.set(fieldKey + '.isEmpty', isEmpty !== '');
-    form._validateField(fieldKey);
+    form.set(fieldKey + '.isEmpty', isEmpty === '');
+    //form._validateField(fieldKey);
   };
 
 
@@ -178,6 +183,8 @@ function onEmptyChange(form, field) {
 
 /**
  * returns a function value for when there is a state change
+ * @param form: credit-card-form
+ * @param field: string
  */
 function onFieldStateChange(form, field) {
   return function(){

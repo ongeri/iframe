@@ -95,42 +95,52 @@
               //throw some kind of error event
               return;
             }
+            console.log("client of callback "+client.request);
             interswitch.hostedFields.newInstance({
-              client: null, /**defer till implementation **/
-            fields: {
-              cardPan: {
-                selector: '#card-pan',
-                placeholder: '1111 1111 1111 1111'
+              client: client,
+              styles: {
+                'input': {
+                  'font-size': '16px',
+                  'font-family': 'roboto, verdana, sans-serif',
+                  'font-weight': 'lighter',
+                  'color': 'black'
+                },
+                ':focus': {
+                  'color': 'black'
+                },
+                '.valid': {
+                  'color': 'black'
+                },
+                '.invalid': {
+                  'color': 'black'
+                }
               },
-              cardCVV: {
-                selector: '#card-cvv',
-                placeholder: '111'
-              },
-              expirationDate: {
-                selector: '#expiration-date',
-                placeholder: 'MM/YY'
-              },
-              cardPIN:{
-                selector:'#card-pin',
-                placeholder:'PIN'
+              fields: {
+                pan: {
+                  selector: '#card-pan',
+                  placeholder: '1111 1111 1111 1111'
+                },
+                cvv: {
+                  selector: '#card-cvv',
+                  placeholder: '111'
+                },
+                exp: {
+                  selector: '#expiration-date',
+                  placeholder: 'MM/YY'
+                },
+                pin:{
+                  selector:'#card-pin',
+                  placeholder:'PIN'
+                }
               }
-            }
-          },
+            },
           function(err, hostedFieldInstance){
+
+            if(err) {
+              // something is wrong,
+
+            }
             console.log("hosted instance in place");
-            //callback function after instance has been created
-
-            //attach events for handling validation error
-
-            //attach events for paying and we return a nonce for you
-            /**
-            *e.g hostedFieldInstance.pay(function(err, payload){
-            *        //access the payment reference and do something with it.
-            *    });
-            *
-            *
-            *
-            **/
 
               submit.addEventListener('click', function(evt){
 
@@ -138,11 +148,9 @@
                 evt.stopPropagation();
 
                 hostedFieldInstance.pay(function(err, payload){
-
-                //   //submit your nonce to your server
+                  console.log(" "+JSON.stringify(payload));
                 });
                 console.log(hostedFieldInstance);
-                //hostedFieldInstance.pay();
               }, false)
           });
 
