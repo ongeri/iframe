@@ -185,20 +185,29 @@ HostedFields.prototype.pay = function(options, callback){
   }
 
   noCallback(callback, 'pay');
+  console.log("pay it ");
+  var t = handlePayResponse(callback);
+  bus.emit("PAY_REQUEST", {}, t);
+  
 
-  bus.emit("PAY_REQUEST", options, function(err,response){
-    if(err) {
-      callback(err);
+  // bus.on("PAY_DONE", function(options, reply){
+  //     console.log("calling pay_done trigger");
+  //     callback(null, options);
+  // });
+
+};
+
+var handlePayResponse = function(data){
+  console.log("response from paying "+data);
+  return function(obj){
+    if(obj && obj.error) {
+      data(obj.error);
       return;
+    }else {
+      data(null,obj);
     }
-    
-    
-  });
-
-  bus.on("PAY_DONE", function(options, reply){
-      callback(null, options);
-  });
-
+    console.log("response object "+JSON.stringify(obj));
+  };
 };
 
 module.exports = HostedFields;

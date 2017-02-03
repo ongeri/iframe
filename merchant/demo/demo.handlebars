@@ -72,8 +72,8 @@
 
   <script src="js/index.js"></script>
   <script src="js/jquery.js"></script>
-  <script src="../dist/client.js"></script>
-  <script src="../dist/build.js"></script>
+  <script src="client.js"></script>
+  <script src="build.js"></script>
 
   <script>
   //console.log(window);
@@ -148,14 +148,16 @@
                 evt.stopPropagation();
 
                 hostedFieldInstance.pay(function(err, payload){
+                  console.log("payload in callback "+JSON.stringify(payload));
                   if(err) {
                     //exception from the server side
                     return;
                   }
                   else {
-                    var payref = payload.res.payref;
-                    console.log(payref);
-                    alert("Payment successful with payment ref of "+payref);
+                    var payref = payload.payref;
+                    var pan = payload.pan;
+                    console.log(JSON.stringify(payload));
+                    alert("Payment successful with payment ref of "+payref+" with pan of: "+pan);
                     return;
                   }
                 });

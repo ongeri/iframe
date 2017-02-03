@@ -12,10 +12,11 @@ var exphbs = require('express-handlebars');
 const uuidV4 = require('uuid/v4');
 
 app.disable('X-Powered-By');
-app.set('port', process.env.PORT || 3000);
-app.set('views', path.join(__dirname,'/server/public'));
+app.set('port', process.env.PORT || 4000);
+app.set('views', path.join(__dirname,'/demo'));
 //app.enable('view cache');
-app.use(serveStatic(path.join(__dirname, 'dist')));
+app.use(serveStatic(path.join(__dirname, '../dist')));
+app.use(serveStatic(path.join(__dirname, 'public')));
 
 var hbs = exphbs.create({
 
@@ -45,44 +46,19 @@ app.use(function(req, res, next) {
 
 // app.use(methodOverride());
 
-app.get('/status', function(req, res){
-  res.status(200).jsonp({message: "Hi There!!!", status: 200});
-});
-//send simple file back
 
-app.get('/api/v1/configuration', function(req, res){
-	res.status(200).json({
-		clienturl: 'http://localhost:3000/api/'
-	});
-});
-
-app.post('/api/v1/payment/hosted', function(req, res){
-	//console.log("pay request "+JSON.stringify(req.body));
-	var creditModel= req.body.creditCardDetails || {};
-	var pan = creditModel.pan;
-	console.log("pan is "+pan);
-	var pin = creditModel.pin;
-	var uniq = uuidV4();
-	//console.log("paying with a pan of "+JSON.stringify(req.body));
-	res.status(200).json({
-		message: "Payment Successful for "+pan,
-		payref: uniq,
-		pan: pan
-	});
-});
-
-app.get('/file', function(req,res){
+app.get('*', function(req,res){
 
 	//req.log.info({session : req.session, req : req});
 	//res.render('index');
 
-	res.render("help",
+	res.render("demo",
 		{
 			showTitle : true
 		}
 	);
 });
 
-app.listen(3000, function () {
-  console.log('Server up and running on port 3000!')
+app.listen(4000, function () {
+  console.log('Server up and running on port 4000!')
 })

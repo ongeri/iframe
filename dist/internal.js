@@ -340,8 +340,8 @@ var builder = function builder(conf) {
     });
 
     bus.on("PAY_REQUEST", function (options, reply) {
-        console.log("handle the pay request");
-
+        console.log("handle the pay request " + JSON.stringify(options) + " " + reply);
+        //var options = {};
         var payHandler = createPayHandler(client, cardForm);
 
         payHandler(options, reply);
@@ -370,11 +370,16 @@ var createPayHandler = function createPayHandler(client, cardForm) {
         }, function (err, res, status) {
             if (err) {
                 console.log("error paying " + err);
-                reply(err);
+                var obj = {
+                    error: err
+                };
+                reply(obj);
                 return;
             } else {
                 console.log("response from server " + res.message);
-                bus.emit("PAY_DONE", { res: res });
+                //bus.emit("PAY_DONE", {res});
+                //bus.off("PAY_DONE");
+                reply(res);
             }
         });
     };

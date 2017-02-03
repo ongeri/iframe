@@ -32,9 +32,9 @@ var builder = function(conf) {
         frame.interswitch.hostedFields.initialize(cardForm);
     });
 
-    bus.on("PAY_REQUEST", function(options, reply){
-        console.log("handle the pay request");
-
+    bus.on("PAY_REQUEST", function(options,reply){
+        console.log("handle the pay request "+JSON.stringify(options)+" "+reply);
+        //var options = {};
         var payHandler = createPayHandler(client, cardForm);
 
         payHandler(options, reply);
@@ -65,11 +65,16 @@ var createPayHandler = function(client, cardForm){
         }, function(err, res, status){
             if(err) {
                 console.log("error paying "+err);
-                reply(err);
+                var obj = {
+                    error: err
+                };
+                reply(obj);
                 return;
             }else {
                 console.log("response from server "+res.message);
-                bus.emit("PAY_DONE", {res});
+                //bus.emit("PAY_DONE", {res});
+                //bus.off("PAY_DONE");
+                reply(res);
             }
         });
 
