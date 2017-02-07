@@ -1,21 +1,86 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+    cvv: require('./src/cvv.js')
+};
+
+},{"./src/cvv.js":2}],2:[function(require,module,exports){
+'use strict';
+
+var DEFAULT_MAX = 3;
+
+var validation = function validation(isValid, isPotentiallyValid) {
+    return {
+        isValid: isValid,
+        isPotentiallyValid: isPotentiallyValid
+    };
+};
+
+var isMemberOf = function isMemberOf(value, arr) {
+
+    var i = 0;
+
+    for (; i < arr.length; i++) {
+        if (arr[i] === value) return true;
+    }
+    return false;
+};
+var check = function check(value, maxlen) {
+    maxlen = maxlen || DEFAULT_MAX;
+    maxlen = maxlen instanceof Array ? maxlen : [maxlen];
+
+    if (!(typeof value === 'string')) {
+        //there is no way for it to be correct because it is
+        //a string
+        return validation(false, false);
+    }
+    if (!/^\d*$/.test(value)) {
+        //it is not composed entirely of digits
+        return validation(false, false);
+    }
+    if (isMemberOf(value.length, maxlen)) {
+        //is a digit seq, is of the right length
+        return validation(true, true);
+    }
+    if (value.length < Math.min.apply(null, maxlen)) {
+
+        //even though not complete, have a good prefix
+        return validation(false, true);
+    }
+    if (value.length > Math.max.apply(null, maxlen)) {
+
+        //this is when the length is too long
+        return validation(false, false);
+    }
+
+    //i find no other reason why you will be bad 
+    return validation(true, true);
+};
+
+module.exports = check;
+
+},{}],3:[function(require,module,exports){
 "use strict";
 
 module.exports = {
 
     READY: "READY",
     FRAME_SET: "FRAME_SET",
-    INPUT_EVENT: "INPUT_EVENT"
+    INPUT_EVENT: "INPUT_EVENT",
+    PAY_REQUEST: "PAY_REQUEST"
 };
 
-},{}],2:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
 var createRestrictedInput = require('../../libs/create-restricted-input.js');
 var constants = require('../../libs/constants');
+var isIe9 = require('../../libs/is-ie9.js');
 var ENTER_KEY_CODE = 13;
 function BaseInput(options) {
+    var shouldFormat;
 
     this.type = options.type;
 
@@ -26,7 +91,8 @@ function BaseInput(options) {
     if (this.MAX_SIZE) {
         this.element.setAttribute('maxlength', this.MAX_SIZE);
     }
-
+    shouldFormat = this.getConfiguration().formatInput !== false && this.element instanceof HTMLInputElement;
+    console.log("shouldFormat " + shouldFormat);
     this.formatter = createRestrictedInput({
         shouldFormat: false,
         element: this.element,
@@ -47,14 +113,14 @@ BaseInput.prototype.buildElement = function () {
 
     var element = document.createElement('input');
 
-    var placeHolder = this.getConfiguration().placeholder;
+    var placeholder = this.getConfiguration().placeholder;
 
     var formMap = constants.formMap[type];
 
     var name = formMap.name;
 
     var attributes = {
-        type: type,
+        type: inputType,
         autocomplete: 'off',
         autocorrect: 'off',
         autocapitalize: 'none',
@@ -64,6 +130,12 @@ BaseInput.prototype.buildElement = function () {
         name: name,
         id: name
     };
+
+    if (placeholder) {
+        attributes.placeholder = placeholder;
+    }
+
+    console.log("primitive attrs " + JSON.stringify(attributes));
 
     Object.keys(attributes).forEach(function (attr) {
         element.setAttribute(attr, attributes[attr]);
@@ -93,13 +165,12 @@ BaseInput.prototype._addDOMKeypressListeners = function () {
 BaseInput.prototype._addDOMInputListeners = function () {
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
-        //console.log("value change is "+valueChanged);
         this.updateModel('value', valueChanged);
     }.bind(this), false);
 };
 
 BaseInput.prototype._getDOMChangeEvent = function () {
-    return 'input';
+    return isIe9() ? 'keyup' : 'input';
 };
 
 BaseInput.prototype.updateModel = function (key, value) {
@@ -164,7 +235,7 @@ module.exports = {
     BaseInput: BaseInput
 };
 
-},{"../../libs/constants":16,"../../libs/create-restricted-input.js":17,"framebus":29}],3:[function(require,module,exports){
+},{"../../libs/constants":18,"../../libs/create-restricted-input.js":19,"../../libs/is-ie9.js":21,"framebus":32}],5:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -184,7 +255,7 @@ module.exports = {
     CVVINPUT: cvvInput
 };
 
-},{"./base-input.js":2}],4:[function(require,module,exports){
+},{"./base-input.js":4}],6:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -203,7 +274,7 @@ module.exports = {
     EXP: expInput
 };
 
-},{"./base-input.js":2}],5:[function(require,module,exports){
+},{"./base-input.js":4}],7:[function(require,module,exports){
 'use strict';
 
 var LabelComponent = require('./label.js');
@@ -231,7 +302,7 @@ module.exports = {
     FieldComponent: fieldComponent
 };
 
-},{"../../libs/constants":16,"./input-components.js":6,"./label.js":7}],6:[function(require,module,exports){
+},{"../../libs/constants":18,"./input-components.js":8,"./label.js":9}],8:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -241,7 +312,7 @@ module.exports = {
     exp: require('./exp.js').EXP
 };
 
-},{"./cvv.js":3,"./exp.js":4,"./pan.js":8,"./pin.js":9}],7:[function(require,module,exports){
+},{"./cvv.js":5,"./exp.js":6,"./pan.js":10,"./pin.js":11}],9:[function(require,module,exports){
 "use strict";
 
 var label = function label(options) {
@@ -256,7 +327,7 @@ var label = function label(options) {
 
 module.exports = label;
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -275,7 +346,7 @@ module.exports = {
     PAN: panInput
 };
 
-},{"./base-input.js":2}],9:[function(require,module,exports){
+},{"./base-input.js":4}],11:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -294,7 +365,7 @@ module.exports = {
     PIN: pinInput
 };
 
-},{"./base-input.js":2}],10:[function(require,module,exports){
+},{"./base-input.js":4}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -305,7 +376,7 @@ module.exports = {
 
 };
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
@@ -318,8 +389,6 @@ var request = require('../request');
 
 var create = function create() {
 
-    console.log("-send event back to merchant of successful loading>>> ");
-
     bus.emit(events.FRAME_SET, {}, builder);
 };
 
@@ -328,7 +397,7 @@ var builder = function builder(conf) {
     console.log("---> building started>>>");
 
     var client = conf.client;
-    //console.log("client object in builder "+JSON.stringify(conf));
+    console.log("client object in builder " + JSON.stringify(conf));
 
     var cardForm = new CreditCardForm(conf);
 
@@ -339,9 +408,8 @@ var builder = function builder(conf) {
         frame.interswitch.hostedFields.initialize(cardForm);
     });
 
-    bus.on("PAY_REQUEST", function (options, reply) {
-        console.log("handle the pay request " + JSON.stringify(options) + " " + reply);
-        //var options = {};
+    bus.on(events.PAY_REQUEST, function (options, reply) {
+
         var payHandler = createPayHandler(client, cardForm);
 
         payHandler(options, reply);
@@ -406,7 +474,7 @@ module.exports = {
     initialize: initialize
 };
 
-},{"../hosted-fields/events.js":1,"../request":24,"./components/field-component.js":5,"./get-frame-name.js":10,"./models/credit-card-form.js":13,"./pack-iframes.js":15,"framebus":29}],12:[function(require,module,exports){
+},{"../hosted-fields/events.js":3,"../request":27,"./components/field-component.js":7,"./get-frame-name.js":12,"./models/credit-card-form.js":15,"./pack-iframes.js":17,"framebus":32}],14:[function(require,module,exports){
 'use strict';
 
 var hostedFields = require('./hosted-internal-fields.js');
@@ -414,13 +482,14 @@ window.interswitch = {
     hostedFields: hostedFields
 };
 
-},{"./hosted-internal-fields.js":11}],13:[function(require,module,exports){
+},{"./hosted-internal-fields.js":13}],15:[function(require,module,exports){
 'use strict';
 
 var EventedModel = require('./evented-model');
 var constants = require('../../libs/constants.js');
 var externalEvents = constants.externalEvents;
 var bus = require('framebus');
+var validator = require('../../card-validator');
 
 var CreditCardForm = function CreditCardForm(conf) {
 
@@ -456,6 +525,8 @@ var CreditCardForm = function CreditCardForm(conf) {
     var onFieldChange = onFieldStateChange(this, field); //pass the entire form state to be processed
 
     this.on('change:' + field + '.value', onFieldValueChange(this, field));
+    this.on('change:' + field + '.isValid', onFieldChange);
+    this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
   }.bind(this));
 
   this.on('change:number.value', this._onNumberChange);
@@ -469,11 +540,19 @@ CreditCardForm.prototype.constructor = CreditCardForm;
 CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
 
   var fields = this._fieldKeys.reduce(function (result, key) {
+    console.log("iterating for key " + key);
     var fieldData = this.get(key);
 
-    result[key] = {};
+    result[key] = {
+      isEmpty: fieldData.isEmpty,
+      isValid: fieldData.isValid,
+      isPotentiallyValid: fieldData.isPotentiallyValid,
+      isFocused: fieldData.isFocused
+    };
     return result;
   }.bind(this), {});
+
+  console.log("before emitting INPUT_EVENT " + JSON.stringify(fields));
 
   bus.emit("INPUT_EVENT", {
     merchantPayload: {
@@ -491,9 +570,10 @@ CreditCardForm.prototype._onNumberChange = function (number) {
 CreditCardForm.prototype._validateField = function (fieldKey) {
 
   var validationResult;
+
   var value = this.get(fieldKey + '.value');
 
-  if (fieldKey === 'cardCVV') {
+  if (fieldKey === 'cvv') {
     validationResult = this._validateCvv(value);
   } else if (fieldKey === 'expirationDate') {
     //validationResult = validate(splitDate(value));
@@ -504,13 +584,15 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
   if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
     //this._onSplitDateChange();
   } else {
-      //this.set(fieldKey + '.isValid', validationResult.isValid);
-      //this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
-    }
+    console.log(JSON.stringify(validationResult));
+    this.set(fieldKey + '.isValid', validationResult.isValid);
+    this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
+  }
 };
 
 CreditCardForm.prototype._validateCvv = function (value) {
-  return true; //defer implementation
+  console.log("validating cvv");
+  return validator.cvv(value, 3);
 };
 
 CreditCardForm.prototype.getCardData = function () {
@@ -564,9 +646,8 @@ function onFieldValueChange(form, fieldKey) {
 
   return function () {
     var isEmpty = form.get(fieldKey + '.value');
-    //console.log("isEmpty is "+isEmpty+" ");
     form.set(fieldKey + '.isEmpty', isEmpty === '');
-    //form._validateField(fieldKey);
+    form._validateField(fieldKey);
   };
 }
 
@@ -593,7 +674,7 @@ module.exports = {
   CreditCardForm: CreditCardForm
 };
 
-},{"../../libs/constants.js":16,"./evented-model":14,"framebus":29}],14:[function(require,module,exports){
+},{"../../card-validator":1,"../../libs/constants.js":18,"./evented-model":16,"framebus":32}],16:[function(require,module,exports){
 "use strict";
 
 var slice = Array.prototype.slice;
@@ -697,13 +778,14 @@ EventedModel.prototype.resetAttributes = function resetAttributes() {
 
 module.exports = EventedModel;
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 var packIframes = function packIframes(win) {
     var i, frame;
     var frames = [];
-    console.log(win.frames[0].location.href + "----");
+    console.log(document.referrer);
+    console.log(win.frames[0].location.href + "----" + win.frames[1].location.href);
     for (i = 0; i < win.frames.length; i++) {
         frame = win.frames[i];
 
@@ -722,7 +804,7 @@ module.exports = {
     packIframes: packIframes
 };
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var constants = {
@@ -774,16 +856,18 @@ var constants = {
 
 module.exports = constants;
 
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var FakeRestrictedInput = require('./fake-restricted-input');
 module.exports = function (options) {
 
+    var shouldFormat = options.shouldFormat;
+
     return new FakeRestrictedInput(options);
 };
 
-},{"./fake-restricted-input":18}],18:[function(require,module,exports){
+},{"./fake-restricted-input":20}],20:[function(require,module,exports){
 "use strict";
 
 function FakeRestrictedInput(options) {
@@ -798,7 +882,15 @@ FakeRestrictedInput.prototype.setPattern = function () {};
 
 module.exports = FakeRestrictedInput;
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
+'use strict';
+
+module.exports = function isIe9(userAgent) {
+  userAgent = userAgent || navigator.userAgent;
+  return userAgent.indexOf('MSIE 9') !== -1;
+};
+
+},{}],22:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -811,7 +903,7 @@ module.exports = function (fn) {
     };
 };
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -890,7 +982,7 @@ module.exports = {
     stringify: stringify
 };
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 /**
@@ -907,7 +999,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],22:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1014,7 +1106,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":20,"./parse-body.js":27,"./prep-body.js":28}],23:[function(require,module,exports){
+},{"../libs/query-string.js":23,"./parse-body.js":30,"./prep-body.js":31}],26:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1023,7 +1115,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1088,7 +1180,7 @@ module.exports = function (options, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/once.js":19,"./ajax-driver.js":22,"./get-user-agent.js":23,"./is-http.js":25,"./jsonp-driver.js":26}],25:[function(require,module,exports){
+},{"../libs/once.js":22,"./ajax-driver.js":25,"./get-user-agent.js":26,"./is-http.js":28,"./jsonp-driver.js":29}],28:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1097,7 +1189,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1228,7 +1320,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":20,"../libs/uuid.js":21}],27:[function(require,module,exports){
+},{"../libs/query-string.js":23,"../libs/uuid.js":24}],30:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1242,7 +1334,7 @@ module.exports = function (body) {
     return body;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -1256,7 +1348,7 @@ module.exports = function (method, body) {
     return body;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -1534,4 +1626,4 @@ module.exports = function (method, body) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[12]);
+},{}]},{},[14]);

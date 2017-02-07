@@ -8,8 +8,6 @@ var request = require('../request');
 
 
 var create = function(){
-
-    console.log("-send event back to merchant of successful loading>>> ");
     
     bus.emit(events.FRAME_SET, {
     }, builder);
@@ -21,7 +19,7 @@ var builder = function(conf) {
     console.log("---> building started>>>");
 
     var client = conf.client;
-    //console.log("client object in builder "+JSON.stringify(conf));
+    console.log("client object in builder "+JSON.stringify(conf));
 
     var cardForm = new CreditCardForm(conf);
 
@@ -32,9 +30,8 @@ var builder = function(conf) {
         frame.interswitch.hostedFields.initialize(cardForm);
     });
 
-    bus.on("PAY_REQUEST", function(options,reply){
-        console.log("handle the pay request "+JSON.stringify(options)+" "+reply);
-        //var options = {};
+    bus.on(events.PAY_REQUEST, function(options,reply){
+
         var payHandler = createPayHandler(client, cardForm);
 
         payHandler(options, reply);

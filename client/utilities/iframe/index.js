@@ -6,6 +6,8 @@ var assign = require('./lib/assign');
 
 module.exports = function createFrame(options) {
 
+  console.log("creating Iframe");
+
   //create an iframe element
   var iframe = document.createElement('iframe');
 
@@ -15,6 +17,8 @@ module.exports = function createFrame(options) {
     assign(iframe.style, config.style);
     delete config.style;
   }
+
+  
 
   setAttributes(iframe, config);
 

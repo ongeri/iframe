@@ -2,8 +2,10 @@
 var bus = require('framebus');
 var createRestrictedInput = require('../../libs/create-restricted-input.js');
 var constants = require('../../libs/constants');
+var isIe9 = require('../../libs/is-ie9.js');
 var ENTER_KEY_CODE = 13;
 function BaseInput(options){
+    var shouldFormat;
 
     this.type = options.type;
 
@@ -14,7 +16,8 @@ function BaseInput(options){
     if(this.MAX_SIZE) {
         this.element.setAttribute('maxlength', this.MAX_SIZE);
     }
-
+    shouldFormat = this.getConfiguration().formatInput !== false && this.element instanceof HTMLInputElement;
+    console.log("shouldFormat "+shouldFormat);
     this.formatter = createRestrictedInput({
         shouldFormat: false,
         element: this.element,
@@ -37,14 +40,14 @@ BaseInput.prototype.buildElement = function(){
 
     var element = document.createElement('input');
 
-    var placeHolder = this.getConfiguration().placeholder;
+    var placeholder = this.getConfiguration().placeholder;
 
     var formMap = constants.formMap[type];
 
     var name = formMap.name;
 
     var attributes = {
-        type: type,
+        type: inputType,
         autocomplete: 'off',
         autocorrect: 'off',
         autocapitalize: 'none',
@@ -54,6 +57,12 @@ BaseInput.prototype.buildElement = function(){
         name: name,
         id: name
   };
+
+   if (placeholder) {
+    attributes.placeholder = placeholder;
+  }
+
+  console.log("primitive attrs "+JSON.stringify(attributes));
 
   Object.keys(attributes).forEach(function (attr) {
     element.setAttribute(attr, attributes[attr]);
@@ -85,13 +94,12 @@ BaseInput.prototype._addDOMKeypressListeners = function(){
 BaseInput.prototype._addDOMInputListeners = function(){
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
-        //console.log("value change is "+valueChanged);
         this.updateModel('value', valueChanged);
     }.bind(this), false);
 };
 
 BaseInput.prototype._getDOMChangeEvent = function(){
-    return 'input';
+    return isIe9() ? 'keyup' : 'input';
 };
 
 BaseInput.prototype.updateModel = function(key, value){

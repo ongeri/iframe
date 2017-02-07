@@ -5,7 +5,8 @@ module.exports = {
 
     READY: "READY",
     FRAME_SET: "FRAME_SET",
-    INPUT_EVENT: "INPUT_EVENT"
+    INPUT_EVENT: "INPUT_EVENT",
+    PAY_REQUEST: "PAY_REQUEST"
 };
 
 },{}],2:[function(require,module,exports){
@@ -872,6 +873,8 @@ var defaultAttributes = require('./lib/default-attributes');
 var assign = require('./lib/assign');
 
 module.exports = function createFrame(options) {
+
+  console.log("creating Iframe");
 
   //create an iframe element
   var iframe = document.createElement('iframe');

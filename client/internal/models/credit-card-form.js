@@ -3,6 +3,7 @@ var EventedModel = require('./evented-model');
 var constants = require('../../libs/constants.js');
 var externalEvents = constants.externalEvents;
 var bus = require('framebus');
+var validator = require('../../card-validator');
 
 var CreditCardForm = function(conf){
     
@@ -39,6 +40,8 @@ var CreditCardForm = function(conf){
       var onFieldChange = onFieldStateChange(this, field);//pass the entire form state to be processed
 
       this.on('change:' + field + '.value', onFieldValueChange(this, field));
+      this.on('change:' + field + '.isValid', onFieldChange);
+    this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
 
     }.bind(this));
 
@@ -56,15 +59,20 @@ CreditCardForm.prototype.emitEvent = function(fieldKey, eventType){
   
   
   var fields = this._fieldKeys.reduce(function (result, key) {
+    console.log("iterating for key "+key);
     var fieldData = this.get(key);
 
     result[key] = {
-      
+      isEmpty: fieldData.isEmpty,
+      isValid: fieldData.isValid,
+      isPotentiallyValid: fieldData.isPotentiallyValid,
+      isFocused: fieldData.isFocused
     };
     return result;
   }.bind(this), {});
 
-  
+
+  console.log("before emitting INPUT_EVENT "+JSON.stringify(fields));  
 
   bus.emit("INPUT_EVENT", {
     merchantPayload: {
@@ -82,9 +90,10 @@ CreditCardForm.prototype._onNumberChange = function (number) {
 CreditCardForm.prototype._validateField = function (fieldKey) {
 
   var validationResult;
+
   var value = this.get(fieldKey + '.value');
 
-  if (fieldKey === 'cardCVV') {
+  if (fieldKey === 'cvv') {
     validationResult = this._validateCvv(value);
   } else if (fieldKey === 'expirationDate') {
     //validationResult = validate(splitDate(value));
@@ -95,13 +104,15 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
   if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
     //this._onSplitDateChange();
   } else {
-    //this.set(fieldKey + '.isValid', validationResult.isValid);
-    //this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
+    console.log(JSON.stringify(validationResult));
+    this.set(fieldKey + '.isValid', validationResult.isValid);
+    this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
   }
 };
 
 CreditCardForm.prototype._validateCvv = function (value) {
-  return true;//defer implementation
+  console.log("validating cvv");
+  return validator.cvv(value, 3);
 };
 
 CreditCardForm.prototype.getCardData = function () {
@@ -161,9 +172,8 @@ function onFieldValueChange(form, fieldKey) {
   
    return function () {
     var isEmpty =  form.get(fieldKey + '.value');
-    //console.log("isEmpty is "+isEmpty+" ");
     form.set(fieldKey + '.isEmpty', isEmpty === '');
-    //form._validateField(fieldKey);
+    form._validateField(fieldKey);
   };
 
 

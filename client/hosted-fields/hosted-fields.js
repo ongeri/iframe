@@ -90,7 +90,6 @@ var HostedFields = function(options){
   this._client = options.client;
 
 
-
   Object.keys(options.fields).forEach(function(key){
     var field, container, frame;
 
