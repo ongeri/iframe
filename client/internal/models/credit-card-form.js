@@ -41,11 +41,11 @@ var CreditCardForm = function(conf){
 
       this.on('change:' + field + '.value', onFieldValueChange(this, field));
       this.on('change:' + field + '.isValid', onFieldChange);
-    this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
+      this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
 
     }.bind(this));
 
-    this.on('change:number.value', this._onNumberChange);
+    this.on('change:pan.value', this._onNumberChange);
     
 
     //should add event listeners on each of the field :TODO
@@ -88,22 +88,29 @@ CreditCardForm.prototype._onNumberChange = function (number) {
 };
 
 CreditCardForm.prototype._validateField = function (fieldKey) {
-
+  console.log("Validating fieldKey "+fieldKey);
   var validationResult;
 
   var value = this.get(fieldKey + '.value');
+  var validate = validator[fieldKey];
 
   if (fieldKey === 'cvv') {
     validationResult = this._validateCvv(value);
   } else if (fieldKey === 'expirationDate') {
     //validationResult = validate(splitDate(value));
   } else {
-    //validationResult = validate(value);
+    validationResult = validate(value);
   }
 
   if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
     //this._onSplitDateChange();
   } else {
+    if(!validationResult) {
+      validationResult = {
+        isValid: false,
+        isPotentiallyValid: true
+      };
+    }
     console.log(JSON.stringify(validationResult));
     this.set(fieldKey + '.isValid', validationResult.isValid);
     this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
@@ -171,6 +178,7 @@ CreditCardForm.prototype.invalidFieldKeys = function () {
 function onFieldValueChange(form, fieldKey) {
   
    return function () {
+     console.log("-checking empty- after FieldValueChange");
     var isEmpty =  form.get(fieldKey + '.value');
     form.set(fieldKey + '.isEmpty', isEmpty === '');
     form._validateField(fieldKey);

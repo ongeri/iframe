@@ -3,6 +3,7 @@ var bus = require('framebus');
 var createRestrictedInput = require('../../libs/create-restricted-input.js');
 var constants = require('../../libs/constants');
 var isIe9 = require('../../libs/is-ie9.js');
+var toggler = require('../../libs/class-toggle.js');
 var ENTER_KEY_CODE = 13;
 function BaseInput(options){
     var shouldFormat;
@@ -27,7 +28,7 @@ function BaseInput(options){
     this.addDOMEventListeners();
     this.addModelEventListeners();
     this.addBusEventListeners();
-    this.render();
+    //this.render();
     
 }
 
@@ -112,6 +113,7 @@ BaseInput.prototype.getUnformattedValue = function(){
 
 BaseInput.prototype.addModelEventListeners = function(){
     this.modelOnChange('isValid', this.render);
+    this.modelOnChange('isPotentiallyValid', this.render);
 };
 
 BaseInput.prototype.modelOnChange = function (property, callback) {
@@ -124,12 +126,16 @@ BaseInput.prototype.modelOnChange = function (property, callback) {
 };
 
 BaseInput.prototype.render = function () {
-  var modelData = this.model.get(this.type);
-  
+    var modelData = this.model.get(this.type);
+    var isValid = modelData.isValid;
+    var isPotentiallyValid = modelData.isPotentiallyValid;
 
-  if (this.maxLength) {
-    this.element.setAttribute('maxlength', this.maxLength);
-  }
+    toggler.toggle(this.element, 'valid', isValid);
+    toggler.toggle(this.element, 'invalid', !isPotentiallyValid);
+
+    if (this.maxLength) {
+      this.element.setAttribute('maxlength', this.maxLength);
+    }
 };
 
 BaseInput.prototype.addBusEventListeners = function () {

@@ -1,11 +1,100 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-module.exports = {
-    cvv: require('./src/cvv.js')
+var types = {};
+var VISA = 'visa';
+var MASTERCARD = 'master-card';
+var VERVE = 'verve';
+var CVV = 'CVV';
+
+var cardMap = [VISA, MASTERCARD];
+
+types[VISA] = {
+    common: 'Visa',
+    type: VISA,
+    prefixPattern: /^4$/,
+    exactPattern: /^4\d*$/,
+    gaps: [4, 8, 12],
+    lengths: [16, 18, 19],
+    code: {
+        name: CVV,
+        size: 3
+    }
 };
 
-},{"./src/cvv.js":2}],2:[function(require,module,exports){
+types[MASTERCARD] = {
+    common: 'MasterCard',
+    type: MASTERCARD,
+    prefixPattern: /^(5|5[1-5]|2|22|222|222[1-9]|2[3-6]|27[0-1]|2720)$/,
+    exactPattern: /^(5[1-5]|222[1-9]|2[3-6]|27[0-1]|2720)\d*$/,
+    gaps: [4, 8, 12],
+    lengths: [16],
+    code: {
+        name: CVV,
+        size: 3
+    }
+};
+
+var clone = function clone(x) {
+
+    var exactPattern, prefixPattern, ret;
+
+    if (!x) {
+        return null;
+    }
+
+    exactPattern = x.exactPattern.source;
+    prefixPattern = x.prefixPattern.source;
+    ret = JSON.parse(JSON.stringify(x));
+    ret.exactPattern = exactPattern;
+    ret.prefixPattern = prefixPattern;
+
+    return ret;
+};
+
+/**
+ * Given a pan prefix value,
+ * what type of card is this?
+ */
+var Card = function Card(val) {
+    var type, value, i;
+    var prefixResults = [];
+    var exactResults = [];
+
+    if (!(typeof val === 'string' || val instanceof String)) {
+        return [];
+    }
+
+    for (i = 0; i < cardMap.length; i++) {
+        type = cardMap[i];
+        value = types[type];
+
+        if (val.length === 0) {
+            prefixResults.push(clone(value));
+            continue;
+        }
+
+        if (value.exactPattern.test(val)) {
+            exactResults.push(clone(value));
+        } else if (value.prefixPattern.test(val)) {
+            prefixResults.push(clone(value));
+        }
+
+        return exactResults.length ? exactResults : prefixResults;
+    }
+};
+
+module.exports = Card;
+
+},{}],2:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+    cvv: require('./src/cvv.js'),
+    pan: require('./src/pan.js')
+};
+
+},{"./src/cvv.js":3,"./src/pan.js":5}],3:[function(require,module,exports){
 'use strict';
 
 var DEFAULT_MAX = 3;
@@ -60,7 +149,122 @@ var check = function check(value, maxlen) {
 
 module.exports = check;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
+/*
+ * Luhn algorithm implementation in JavaScript
+ * Copyright (c) 2009 Nicholas C. Zakas
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+'use strict';
+
+function luhn10(identifier) {
+  var sum = 0;
+  var alt = false;
+  var i = identifier.length - 1;
+  var num;
+
+  while (i >= 0) {
+    num = parseInt(identifier.charAt(i), 10);
+
+    if (alt) {
+      num *= 2;
+      if (num > 9) {
+        num = num % 10 + 1; // eslint-disable-line no-extra-parens
+      }
+    }
+
+    alt = !alt;
+
+    sum += num;
+
+    i--;
+  }
+
+  return sum % 10 === 0;
+}
+
+module.exports = luhn10;
+
+},{}],5:[function(require,module,exports){
+'use strict';
+
+var getCardTypes = require('../../card-type');
+var luhn = require('./luhn-10.js');
+
+var verification = function verification(card, isPotentiallyValid, isValid) {
+    return {
+        card: card,
+        isPotentiallyValid: isPotentiallyValid,
+        isValid: isValid
+    };
+};
+var Pan = function Pan(value) {
+
+    var potentialTypes, cardType, isValid, i, maxLength;
+    if (typeof value === 'number') {
+        value = String(value);
+    }
+
+    if (typeof value !== 'string') {
+        return verification(null, false, false);
+    }
+
+    //replace dashes or spaces with empty space
+    value = value.replace(/\-|\s/g, '');
+
+    //if not a number return
+    if (!/^\d*$/.test(value)) {
+        return verification(null, false, false);
+    }
+
+    potentialTypes = getCardTypes(value);
+
+    console.log("potential types for " + value + " is " + JSON.stringify(potentialTypes));
+
+    if (potentialTypes.length === 0) {
+        return verification(null, false, false);
+    } else if (potentialTypes.length !== 1) {
+        return verification(null, true, false);
+    }
+
+    //there is just one card now
+    cardType = potentialTypes[0];
+
+    //do a luhn check
+    isValid = luhn(value);
+
+    maxLength = Math.max.apply(null, cardType.lengths);
+
+    for (i = 0; i < cardType.lengths.length; i++) {
+        if (cardType.lengths[i] === value.length) {
+            isPotentiallyValid = value.length !== maxLength || isValid;
+            return verification(cardType, isPotentiallyValid, isValid);
+        }
+    }
+
+    return verification(cardType, value.length < maxLength, false);
+};
+
+module.exports = Pan;
+
+},{"../../card-type":1,"./luhn-10.js":4}],6:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -71,13 +275,14 @@ module.exports = {
     PAY_REQUEST: "PAY_REQUEST"
 };
 
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
 var createRestrictedInput = require('../../libs/create-restricted-input.js');
 var constants = require('../../libs/constants');
 var isIe9 = require('../../libs/is-ie9.js');
+var toggler = require('../../libs/class-toggle.js');
 var ENTER_KEY_CODE = 13;
 function BaseInput(options) {
     var shouldFormat;
@@ -102,7 +307,7 @@ function BaseInput(options) {
     this.addDOMEventListeners();
     this.addModelEventListeners();
     this.addBusEventListeners();
-    this.render();
+    //this.render();
 }
 
 BaseInput.prototype.buildElement = function () {
@@ -183,6 +388,7 @@ BaseInput.prototype.getUnformattedValue = function () {
 
 BaseInput.prototype.addModelEventListeners = function () {
     this.modelOnChange('isValid', this.render);
+    this.modelOnChange('isPotentiallyValid', this.render);
 };
 
 BaseInput.prototype.modelOnChange = function (property, callback) {
@@ -196,6 +402,11 @@ BaseInput.prototype.modelOnChange = function (property, callback) {
 
 BaseInput.prototype.render = function () {
     var modelData = this.model.get(this.type);
+    var isValid = modelData.isValid;
+    var isPotentiallyValid = modelData.isPotentiallyValid;
+
+    toggler.toggle(this.element, 'valid', isValid);
+    toggler.toggle(this.element, 'invalid', !isPotentiallyValid);
 
     if (this.maxLength) {
         this.element.setAttribute('maxlength', this.maxLength);
@@ -235,7 +446,7 @@ module.exports = {
     BaseInput: BaseInput
 };
 
-},{"../../libs/constants":18,"../../libs/create-restricted-input.js":19,"../../libs/is-ie9.js":21,"framebus":32}],5:[function(require,module,exports){
+},{"../../libs/class-toggle.js":21,"../../libs/constants":22,"../../libs/create-restricted-input.js":23,"../../libs/is-ie9.js":25,"framebus":36}],8:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -255,7 +466,7 @@ module.exports = {
     CVVINPUT: cvvInput
 };
 
-},{"./base-input.js":4}],6:[function(require,module,exports){
+},{"./base-input.js":7}],9:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -274,7 +485,7 @@ module.exports = {
     EXP: expInput
 };
 
-},{"./base-input.js":4}],7:[function(require,module,exports){
+},{"./base-input.js":7}],10:[function(require,module,exports){
 'use strict';
 
 var LabelComponent = require('./label.js');
@@ -302,7 +513,7 @@ module.exports = {
     FieldComponent: fieldComponent
 };
 
-},{"../../libs/constants":18,"./input-components.js":8,"./label.js":9}],8:[function(require,module,exports){
+},{"../../libs/constants":22,"./input-components.js":11,"./label.js":12}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -312,7 +523,7 @@ module.exports = {
     exp: require('./exp.js').EXP
 };
 
-},{"./cvv.js":5,"./exp.js":6,"./pan.js":10,"./pin.js":11}],9:[function(require,module,exports){
+},{"./cvv.js":8,"./exp.js":9,"./pan.js":13,"./pin.js":14}],12:[function(require,module,exports){
 "use strict";
 
 var label = function label(options) {
@@ -327,7 +538,7 @@ var label = function label(options) {
 
 module.exports = label;
 
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -346,7 +557,7 @@ module.exports = {
     PAN: panInput
 };
 
-},{"./base-input.js":4}],11:[function(require,module,exports){
+},{"./base-input.js":7}],14:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -365,7 +576,7 @@ module.exports = {
     PIN: pinInput
 };
 
-},{"./base-input.js":4}],12:[function(require,module,exports){
+},{"./base-input.js":7}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -376,7 +587,7 @@ module.exports = {
 
 };
 
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
@@ -474,7 +685,7 @@ module.exports = {
     initialize: initialize
 };
 
-},{"../hosted-fields/events.js":3,"../request":27,"./components/field-component.js":7,"./get-frame-name.js":12,"./models/credit-card-form.js":15,"./pack-iframes.js":17,"framebus":32}],14:[function(require,module,exports){
+},{"../hosted-fields/events.js":6,"../request":31,"./components/field-component.js":10,"./get-frame-name.js":15,"./models/credit-card-form.js":18,"./pack-iframes.js":20,"framebus":36}],17:[function(require,module,exports){
 'use strict';
 
 var hostedFields = require('./hosted-internal-fields.js');
@@ -482,7 +693,7 @@ window.interswitch = {
     hostedFields: hostedFields
 };
 
-},{"./hosted-internal-fields.js":13}],15:[function(require,module,exports){
+},{"./hosted-internal-fields.js":16}],18:[function(require,module,exports){
 'use strict';
 
 var EventedModel = require('./evented-model');
@@ -529,7 +740,7 @@ var CreditCardForm = function CreditCardForm(conf) {
     this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
   }.bind(this));
 
-  this.on('change:number.value', this._onNumberChange);
+  this.on('change:pan.value', this._onNumberChange);
 
   //should add event listeners on each of the field :TODO
 };
@@ -568,22 +779,29 @@ CreditCardForm.prototype._onNumberChange = function (number) {
 };
 
 CreditCardForm.prototype._validateField = function (fieldKey) {
-
+  console.log("Validating fieldKey " + fieldKey);
   var validationResult;
 
   var value = this.get(fieldKey + '.value');
+  var validate = validator[fieldKey];
 
   if (fieldKey === 'cvv') {
     validationResult = this._validateCvv(value);
   } else if (fieldKey === 'expirationDate') {
     //validationResult = validate(splitDate(value));
   } else {
-      //validationResult = validate(value);
-    }
+    validationResult = validate(value);
+  }
 
   if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
     //this._onSplitDateChange();
   } else {
+    if (!validationResult) {
+      validationResult = {
+        isValid: false,
+        isPotentiallyValid: true
+      };
+    }
     console.log(JSON.stringify(validationResult));
     this.set(fieldKey + '.isValid', validationResult.isValid);
     this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
@@ -645,6 +863,7 @@ CreditCardForm.prototype.invalidFieldKeys = function () {};
 function onFieldValueChange(form, fieldKey) {
 
   return function () {
+    console.log("-checking empty- after FieldValueChange");
     var isEmpty = form.get(fieldKey + '.value');
     form.set(fieldKey + '.isEmpty', isEmpty === '');
     form._validateField(fieldKey);
@@ -674,7 +893,7 @@ module.exports = {
   CreditCardForm: CreditCardForm
 };
 
-},{"../../card-validator":1,"../../libs/constants.js":18,"./evented-model":16,"framebus":32}],16:[function(require,module,exports){
+},{"../../card-validator":2,"../../libs/constants.js":22,"./evented-model":19,"framebus":36}],19:[function(require,module,exports){
 "use strict";
 
 var slice = Array.prototype.slice;
@@ -778,7 +997,7 @@ EventedModel.prototype.resetAttributes = function resetAttributes() {
 
 module.exports = EventedModel;
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict";
 
 var packIframes = function packIframes(win) {
@@ -804,7 +1023,64 @@ module.exports = {
     packIframes: packIframes
 };
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
+'use strict';
+
+/**
+ * element is HTML element
+ * @returns array of classlist,
+ * if the element does not exist,
+ * return an empty array
+ */
+var _classOf = function _classOf(element) {
+    if (element) {
+        return element.className.trim().split('/\s+/');
+    }
+
+    return [];
+};
+
+var add = function add(element) {
+
+    var toAdd = Array.prototype.slice.call(arguments, 1);
+
+    console.log("adding class " + toAdd);
+
+    var className = _classOf(element).filter(function (c) {
+        return toAdd.indexOf(c) === -1;
+    }).concat(toAdd).join(' ');
+
+    console.log("final class name " + className);
+    element.className = className;
+};
+
+var remove = function remove(element) {
+
+    var toAdd = Array.prototype.slice.call(arguments, 1);
+
+    var className = _classOf(element).filter(function (c) {
+        return toAdd.indexOf(c) === -1;
+    }).join(' ');
+
+    element.className = className;
+};
+
+var toggle = function toggle(element, className, adding) {
+
+    if (adding) {
+        add(element, className);
+    } else {
+        remove(element, className);
+    }
+};
+
+module.exports = {
+    add: add,
+    remove: remove,
+    toggle: toggle
+};
+
+},{}],22:[function(require,module,exports){
 'use strict';
 
 var constants = {
@@ -856,7 +1132,7 @@ var constants = {
 
 module.exports = constants;
 
-},{}],19:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var FakeRestrictedInput = require('./fake-restricted-input');
@@ -867,7 +1143,7 @@ module.exports = function (options) {
     return new FakeRestrictedInput(options);
 };
 
-},{"./fake-restricted-input":20}],20:[function(require,module,exports){
+},{"./fake-restricted-input":24}],24:[function(require,module,exports){
 "use strict";
 
 function FakeRestrictedInput(options) {
@@ -882,7 +1158,7 @@ FakeRestrictedInput.prototype.setPattern = function () {};
 
 module.exports = FakeRestrictedInput;
 
-},{}],21:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = function isIe9(userAgent) {
@@ -890,7 +1166,7 @@ module.exports = function isIe9(userAgent) {
   return userAgent.indexOf('MSIE 9') !== -1;
 };
 
-},{}],22:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -903,7 +1179,7 @@ module.exports = function (fn) {
     };
 };
 
-},{}],23:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -982,7 +1258,7 @@ module.exports = {
     stringify: stringify
 };
 
-},{}],24:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 /**
@@ -999,7 +1275,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],25:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1106,7 +1382,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":23,"./parse-body.js":30,"./prep-body.js":31}],26:[function(require,module,exports){
+},{"../libs/query-string.js":27,"./parse-body.js":34,"./prep-body.js":35}],30:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1115,7 +1391,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],27:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1180,7 +1456,7 @@ module.exports = function (options, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/once.js":22,"./ajax-driver.js":25,"./get-user-agent.js":26,"./is-http.js":28,"./jsonp-driver.js":29}],28:[function(require,module,exports){
+},{"../libs/once.js":26,"./ajax-driver.js":29,"./get-user-agent.js":30,"./is-http.js":32,"./jsonp-driver.js":33}],32:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1189,7 +1465,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1320,7 +1596,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":23,"../libs/uuid.js":24}],30:[function(require,module,exports){
+},{"../libs/query-string.js":27,"../libs/uuid.js":28}],34:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1334,7 +1610,7 @@ module.exports = function (body) {
     return body;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -1348,7 +1624,7 @@ module.exports = function (method, body) {
     return body;
 };
 
-},{}],32:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -1626,4 +1902,4 @@ module.exports = function (method, body) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[14]);
+},{}]},{},[17]);

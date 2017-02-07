@@ -14,12 +14,16 @@ var _classOf = function(element){
 
 var add = function(element){
 
+
     var toAdd = Array.prototype.slice.call(arguments, 1);
+
+    console.log("adding class "+toAdd);
 
     var className = _classOf(element).filter(function(c){
         return toAdd.indexOf(c) === -1;
     }).concat(toAdd).join(' ');
 
+    console.log("final class name "+className);
     element.className = className;
 };
 

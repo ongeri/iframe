@@ -7,6 +7,7 @@ var noCallback = require('../libs/no-callback.js');
 var uuid = require('../libs/uuid.js');
 var constants = require('../libs/constants.js');
 var events = require('./events.js');
+var toggler = require('../libs/class-toggle.js');
 
 
 
@@ -37,11 +38,21 @@ var createInputEventHandler = function(fields) {
     var emittedBy = merchantPayload.emittedBy;
     var container = fields[emittedBy].containerElement;
 
+    console.log("received from internal.js for INPUT event--- ");
+    console.log(JSON.stringify(eventData));
+
     Object.keys(merchantPayload.fields).forEach(function (key) {
       merchantPayload.fields[key].container = fields[key].containerElement;
     });
 
     field = merchantPayload.fields[emittedBy];
+
+    console.log("emmited by "+emittedBy);
+
+    console.log(!field.isPotentiallyValid+"-"+field.isValid);
+    //change class of elements here
+    toggler.toggle(container, "valid", field.isValid);
+    toggler.toggle(container, "inValid", !field.isPotentiallyValid);
 
     this._state = {
       fields: merchantPayload.fields
@@ -165,9 +176,7 @@ var HostedFields = function(options){
     }
   });
 
-  bus.on(events.INPUT_EVENT ,function(){
-    createInputEventHandler(fields).bind(this);
-  });
+  bus.on(events.INPUT_EVENT , createInputEventHandler(fields).bind(this) );
 
 };
 

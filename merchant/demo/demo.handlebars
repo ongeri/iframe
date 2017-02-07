@@ -142,6 +142,21 @@
               // something is wrong,
 
             }
+            hostedFieldInstance.on("validityChange" , function(event){
+              console.log("a validity change "+JSON.stringify(event));
+              var field = event.fields[event.emittedBy];
+
+                 var formValid = Object.keys(event.fields).every(function (key) {
+                    return event.fields[key].isValid;
+                  });
+
+                  if (formValid) {
+                    $('.button').show();
+                  } else {
+                    $('.button').hide();
+                  }
+              
+            });
             console.log("hosted instance in place");
 
               submit.addEventListener('click', function(evt){

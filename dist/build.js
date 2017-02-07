@@ -39,6 +39,7 @@ var noCallback = require('../libs/no-callback.js');
 var uuid = require('../libs/uuid.js');
 var constants = require('../libs/constants.js');
 var events = require('./events.js');
+var toggler = require('../libs/class-toggle.js');
 
 var createInputEventHandler = function createInputEventHandler(fields) {
   /*
@@ -66,11 +67,21 @@ var createInputEventHandler = function createInputEventHandler(fields) {
     var emittedBy = merchantPayload.emittedBy;
     var container = fields[emittedBy].containerElement;
 
+    console.log("received from internal.js for INPUT event--- ");
+    console.log(JSON.stringify(eventData));
+
     Object.keys(merchantPayload.fields).forEach(function (key) {
       merchantPayload.fields[key].container = fields[key].containerElement;
     });
 
     field = merchantPayload.fields[emittedBy];
+
+    console.log("emmited by " + emittedBy);
+
+    console.log(!field.isPotentiallyValid + "-" + field.isValid);
+    //change class of elements here
+    toggler.toggle(container, "valid", field.isValid);
+    toggler.toggle(container, "inValid", !field.isPotentiallyValid);
 
     this._state = {
       fields: merchantPayload.fields
@@ -187,9 +198,7 @@ var HostedFields = function HostedFields(options) {
     }
   });
 
-  bus.on(events.INPUT_EVENT, function () {
-    createInputEventHandler(fields).bind(this);
-  });
+  bus.on(events.INPUT_EVENT, createInputEventHandler(fields).bind(this));
 };
 
 HostedFields.prototype = Object.create(EventEmitter.prototype, {
@@ -230,7 +239,7 @@ var handlePayResponse = function handlePayResponse(data) {
 
 module.exports = HostedFields;
 
-},{"../libs/constants.js":6,"../libs/event-emitter.js":8,"../libs/no-callback.js":9,"../libs/uuid.js":12,"../utilities/iframe/index.js":20,"./events.js":1,"./frame-inject.js":2,"backbone":24,"framebus":25}],4:[function(require,module,exports){
+},{"../libs/class-toggle.js":6,"../libs/constants.js":7,"../libs/event-emitter.js":9,"../libs/no-callback.js":10,"../libs/uuid.js":13,"../utilities/iframe/index.js":21,"./events.js":1,"./frame-inject.js":2,"backbone":25,"framebus":26}],4:[function(require,module,exports){
 'use strict';
 
 /**
@@ -269,7 +278,7 @@ module.exports = {
   newInstance: newInstance
 };
 
-},{"../libs/deferred.js":7,"../libs/no-callback.js":9,"./events.js":1,"./hosted-fields.js":3,"framebus":25}],5:[function(require,module,exports){
+},{"../libs/deferred.js":8,"../libs/no-callback.js":10,"./events.js":1,"./hosted-fields.js":3,"framebus":26}],5:[function(require,module,exports){
 'use strict';
 
 /**
@@ -296,7 +305,64 @@ window.interswitch = window.interswitch || {};
 window.interswitch.hostedFields = ISWContainerFields;
 window.interswitch.request = request;
 
-},{"./hosted-fields/index.js":4,"./request":15}],6:[function(require,module,exports){
+},{"./hosted-fields/index.js":4,"./request":16}],6:[function(require,module,exports){
+'use strict';
+
+/**
+ * element is HTML element
+ * @returns array of classlist,
+ * if the element does not exist,
+ * return an empty array
+ */
+var _classOf = function _classOf(element) {
+    if (element) {
+        return element.className.trim().split('/\s+/');
+    }
+
+    return [];
+};
+
+var add = function add(element) {
+
+    var toAdd = Array.prototype.slice.call(arguments, 1);
+
+    console.log("adding class " + toAdd);
+
+    var className = _classOf(element).filter(function (c) {
+        return toAdd.indexOf(c) === -1;
+    }).concat(toAdd).join(' ');
+
+    console.log("final class name " + className);
+    element.className = className;
+};
+
+var remove = function remove(element) {
+
+    var toAdd = Array.prototype.slice.call(arguments, 1);
+
+    var className = _classOf(element).filter(function (c) {
+        return toAdd.indexOf(c) === -1;
+    }).join(' ');
+
+    element.className = className;
+};
+
+var toggle = function toggle(element, className, adding) {
+
+    if (adding) {
+        add(element, className);
+    } else {
+        remove(element, className);
+    }
+};
+
+module.exports = {
+    add: add,
+    remove: remove,
+    toggle: toggle
+};
+
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var constants = {
@@ -348,7 +414,7 @@ var constants = {
 
 module.exports = constants;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -361,7 +427,7 @@ module.exports = function (fn) {
     };
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 function EventEmitter() {
@@ -395,7 +461,7 @@ EventEmitter.prototype._emit = function (event) {
 
 module.exports = EventEmitter;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 //throws an error if the callback is not a function
@@ -407,7 +473,7 @@ module.exports = function (callback, functionName) {
   }
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -420,7 +486,7 @@ module.exports = function (fn) {
     };
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -499,7 +565,7 @@ module.exports = {
     stringify: stringify
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 /**
@@ -516,7 +582,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -623,7 +689,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":11,"./parse-body.js":18,"./prep-body.js":19}],14:[function(require,module,exports){
+},{"../libs/query-string.js":12,"./parse-body.js":19,"./prep-body.js":20}],15:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -632,7 +698,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -697,7 +763,7 @@ module.exports = function (options, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/once.js":10,"./ajax-driver.js":13,"./get-user-agent.js":14,"./is-http.js":16,"./jsonp-driver.js":17}],16:[function(require,module,exports){
+},{"../libs/once.js":11,"./ajax-driver.js":14,"./get-user-agent.js":15,"./is-http.js":17,"./jsonp-driver.js":18}],17:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -706,7 +772,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -837,7 +903,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":11,"../libs/uuid.js":12}],18:[function(require,module,exports){
+},{"../libs/query-string.js":12,"../libs/uuid.js":13}],19:[function(require,module,exports){
 "use strict";
 
 /**
@@ -851,7 +917,7 @@ module.exports = function (body) {
     return body;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -865,7 +931,7 @@ module.exports = function (method, body) {
     return body;
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 var setAttributes = require('./lib/set-attributes');
@@ -895,7 +961,7 @@ module.exports = function createFrame(options) {
   return iframe;
 };
 
-},{"./lib/assign":21,"./lib/default-attributes":22,"./lib/set-attributes":23}],21:[function(require,module,exports){
+},{"./lib/assign":22,"./lib/default-attributes":23,"./lib/set-attributes":24}],22:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -916,7 +982,7 @@ module.exports = function assign(target) {
   return target;
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -926,7 +992,7 @@ module.exports = {
   scrolling: 'no'
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = function setAttributes(element, attributes) {
@@ -945,7 +1011,7 @@ module.exports = function setAttributes(element, attributes) {
   }
 };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -2869,7 +2935,7 @@ module.exports = function setAttributes(element, attributes) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":26,"underscore":27}],25:[function(require,module,exports){
+},{"jquery":27,"underscore":28}],26:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -3147,7 +3213,7 @@ module.exports = function setAttributes(element, attributes) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.1.1
  * https://jquery.com/
@@ -13369,7 +13435,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
