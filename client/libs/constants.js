@@ -9,6 +9,14 @@ var constants = {
     CARD_TYPE_CHANGE: 'cardTypeChange'
   },
 
+  events: {
+    TRIGGER_INPUT_FOCUS: 'TRIGGER_INPUT_FOCUS',
+    SET_PLACEHOLDER: 'SET_PLACEHOLDER',
+    ADD_CLASS: 'ADD_CLASS',
+    REMOVE_CLASS: 'REMOVE_CLASS',
+    CLEAR_FIELD: 'CLEAR_FIELD'
+  },
+
   DEFAULTIFRAMESTYLE: {
     border: 'none',
     width: '100%',

@@ -157,6 +157,10 @@
                   }
               
             });
+
+            hostedFieldInstance.on("notEmpty", function(event){
+              console.log("a notEmpty event "+ event.fields[event.emittedBy]);
+            });
             console.log("hosted instance in place");
 
               submit.addEventListener('click', function(evt){

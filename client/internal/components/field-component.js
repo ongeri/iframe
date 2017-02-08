@@ -12,7 +12,7 @@ var fieldComponent = function(options) {
     var formMap = constants.formMap[type];
 
     this.element.appendChild(new LabelComponent(formMap).element);
-    console.log("type is "+type);
+
     var inputElem = new InputLabelComponent[type]({
         model: options.model,
         type: type

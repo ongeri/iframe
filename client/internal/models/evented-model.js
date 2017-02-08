@@ -6,6 +6,27 @@ function EventedModel() {
   this._listeners = {};
 }
 
+EventedModel.prototype.initialize = function(obj){
+
+  if(!obj) {return};
+
+  var traversal = this._attributes;
+
+  
+
+  console.log(typeof obj);
+
+  for(var key in obj) {
+   
+    if(obj.hasOwnProperty(key)) {
+      traversal[key] = obj[key];
+    }
+  }
+
+ // console.log("object after initialization is "+JSON.stringify(traversal));
+
+};
+
 EventedModel.prototype.get = function get(compoundKey) {
   var i, key, keys;
   var traversal = this._attributes;
@@ -54,7 +75,7 @@ EventedModel.prototype.set = function set(compoundKey, value) {
   if (traversal[key] !== value) {
     traversal[key] = value;
     //the value associated with this field has just changed
-    this.emit('change');
+    //this.emit('change');
 
     for (i = 1; i <= keys.length; i++) {
       key = keys.slice(0, i).join('.');

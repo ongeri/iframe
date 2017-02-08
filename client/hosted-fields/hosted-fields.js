@@ -47,15 +47,17 @@ var createInputEventHandler = function(fields) {
 
     field = merchantPayload.fields[emittedBy];
 
-    console.log("emmited by "+emittedBy);
+    console.log("emmited by "+emittedBy+" event name "+eventData.type);
 
     console.log(!field.isPotentiallyValid+"-"+field.isValid);
     //change class of elements here
+    toggler.toggle(container, "valid", field.isFocused);
     toggler.toggle(container, "valid", field.isValid);
     toggler.toggle(container, "inValid", !field.isPotentiallyValid);
 
     this._state = {
-      fields: merchantPayload.fields
+      fields: merchantPayload.fields,
+      cards: merchantPayload.cards
     };
 
     this._emit(eventData.type, merchantPayload);
@@ -66,9 +68,6 @@ var HostedFields = function(options){
 
   var failureTimeout;
 
-  
-
-  console.log("Constructing Hosted Field Object >>>");
 
   var self = this;
   var fields = {};
@@ -91,8 +90,9 @@ var HostedFields = function(options){
 
   this._fields = fields;
 
-  //we need to know the state
-  //of each  field at any point in time
+  /**
+   * state of the form
+   */
   this._state = {
     fields: {}
   };

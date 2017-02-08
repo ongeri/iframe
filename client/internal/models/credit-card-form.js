@@ -4,6 +4,7 @@ var constants = require('../../libs/constants.js');
 var externalEvents = constants.externalEvents;
 var bus = require('framebus');
 var validator = require('../../card-validator');
+var CardDefault = require('./card-default.js');
 
 var CreditCardForm = function(conf){
     
@@ -25,6 +26,43 @@ var CreditCardForm = function(conf){
 
     EventedModel.apply(this, arguments);
 
+    /**
+     * Initialize the tree with default data
+     * 
+     * {
+     *  pan: {
+     *      value: "",
+     *      isEmpty: true,
+     *      isFocused: true,
+     *      isValid: false,
+     *      isPotentiallyValid: false
+     *  },
+     * cvv: {
+     *      value: "",
+     *      isEmpty: true,
+     *      isFocused: false,
+     *      isValid: false,
+     *      isPotentiallyValid: false
+     *  },
+     * exp: {
+     *      value: "",
+     *      isEmpty: true,
+     *      isFocused: true,
+     *      isValid: false,
+     *      isPotentiallyValid: false
+     *  },
+     * pin: {
+     *      value: "",
+     *      isEmpty: true,
+     *      isFocused: true,
+     *      isValid: false,
+     *      isPotentiallyValid: false
+     *  }
+     * }
+     */
+
+    this.initialize(CardDefault);
+
     this.conf = conf;
 
     /** 
@@ -42,10 +80,11 @@ var CreditCardForm = function(conf){
       this.on('change:' + field + '.value', onFieldValueChange(this, field));
       this.on('change:' + field + '.isValid', onFieldChange);
       this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
+      this.on('change:' + field + '.isEmpty', onEmptyChange(this, field));
 
     }.bind(this));
 
-    this.on('change:pan.value', this._onNumberChange);
+    //this.on('change:pan.value', this._onNumberChange);
     
 
     //should add event listeners on each of the field :TODO
@@ -56,26 +95,39 @@ CreditCardForm.prototype.constructor = CreditCardForm;
 
 
 CreditCardForm.prototype.emitEvent = function(fieldKey, eventType){
-  
-  
+  var cards;
+
+  var possibleCardTypes = this.get('possibleCardTypes');
   var fields = this._fieldKeys.reduce(function (result, key) {
     console.log("iterating for key "+key);
     var fieldData = this.get(key);
 
-    result[key] = {
-      isEmpty: fieldData.isEmpty,
-      isValid: fieldData.isValid,
-      isPotentiallyValid: fieldData.isPotentiallyValid,
-      isFocused: fieldData.isFocused
-    };
+    if(fieldData) {
+        result[key] = {
+          isEmpty: fieldData.isEmpty,
+          isValid: fieldData.isValid,
+          isPotentiallyValid: fieldData.isPotentiallyValid,
+          isFocused: fieldData.isFocused
+        };
+    }
     return result;
   }.bind(this), {});
 
+  if(possibleCardTypes) {
+    cards = possibleCardTypes.map(function (cardType) {
+      return {
+        common: cardType.common,
+        type: cardType.type,
+        code: cardType.code
+      };
+    });
+  }
 
   console.log("before emitting INPUT_EVENT "+JSON.stringify(fields));  
 
   bus.emit("INPUT_EVENT", {
     merchantPayload: {
+      cards: cards,
       emittedBy: fieldKey,
       fields: fields
     },
@@ -99,6 +151,7 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
   } else if (fieldKey === 'expirationDate') {
     //validationResult = validate(splitDate(value));
   } else {
+    //validate pan , pin
     validationResult = validate(value);
   }
 
@@ -112,8 +165,8 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
       };
     }
     console.log(JSON.stringify(validationResult));
-    this.set(fieldKey + '.isValid', validationResult.isValid);
-    this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
+    //this.set(fieldKey + '.isValid', validationResult.isValid);
+    //this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
   }
 };
 
@@ -178,7 +231,6 @@ CreditCardForm.prototype.invalidFieldKeys = function () {
 function onFieldValueChange(form, fieldKey) {
   
    return function () {
-     console.log("-checking empty- after FieldValueChange");
     var isEmpty =  form.get(fieldKey + '.value');
     form.set(fieldKey + '.isEmpty', isEmpty === '');
     form._validateField(fieldKey);
@@ -197,6 +249,10 @@ function onCardTypeChange(form, field) {
 
 function onEmptyChange(form, field) {
   
+  return function(){
+    var event = form.get(field + '.isEmpty') ? externalEvents.EMPTY : externalEvents.NOT_EMPTY;
+    form.emitEvent(field, event);
+  };
 }
 
 /**

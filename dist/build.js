@@ -76,15 +76,17 @@ var createInputEventHandler = function createInputEventHandler(fields) {
 
     field = merchantPayload.fields[emittedBy];
 
-    console.log("emmited by " + emittedBy);
+    console.log("emmited by " + emittedBy + " event name " + eventData.type);
 
     console.log(!field.isPotentiallyValid + "-" + field.isValid);
     //change class of elements here
+    toggler.toggle(container, "valid", field.isFocused);
     toggler.toggle(container, "valid", field.isValid);
     toggler.toggle(container, "inValid", !field.isPotentiallyValid);
 
     this._state = {
-      fields: merchantPayload.fields
+      fields: merchantPayload.fields,
+      cards: merchantPayload.cards
     };
 
     this._emit(eventData.type, merchantPayload);
@@ -93,8 +95,6 @@ var createInputEventHandler = function createInputEventHandler(fields) {
 var HostedFields = function HostedFields(options) {
 
   var failureTimeout;
-
-  console.log("Constructing Hosted Field Object >>>");
 
   var self = this;
   var fields = {};
@@ -117,8 +117,9 @@ var HostedFields = function HostedFields(options) {
 
   this._fields = fields;
 
-  //we need to know the state
-  //of each  field at any point in time
+  /**
+   * state of the form
+   */
   this._state = {
     fields: {}
   };
@@ -374,6 +375,14 @@ var constants = {
     NOT_EMPTY: 'notEmpty',
     VALIDITY_CHANGE: 'validityChange',
     CARD_TYPE_CHANGE: 'cardTypeChange'
+  },
+
+  events: {
+    TRIGGER_INPUT_FOCUS: 'TRIGGER_INPUT_FOCUS',
+    SET_PLACEHOLDER: 'SET_PLACEHOLDER',
+    ADD_CLASS: 'ADD_CLASS',
+    REMOVE_CLASS: 'REMOVE_CLASS',
+    CLEAR_FIELD: 'CLEAR_FIELD'
   },
 
   DEFAULTIFRAMESTYLE: {

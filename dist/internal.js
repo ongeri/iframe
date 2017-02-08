@@ -38,7 +38,6 @@ types[MASTERCARD] = {
 var clone = function clone(x) {
 
     var exactPattern, prefixPattern, ret;
-
     if (!x) {
         return null;
     }
@@ -79,9 +78,8 @@ var Card = function Card(val) {
         } else if (value.prefixPattern.test(val)) {
             prefixResults.push(clone(value));
         }
-
-        return exactResults.length ? exactResults : prefixResults;
     }
+    return exactResults.length ? exactResults : prefixResults;
 };
 
 module.exports = Card;
@@ -236,14 +234,13 @@ var Pan = function Pan(value) {
 
     potentialTypes = getCardTypes(value);
 
-    console.log("potential types for " + value + " is " + JSON.stringify(potentialTypes));
-
     if (potentialTypes.length === 0) {
         return verification(null, false, false);
     } else if (potentialTypes.length !== 1) {
         return verification(null, true, false);
     }
 
+    console.log("potential types for " + value + " is " + JSON.stringify(potentialTypes));
     //there is just one card now
     cardType = potentialTypes[0];
 
@@ -283,170 +280,213 @@ var createRestrictedInput = require('../../libs/create-restricted-input.js');
 var constants = require('../../libs/constants');
 var isIe9 = require('../../libs/is-ie9.js');
 var toggler = require('../../libs/class-toggle.js');
+var events = constants.events;
 var ENTER_KEY_CODE = 13;
 function BaseInput(options) {
-    var shouldFormat;
+  var shouldFormat;
 
-    this.type = options.type;
+  this.type = options.type;
 
-    this.model = options.model;
+  this.model = options.model;
 
-    this.element = this.buildElement();
+  this.element = this.buildElement();
 
-    if (this.MAX_SIZE) {
-        this.element.setAttribute('maxlength', this.MAX_SIZE);
-    }
-    shouldFormat = this.getConfiguration().formatInput !== false && this.element instanceof HTMLInputElement;
-    console.log("shouldFormat " + shouldFormat);
-    this.formatter = createRestrictedInput({
-        shouldFormat: false,
-        element: this.element,
-        pattern: ' '
-    });
+  if (this.MAX_SIZE) {
+    this.element.setAttribute('maxlength', this.MAX_SIZE);
+  }
+  shouldFormat = this.getConfiguration().formatInput !== false && this.element instanceof HTMLInputElement;
+  console.log("shouldFormat " + shouldFormat);
+  this.formatter = createRestrictedInput({
+    shouldFormat: false,
+    element: this.element,
+    pattern: ' '
+  });
 
-    this.addDOMEventListeners();
-    this.addModelEventListeners();
-    this.addBusEventListeners();
-    //this.render();
+  this.addDOMEventListeners();
+  this.addModelEventListeners();
+  this.addBusEventListeners();
+  this.render();
 }
 
 BaseInput.prototype.buildElement = function () {
 
-    var type = this.type;
+  var type = this.type;
 
-    var inputType = this.getConfiguration().type || 'tel';
+  var inputType = this.getConfiguration().type || 'tel';
 
-    var element = document.createElement('input');
+  var element = document.createElement('input');
 
-    var placeholder = this.getConfiguration().placeholder;
+  var placeholder = this.getConfiguration().placeholder;
 
-    var formMap = constants.formMap[type];
+  var formMap = constants.formMap[type];
 
-    var name = formMap.name;
+  var name = formMap.name;
 
-    var attributes = {
-        type: inputType,
-        autocomplete: 'off',
-        autocorrect: 'off',
-        autocapitalize: 'none',
-        spellcheck: 'false',
-        'class': type,
-        'data-isw-name': type,
-        name: name,
-        id: name
-    };
+  var attributes = {
+    type: inputType,
+    autocomplete: 'off',
+    autocorrect: 'off',
+    autocapitalize: 'none',
+    spellcheck: 'false',
+    'class': type,
+    'data-isw-name': type,
+    name: name,
+    id: name
+  };
 
-    if (placeholder) {
-        attributes.placeholder = placeholder;
-    }
+  if (placeholder) {
+    attributes.placeholder = placeholder;
+  }
 
-    console.log("primitive attrs " + JSON.stringify(attributes));
+  Object.keys(attributes).forEach(function (attr) {
+    element.setAttribute(attr, attributes[attr]);
+  });
 
-    Object.keys(attributes).forEach(function (attr) {
-        element.setAttribute(attr, attributes[attr]);
-    });
-
-    return element;
+  return element;
 };
 
 BaseInput.prototype.getConfiguration = function () {
-    return this.model.conf.fields[this.type];
+  return this.model.conf.fields[this.type];
 };
 
 BaseInput.prototype.addDOMEventListeners = function () {
-    this._addDOMInputListeners();
-    this._addDOMKeypressListeners();
+  this._addDOMFocusListeners();
+  this._addDOMInputListeners();
+  this._addDOMKeypressListeners();
+};
+
+/**
+ * For any focus event, this.updateModel('isFocused', false|true);
+ */
+BaseInput.prototype._addDOMFocusListeners = function () {
+
+  var element = this.element;
+
+  if ('onfocusin' in document) {
+    document.documentElement.addEventListener('focusin', function (event) {
+      if (event.fromElement === element) {
+        return;
+      }
+      if (event.relatedTarget) {
+        return;
+      }
+
+      element.focus();
+    }, false);
+  } else {
+    document.addEventListener('focus', function () {
+      element.focus();
+    }, false);
+  }
+
+  element.addEventListener('touchstart', function () {
+    element.select();
+  });
+
+  element.addEventListener('focus', function () {
+    this.updateModel('isFocused', true);
+  }.bind(this), false);
+
+  element.addEventListener('blur', function () {
+    this.updateModel('isFocused', false);
+  }.bind(this), false);
 };
 
 BaseInput.prototype._addDOMKeypressListeners = function () {
 
-    this.element.addEventListener('keypress', function (event) {
-        if (event.keyCode === ENTER_KEY_CODE) {
-            this.model.emitEvent(this.type, 'inputSubmitRequest');
-        }
-    }.bind(this), false);
+  this.element.addEventListener('keypress', function (event) {
+    if (event.keyCode === ENTER_KEY_CODE) {
+      this.model.emitEvent(this.type, 'inputSubmitRequest');
+    }
+  }.bind(this), false);
 };
 
 BaseInput.prototype._addDOMInputListeners = function () {
-    this.element.addEventListener(this._getDOMChangeEvent(), function () {
-        var valueChanged = this.getUnformattedValue();
-        this.updateModel('value', valueChanged);
-    }.bind(this), false);
+  this.element.addEventListener(this._getDOMChangeEvent(), function () {
+    var valueChanged = this.getUnformattedValue();
+    this.updateModel('value', valueChanged);
+  }.bind(this), false);
 };
 
 BaseInput.prototype._getDOMChangeEvent = function () {
-    return isIe9() ? 'keyup' : 'input';
+  return isIe9() ? 'keyup' : 'input';
 };
 
 BaseInput.prototype.updateModel = function (key, value) {
-    this.model.set(this.type + '.' + key, value);
+  this.model.set(this.type + '.' + key, value);
 };
 
 BaseInput.prototype.getUnformattedValue = function () {
-    return this.formatter.getUnformattedValue();
+  return this.formatter.getUnformattedValue();
 };
 
 BaseInput.prototype.addModelEventListeners = function () {
-    this.modelOnChange('isValid', this.render);
-    this.modelOnChange('isPotentiallyValid', this.render);
+  this.modelOnChange('isValid', this.render);
+  this.modelOnChange('isPotentiallyValid', this.render);
 };
 
 BaseInput.prototype.modelOnChange = function (property, callback) {
-    var eventPrefix = 'change:' + this.type;
-    var self = this;
+  var eventPrefix = 'change:' + this.type;
+  var self = this;
 
-    this.model.on(eventPrefix + '.' + property, function () {
-        callback.apply(self, arguments);
-    });
+  this.model.on(eventPrefix + '.' + property, function () {
+    callback.apply(self, arguments);
+  });
 };
 
 BaseInput.prototype.render = function () {
-    var modelData = this.model.get(this.type);
-    var isValid = modelData.isValid;
-    var isPotentiallyValid = modelData.isPotentiallyValid;
+  var modelData = this.model.get(this.type);
+  var isValid = modelData.isValid;
+  var isPotentiallyValid = modelData.isPotentiallyValid;
 
-    toggler.toggle(this.element, 'valid', isValid);
-    toggler.toggle(this.element, 'invalid', !isPotentiallyValid);
+  toggler.toggle(this.element, 'valid', isValid);
+  toggler.toggle(this.element, 'invalid', !isPotentiallyValid);
 
-    if (this.maxLength) {
-        this.element.setAttribute('maxlength', this.maxLength);
-    }
+  if (this.maxLength) {
+    this.element.setAttribute('maxlength', this.maxLength);
+  }
 };
 
 BaseInput.prototype.addBusEventListeners = function () {
-    //   bus.on(events.TRIGGER_INPUT_FOCUS, function (type) {
-    //     if (type === this.type) { this.element.focus(); }
-    //   }.bind(this));
+  bus.on(events.TRIGGER_INPUT_FOCUS, function (type) {
+    if (type === this.type) {
+      this.element.focus();
+    }
+  }.bind(this));
 
-    bus.on("SET_PLACEHOLDER", this.setPlaceholder.bind(this));
+  bus.on(events.SET_PLACEHOLDER, this.setPlaceholder.bind(this));
 
-    //   bus.on(events.ADD_CLASS, function (type, classname) {
-    //     if (type === this.type) { classlist.add(this.element, classname); }
-    //   }.bind(this));
+  bus.on(events.ADD_CLASS, function (type, classname) {
+    if (type === this.type) {
+      toggle.add(this.element, classname);
+    }
+  }.bind(this));
 
-    //   global.bus.on(events.REMOVE_CLASS, function (type, classname) {
-    //     if (type === this.type) { classlist.remove(this.element, classname); }
-    //   }.bind(this));
+  bus.on(events.REMOVE_CLASS, function (type, classname) {
+    if (type === this.type) {
+      toggle.remove(this.element, classname);
+    }
+  }.bind(this));
 
-    bus.on("CLEAR_FIELD", function (type) {
-        if (type === this.type) {
-            this.element.value = '';
-            this.updateModel('value', '');
-        }
-    }.bind(this));
+  bus.on(events.CLEAR_FIELD, function (type) {
+    if (type === this.type) {
+      this.element.value = '';
+      this.updateModel('value', '');
+    }
+  }.bind(this));
 };
 
 BaseInput.prototype.setPlaceholder = function (type, placeholder) {
-    if (type === this.type) {
-        this.element.setAttribute('placeholder', placeholder);
-    }
+  if (type === this.type) {
+    this.element.setAttribute('placeholder', placeholder);
+  }
 };
 
 module.exports = {
-    BaseInput: BaseInput
+  BaseInput: BaseInput
 };
 
-},{"../../libs/class-toggle.js":21,"../../libs/constants":22,"../../libs/create-restricted-input.js":23,"../../libs/is-ie9.js":25,"framebus":36}],8:[function(require,module,exports){
+},{"../../libs/class-toggle.js":22,"../../libs/constants":23,"../../libs/create-restricted-input.js":24,"../../libs/is-ie9.js":26,"framebus":37}],8:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -501,7 +541,7 @@ var fieldComponent = function fieldComponent(options) {
     var formMap = constants.formMap[type];
 
     this.element.appendChild(new LabelComponent(formMap).element);
-    console.log("type is " + type);
+
     var inputElem = new InputLabelComponent[type]({
         model: options.model,
         type: type
@@ -513,7 +553,7 @@ module.exports = {
     FieldComponent: fieldComponent
 };
 
-},{"../../libs/constants":22,"./input-components.js":11,"./label.js":12}],11:[function(require,module,exports){
+},{"../../libs/constants":23,"./input-components.js":11,"./label.js":12}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -597,6 +637,7 @@ var frameName = require('./get-frame-name.js');
 var FieldComponent = require('./components/field-component.js').FieldComponent;
 var events = require('../hosted-fields/events.js');
 var request = require('../request');
+var injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
 
 var create = function create() {
 
@@ -671,6 +712,11 @@ var normalizeFields = function normalizeFields(options) {
 var initialize = function initialize(cardForm) {
     var fieldComponent;
 
+    var blacklist = ['background', 'display'];
+
+    //inject merchant provided styles
+    injectWithBlacklist(cardForm.conf.styles, blacklist);
+
     fieldComponent = new FieldComponent({
         model: cardForm,
         type: frameName.getFrameName()
@@ -685,7 +731,7 @@ module.exports = {
     initialize: initialize
 };
 
-},{"../hosted-fields/events.js":6,"../request":31,"./components/field-component.js":10,"./get-frame-name.js":15,"./models/credit-card-form.js":18,"./pack-iframes.js":20,"framebus":36}],17:[function(require,module,exports){
+},{"../hosted-fields/events.js":6,"../request":32,"./components/field-component.js":10,"./get-frame-name.js":15,"./models/credit-card-form.js":19,"./pack-iframes.js":21,"framebus":37,"inject-stylesheet":38}],17:[function(require,module,exports){
 'use strict';
 
 var hostedFields = require('./hosted-internal-fields.js');
@@ -694,6 +740,42 @@ window.interswitch = {
 };
 
 },{"./hosted-internal-fields.js":16}],18:[function(require,module,exports){
+"use strict";
+
+var obj = {
+    pan: {
+        value: "",
+        isEmpty: true,
+        isFocused: true,
+        isValid: false,
+        isPotentiallyValid: false
+    },
+    cvv: {
+        value: "",
+        isEmpty: true,
+        isFocused: false,
+        isValid: false,
+        isPotentiallyValid: false
+    },
+    exp: {
+        value: "",
+        isEmpty: true,
+        isFocused: true,
+        isValid: false,
+        isPotentiallyValid: false
+    },
+    pin: {
+        value: "",
+        isEmpty: true,
+        isFocused: true,
+        isValid: false,
+        isPotentiallyValid: false
+    }
+};
+
+module.exports = obj;
+
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var EventedModel = require('./evented-model');
@@ -701,6 +783,7 @@ var constants = require('../../libs/constants.js');
 var externalEvents = constants.externalEvents;
 var bus = require('framebus');
 var validator = require('../../card-validator');
+var CardDefault = require('./card-default.js');
 
 var CreditCardForm = function CreditCardForm(conf) {
 
@@ -721,6 +804,43 @@ var CreditCardForm = function CreditCardForm(conf) {
 
   EventedModel.apply(this, arguments);
 
+  /**
+   * Initialize the tree with default data
+   * 
+   * {
+   *  pan: {
+   *      value: "",
+   *      isEmpty: true,
+   *      isFocused: true,
+   *      isValid: false,
+   *      isPotentiallyValid: false
+   *  },
+   * cvv: {
+   *      value: "",
+   *      isEmpty: true,
+   *      isFocused: false,
+   *      isValid: false,
+   *      isPotentiallyValid: false
+   *  },
+   * exp: {
+   *      value: "",
+   *      isEmpty: true,
+   *      isFocused: true,
+   *      isValid: false,
+   *      isPotentiallyValid: false
+   *  },
+   * pin: {
+   *      value: "",
+   *      isEmpty: true,
+   *      isFocused: true,
+   *      isValid: false,
+   *      isPotentiallyValid: false
+   *  }
+   * }
+   */
+
+  this.initialize(CardDefault);
+
   this.conf = conf;
 
   /** 
@@ -738,9 +858,11 @@ var CreditCardForm = function CreditCardForm(conf) {
     this.on('change:' + field + '.value', onFieldValueChange(this, field));
     this.on('change:' + field + '.isValid', onFieldChange);
     this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
+    this.on('change:' + field + '.isEmpty', onEmptyChange(this, field));
   }.bind(this));
 
-  this.on('change:pan.value', this._onNumberChange);
+  //this.on('change:pan.value', this._onNumberChange);
+
 
   //should add event listeners on each of the field :TODO
 };
@@ -749,24 +871,39 @@ CreditCardForm.prototype = Object.create(EventedModel.prototype);
 CreditCardForm.prototype.constructor = CreditCardForm;
 
 CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
+  var cards;
 
+  var possibleCardTypes = this.get('possibleCardTypes');
   var fields = this._fieldKeys.reduce(function (result, key) {
     console.log("iterating for key " + key);
     var fieldData = this.get(key);
 
-    result[key] = {
-      isEmpty: fieldData.isEmpty,
-      isValid: fieldData.isValid,
-      isPotentiallyValid: fieldData.isPotentiallyValid,
-      isFocused: fieldData.isFocused
-    };
+    if (fieldData) {
+      result[key] = {
+        isEmpty: fieldData.isEmpty,
+        isValid: fieldData.isValid,
+        isPotentiallyValid: fieldData.isPotentiallyValid,
+        isFocused: fieldData.isFocused
+      };
+    }
     return result;
   }.bind(this), {});
+
+  if (possibleCardTypes) {
+    cards = possibleCardTypes.map(function (cardType) {
+      return {
+        common: cardType.common,
+        type: cardType.type,
+        code: cardType.code
+      };
+    });
+  }
 
   console.log("before emitting INPUT_EVENT " + JSON.stringify(fields));
 
   bus.emit("INPUT_EVENT", {
     merchantPayload: {
+      cards: cards,
       emittedBy: fieldKey,
       fields: fields
     },
@@ -790,6 +927,7 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
   } else if (fieldKey === 'expirationDate') {
     //validationResult = validate(splitDate(value));
   } else {
+    //validate pan , pin
     validationResult = validate(value);
   }
 
@@ -803,8 +941,8 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
       };
     }
     console.log(JSON.stringify(validationResult));
-    this.set(fieldKey + '.isValid', validationResult.isValid);
-    this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
+    //this.set(fieldKey + '.isValid', validationResult.isValid);
+    //this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
   }
 };
 
@@ -863,7 +1001,6 @@ CreditCardForm.prototype.invalidFieldKeys = function () {};
 function onFieldValueChange(form, fieldKey) {
 
   return function () {
-    console.log("-checking empty- after FieldValueChange");
     var isEmpty = form.get(fieldKey + '.value');
     form.set(fieldKey + '.isEmpty', isEmpty === '');
     form._validateField(fieldKey);
@@ -874,7 +1011,13 @@ function onFieldFocusChange(form, field) {}
 
 function onCardTypeChange(form, field) {}
 
-function onEmptyChange(form, field) {}
+function onEmptyChange(form, field) {
+
+  return function () {
+    var event = form.get(field + '.isEmpty') ? externalEvents.EMPTY : externalEvents.NOT_EMPTY;
+    form.emitEvent(field, event);
+  };
+}
 
 /**
  * returns a function value for when there is a state change
@@ -893,8 +1036,10 @@ module.exports = {
   CreditCardForm: CreditCardForm
 };
 
-},{"../../card-validator":2,"../../libs/constants.js":22,"./evented-model":19,"framebus":36}],19:[function(require,module,exports){
+},{"../../card-validator":2,"../../libs/constants.js":23,"./card-default.js":18,"./evented-model":20,"framebus":37}],20:[function(require,module,exports){
 "use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var slice = Array.prototype.slice;
 
@@ -902,6 +1047,26 @@ function EventedModel() {
   this._attributes = this.resetAttributes();
   this._listeners = {};
 }
+
+EventedModel.prototype.initialize = function (obj) {
+
+  if (!obj) {
+    return;
+  };
+
+  var traversal = this._attributes;
+
+  console.log(typeof obj === "undefined" ? "undefined" : _typeof(obj));
+
+  for (var key in obj) {
+
+    if (obj.hasOwnProperty(key)) {
+      traversal[key] = obj[key];
+    }
+  }
+
+  // console.log("object after initialization is "+JSON.stringify(traversal));
+};
 
 EventedModel.prototype.get = function get(compoundKey) {
   var i, key, keys;
@@ -953,7 +1118,7 @@ EventedModel.prototype.set = function set(compoundKey, value) {
   if (traversal[key] !== value) {
     traversal[key] = value;
     //the value associated with this field has just changed
-    this.emit('change');
+    //this.emit('change');
 
     for (i = 1; i <= keys.length; i++) {
       key = keys.slice(0, i).join('.');
@@ -997,7 +1162,7 @@ EventedModel.prototype.resetAttributes = function resetAttributes() {
 
 module.exports = EventedModel;
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 var packIframes = function packIframes(win) {
@@ -1023,7 +1188,7 @@ module.exports = {
     packIframes: packIframes
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1080,7 +1245,7 @@ module.exports = {
     toggle: toggle
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var constants = {
@@ -1092,6 +1257,14 @@ var constants = {
     NOT_EMPTY: 'notEmpty',
     VALIDITY_CHANGE: 'validityChange',
     CARD_TYPE_CHANGE: 'cardTypeChange'
+  },
+
+  events: {
+    TRIGGER_INPUT_FOCUS: 'TRIGGER_INPUT_FOCUS',
+    SET_PLACEHOLDER: 'SET_PLACEHOLDER',
+    ADD_CLASS: 'ADD_CLASS',
+    REMOVE_CLASS: 'REMOVE_CLASS',
+    CLEAR_FIELD: 'CLEAR_FIELD'
   },
 
   DEFAULTIFRAMESTYLE: {
@@ -1132,7 +1305,7 @@ var constants = {
 
 module.exports = constants;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var FakeRestrictedInput = require('./fake-restricted-input');
@@ -1143,7 +1316,7 @@ module.exports = function (options) {
     return new FakeRestrictedInput(options);
 };
 
-},{"./fake-restricted-input":24}],24:[function(require,module,exports){
+},{"./fake-restricted-input":25}],25:[function(require,module,exports){
 "use strict";
 
 function FakeRestrictedInput(options) {
@@ -1158,7 +1331,7 @@ FakeRestrictedInput.prototype.setPattern = function () {};
 
 module.exports = FakeRestrictedInput;
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = function isIe9(userAgent) {
@@ -1166,7 +1339,7 @@ module.exports = function isIe9(userAgent) {
   return userAgent.indexOf('MSIE 9') !== -1;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -1179,7 +1352,7 @@ module.exports = function (fn) {
     };
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -1258,7 +1431,7 @@ module.exports = {
     stringify: stringify
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1275,7 +1448,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1382,7 +1555,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":27,"./parse-body.js":34,"./prep-body.js":35}],30:[function(require,module,exports){
+},{"../libs/query-string.js":28,"./parse-body.js":35,"./prep-body.js":36}],31:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1391,7 +1564,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1456,7 +1629,7 @@ module.exports = function (options, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/once.js":26,"./ajax-driver.js":29,"./get-user-agent.js":30,"./is-http.js":32,"./jsonp-driver.js":33}],32:[function(require,module,exports){
+},{"../libs/once.js":27,"./ajax-driver.js":30,"./get-user-agent.js":31,"./is-http.js":33,"./jsonp-driver.js":34}],33:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1465,7 +1638,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1596,7 +1769,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":27,"../libs/uuid.js":28}],34:[function(require,module,exports){
+},{"../libs/query-string.js":28,"../libs/uuid.js":29}],35:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1610,7 +1783,7 @@ module.exports = function (body) {
     return body;
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -1624,7 +1797,7 @@ module.exports = function (method, body) {
     return body;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -1902,4 +2075,184 @@ module.exports = function (method, body) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],38:[function(require,module,exports){
+'use strict';
+
+var injectStylesheet = require('./lib/inject-stylesheet');
+
+module.exports = {
+  injectWithWhitelist: function (styles, list) { return injectStylesheet(styles, list, true); },
+  injectWithBlacklist: function (styles, list) { return injectStylesheet(styles, list, false); }
+};
+
+},{"./lib/inject-stylesheet":41}],39:[function(require,module,exports){
+'use strict';
+
+module.exports = function filterStyleKeys(styleObject, propertyList, isWhitelist) {
+  var result = {};
+
+  function whitelistFilter(key) {
+    if (propertyList.indexOf(key) !== -1) {
+      result[key] = styleObject[key];
+    }
+  }
+
+  function blacklistFilter(key) {
+    if (propertyList.indexOf(key) === -1) {
+      result[key] = styleObject[key];
+    }
+  }
+
+  if (isWhitelist) {
+    Object.keys(styleObject).forEach(whitelistFilter);
+  } else {
+    Object.keys(styleObject).forEach(blacklistFilter);
+  }
+
+  return result;
+};
+
+},{}],40:[function(require,module,exports){
+/**
+ * CSS attack vectors: (please add if you find more)
+ *
+ * - IE 5, 6, and 7 support computed properties via injecting JS with expression().
+ * - JS can be executed in place of a url():
+ *   -  backround-color: "javascript:alert(1)"
+ * - CSRF is possible using the url() function.
+ * - The -moz-binding property for attaching XBL requires a URL.
+ *
+ * Resources:
+ * - https://code.google.com/p/google-caja/wiki/CssAllowsArbitraryCodeExecution
+ * - https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet#RULE_.234_-_CSS_Escape_And_Strictly_Validate_Before_Inserting_Untrusted_Data_into_HTML_Style_Property_Values
+ */
+
+'use strict';
+
+var valueFilters = [
+  /;/,
+  /@import/i,
+  /expression/i,
+  /url/i,
+  /javascript/i
+];
+
+function htmlEscape(html) {
+  return String(html)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function filterStyleValues(dirty) {
+  var clean = {};
+
+  dirty = dirty || {};
+
+  Object.keys(dirty).forEach(function (key) {
+    var value = dirty[key];
+    var unsanitary = valueFilters.some(function (regex) {
+      return regex.test(value);
+    });
+
+    if (unsanitary) { return; }
+
+    clean[key] = htmlEscape(dirty[key]);
+  });
+
+  return clean;
+}
+
+module.exports = filterStyleValues;
+
+},{}],41:[function(require,module,exports){
+'use strict';
+
+var validateSelector = require('./validate-selector');
+var filterStyleKeys = require('./filter-style-keys');
+var filterStyleValues = require('./filter-style-values');
+
+function isSelectorMediaQuery(selector) {
+  return /^@media\s+/i.test(selector);
+}
+
+function buildRule(selector, styles, curriedKeysFilter) {
+  var result, sanitized;
+  var constructedRule = selector + '{';
+
+  styles = styles || {};
+
+  if (isSelectorMediaQuery(selector)) {
+    Object.keys(styles).forEach(function (innerSelector) {
+      if (!validateSelector(innerSelector)) { return; }
+
+      constructedRule += buildRule(innerSelector, styles[innerSelector], curriedKeysFilter);
+    });
+  } else {
+    result = curriedKeysFilter(styles);
+    sanitized = filterStyleValues(result);
+
+    Object.keys(sanitized).forEach(function (rule) {
+      constructedRule += rule + ':' + sanitized[rule] + ';';
+    });
+  }
+
+  constructedRule += '}';
+  return constructedRule;
+}
+
+function injectStylesheet(styles, propertyList, isWhitelist) {
+  var stylesheet;
+  var position = 0;
+  var styleElement = document.createElement('style');
+
+  document.querySelector('head').appendChild(styleElement);
+  stylesheet = styleElement.sheet || styleElement.styleSheet;
+
+  styles = styles || {};
+  propertyList = propertyList || [];
+
+  function curriedKeysFilter(styleObject) {
+    return filterStyleKeys(styleObject, propertyList, isWhitelist);
+  }
+
+  Object.keys(styles).forEach(function (selector) {
+    var constructedRule;
+
+    if (!validateSelector(selector)) { return; }
+
+    constructedRule = buildRule(selector, styles[selector], curriedKeysFilter);
+
+    try {
+      if (stylesheet.insertRule) {
+        stylesheet.insertRule(constructedRule, position);
+      } else {
+        stylesheet.addRule(selector, constructedRule.replace(/^[^{]+/, '').replace(/{|}/g, ''), position);
+      }
+      position++;
+    } catch (err) {
+      if (!err instanceof SyntaxError) { throw err; }
+    }
+  });
+
+  return styleElement;
+}
+
+module.exports = injectStylesheet;
+
+},{"./filter-style-keys":39,"./filter-style-values":40,"./validate-selector":42}],42:[function(require,module,exports){
+'use strict';
+
+function validateSelector(selector) {
+  if (selector.trim().length === 0) { return false; }
+  if (/supports/i.test(selector)) { return false; }
+  if (/import/i.test(selector)) { return false; }
+  if (/\{|\}/.test(selector)) { return false; }
+  if (/</.test(selector)) { return false; }
+
+  return true;
+}
+
+module.exports = validateSelector;
+
 },{}]},{},[17]);

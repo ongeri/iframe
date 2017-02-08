@@ -39,7 +39,6 @@ types[MASTERCARD] = {
 var clone = function(x){
 
     var exactPattern, prefixPattern, ret;
-
     if(!x) {return null;}
 
     exactPattern = x.exactPattern.source;
@@ -70,6 +69,7 @@ var Card = function(val){
         type = cardMap[i];
         value = types[type];
 
+
         if(val.length === 0) {
             prefixResults.push(clone(value));
             continue;
@@ -82,8 +82,10 @@ var Card = function(val){
             prefixResults.push(clone(value))
         }
 
-        return exactResults.length ? exactResults : prefixResults;
+        
+        
     }
+    return exactResults.length ? exactResults : prefixResults;
     
 };
 

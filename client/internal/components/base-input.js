@@ -4,6 +4,7 @@ var createRestrictedInput = require('../../libs/create-restricted-input.js');
 var constants = require('../../libs/constants');
 var isIe9 = require('../../libs/is-ie9.js');
 var toggler = require('../../libs/class-toggle.js');
+var events = constants.events;
 var ENTER_KEY_CODE = 13;
 function BaseInput(options){
     var shouldFormat;
@@ -28,7 +29,7 @@ function BaseInput(options){
     this.addDOMEventListeners();
     this.addModelEventListeners();
     this.addBusEventListeners();
-    //this.render();
+    this.render();
     
 }
 
@@ -63,7 +64,6 @@ BaseInput.prototype.buildElement = function(){
     attributes.placeholder = placeholder;
   }
 
-  console.log("primitive attrs "+JSON.stringify(attributes));
 
   Object.keys(attributes).forEach(function (attr) {
     element.setAttribute(attr, attributes[attr]);
@@ -78,8 +78,44 @@ BaseInput.prototype.getConfiguration = function(){
 };
 
 BaseInput.prototype.addDOMEventListeners = function(){
+    this._addDOMFocusListeners();
     this._addDOMInputListeners();
     this._addDOMKeypressListeners();
+};
+
+/**
+ * For any focus event, this.updateModel('isFocused', false|true);
+ */
+BaseInput.prototype._addDOMFocusListeners = function(){
+
+  var element = this.element;
+
+  if ('onfocusin' in document) {
+    document.documentElement.addEventListener('focusin', function (event) {
+      if (event.fromElement === element) { return; }
+      if (event.relatedTarget) { return; }
+
+      element.focus();
+    }, false);
+  } else {
+    document.addEventListener('focus', function () {
+      element.focus();
+    }, false);
+  }
+
+  element.addEventListener('touchstart', function () {
+    element.select();
+  });
+
+  element.addEventListener('focus', function () {
+    this.updateModel('isFocused', true);
+  }.bind(this), false);
+
+  element.addEventListener('blur', function () {
+    this.updateModel('isFocused', false);
+  }.bind(this), false);
+
+  
 };
 
 BaseInput.prototype._addDOMKeypressListeners = function(){
@@ -139,21 +175,21 @@ BaseInput.prototype.render = function () {
 };
 
 BaseInput.prototype.addBusEventListeners = function () {
-//   bus.on(events.TRIGGER_INPUT_FOCUS, function (type) {
-//     if (type === this.type) { this.element.focus(); }
-//   }.bind(this));
+   bus.on(events.TRIGGER_INPUT_FOCUS, function (type) {
+     if (type === this.type) { this.element.focus(); }
+   }.bind(this));
 
-  bus.on("SET_PLACEHOLDER", this.setPlaceholder.bind(this));
+  bus.on(events.SET_PLACEHOLDER, this.setPlaceholder.bind(this));
 
-//   bus.on(events.ADD_CLASS, function (type, classname) {
-//     if (type === this.type) { classlist.add(this.element, classname); }
-//   }.bind(this));
+   bus.on(events.ADD_CLASS, function (type, classname) {
+     if (type === this.type) { toggle.add(this.element, classname); }
+   }.bind(this));
 
-//   global.bus.on(events.REMOVE_CLASS, function (type, classname) {
-//     if (type === this.type) { classlist.remove(this.element, classname); }
-//   }.bind(this));
+   bus.on(events.REMOVE_CLASS, function (type, classname) {
+     if (type === this.type) { toggle.remove(this.element, classname); }
+   }.bind(this));
 
-  bus.on("CLEAR_FIELD", function (type) {
+  bus.on(events.CLEAR_FIELD, function (type) {
     if (type === this.type) {
       this.element.value = '';
       this.updateModel('value', '');

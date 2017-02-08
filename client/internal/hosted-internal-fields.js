@@ -5,6 +5,7 @@ var frameName = require('./get-frame-name.js');
 var FieldComponent = require('./components/field-component.js').FieldComponent;
 var events = require('../hosted-fields/events.js');
 var request = require('../request');
+var injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
 
 
 var create = function(){
@@ -86,6 +87,14 @@ var normalizeFields = function(options){
 
 var initialize = function(cardForm) {
     var fieldComponent;
+
+    var blacklist = [ 'background', 'display' ];
+
+    //inject merchant provided styles
+     injectWithBlacklist(
+        cardForm.conf.styles,
+        blacklist
+    );
 
     fieldComponent = new FieldComponent({
         model: cardForm,
