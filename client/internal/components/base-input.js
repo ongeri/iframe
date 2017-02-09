@@ -40,6 +40,11 @@ BaseInput.prototype.buildElement = function(){
 
     var inputType = this.getConfiguration().type || 'tel';
 
+    if(type === "pin") {
+      
+      inputType = 'password'
+    }
+
     var element = document.createElement('input');
 
     var placeholder = this.getConfiguration().placeholder;

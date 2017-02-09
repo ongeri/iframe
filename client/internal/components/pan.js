@@ -5,6 +5,11 @@ var panInput = function(){
     this.MAX_SIZE = MAX_SIZE;
 
     BaseInput.apply(this, arguments);
+
+    this.model.on("change:possibleCardTypes", function(possibleCardTypes){
+        
+        
+    }.bind(this));
 };
 
 panInput.prototype = Object.create(BaseInput.prototype);
