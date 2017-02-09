@@ -2,7 +2,7 @@ var obj = {
     pan: {
         value: "",
         isEmpty: true,
-        isFocused: true,
+        isFocused: false,
         isValid: false,
         isPotentiallyValid: false
     },
@@ -16,14 +16,14 @@ var obj = {
     exp: {
         value: "",
         isEmpty: true,
-        isFocused: true,
+        isFocused: false,
         isValid: false,
         isPotentiallyValid: false
     },
     pin: {
         value: "",
         isEmpty: true,
-        isFocused: true,
+        isFocused: false,
         isValid: false,
         isPotentiallyValid: false
     }

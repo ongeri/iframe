@@ -5,6 +5,8 @@ var externalEvents = constants.externalEvents;
 var bus = require('framebus');
 var validator = require('../../card-validator');
 var CardDefault = require('./card-default.js');
+var getCardTypes = require('../../card-type');
+var comparePossibleCardTypes = require('../compare-card-type.js');
 
 var CreditCardForm = function(conf){
     
@@ -78,13 +80,16 @@ var CreditCardForm = function(conf){
       var onFieldChange = onFieldStateChange(this, field);//pass the entire form state to be processed
 
       this.on('change:' + field + '.value', onFieldValueChange(this, field));
+      this.on('change:' + field + '.isFocused', onFieldFocusChange(this, field));
       this.on('change:' + field + '.isValid', onFieldChange);
       this.on('change:' + field + '.isPotentiallyValid', onFieldChange);
       this.on('change:' + field + '.isEmpty', onEmptyChange(this, field));
 
     }.bind(this));
 
-    //this.on('change:pan.value', this._onNumberChange);
+    this.on('change:pan.value', this._onNumberChange);
+    this.on('change:possibleCardTypes', function () { this._validateField('cvv'); }.bind(this));
+    this.on('change:possibleCardTypes', onCardTypeChange(this, 'pan'));
     
 
     //should add event listeners on each of the field :TODO
@@ -136,7 +141,13 @@ CreditCardForm.prototype.emitEvent = function(fieldKey, eventType){
 };
 /////////////////////////////////////////////////////////////
 CreditCardForm.prototype._onNumberChange = function (number) {
-  console.log("number change");
+
+  var newPossibleCardTypes = getCardTypes(number.replace(/[-\s]/g, ''));
+  var oldPossibleCardTypes = this.get('possibleCardTypes');
+
+  if (!comparePossibleCardTypes(newPossibleCardTypes, oldPossibleCardTypes)) {
+    this.set('possibleCardTypes', newPossibleCardTypes);
+  }
 };
 
 CreditCardForm.prototype._validateField = function (fieldKey) {
@@ -147,7 +158,9 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
   var validate = validator[fieldKey];
 
   if (fieldKey === 'cvv') {
+    console.log("on validating cvv ");
     validationResult = this._validateCvv(value);
+    console.log(validationResult);
   } else if (fieldKey === 'expirationDate') {
     //validationResult = validate(splitDate(value));
   } else {
@@ -158,15 +171,10 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
   if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
     //this._onSplitDateChange();
   } else {
-    if(!validationResult) {
-      validationResult = {
-        isValid: false,
-        isPotentiallyValid: true
-      };
-    }
-    console.log(JSON.stringify(validationResult));
-    //this.set(fieldKey + '.isValid', validationResult.isValid);
-    //this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
+    
+    console.log("The validation resule::::::"+JSON.stringify(validationResult));
+    this.set(fieldKey + '.isValid', validationResult.isValid);
+    this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
   }
 };
 
@@ -240,11 +248,21 @@ function onFieldValueChange(form, fieldKey) {
 }
 
 function onFieldFocusChange(form, field) {
-  
+
+  return function(isFocused){
+    form._fieldKeys.forEach(function(key){
+      if(key === field) {return ;}
+      form.set(key + '.isFocused', false);
+    });
+
+    form.emitEvent(field, isFocused ? externalEvents.FOCUS : externalEvents.BLUR);
+  }; 
 }
 
 function onCardTypeChange(form, field) {
-  
+   return function () {
+    form.emitEvent(field, externalEvents.CARD_TYPE_CHANGE);
+  };
 }
 
 function onEmptyChange(form, field) {
@@ -262,6 +280,7 @@ function onEmptyChange(form, field) {
  */
 function onFieldStateChange(form, field) {
   return function(){
+    console.log("firing validity change");
     form.emitEvent(field, externalEvents.VALIDITY_CHANGE);
   };
 }

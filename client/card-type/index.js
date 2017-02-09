@@ -60,7 +60,7 @@ var Card = function(val){
     var type, value, i;
     var prefixResults = [];
     var exactResults = [];
-
+    console.log("type of number "+typeof val);
     if (!(typeof val === 'string' || val instanceof String)) {
         return [];
     }
@@ -71,6 +71,7 @@ var Card = function(val){
 
 
         if(val.length === 0) {
+            console.log("adding "+JSON.stringify(value));
             prefixResults.push(clone(value));
             continue;
         }
@@ -83,7 +84,12 @@ var Card = function(val){
         }
 
         
-        
+        if(exactResults.length){
+            console.log("exact-res "+JSON.stringify(exactResults));
+        }
+        else {
+            console.log("partial-res "+JSON.stringify(prefixResults));
+        }
     }
     return exactResults.length ? exactResults : prefixResults;
     

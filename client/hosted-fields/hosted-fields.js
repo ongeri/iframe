@@ -38,7 +38,7 @@ var createInputEventHandler = function(fields) {
     var emittedBy = merchantPayload.emittedBy;
     var container = fields[emittedBy].containerElement;
 
-    console.log("received from internal.js for INPUT event--- ");
+    console.log("received from internal.js for INPUT event--- "+container);
     console.log(JSON.stringify(eventData));
 
     Object.keys(merchantPayload.fields).forEach(function (key) {
@@ -141,6 +141,7 @@ var HostedFields = function(options){
       frameElement: frame,
       containerElement: container
     };
+    console.log("field for "+key+" "+fields[key].frameElement+" "+JSON.stringify(fields[key]));
 
     fieldCount+=1;
 
@@ -176,6 +177,7 @@ var HostedFields = function(options){
     }
   });
 
+  console.log("passed "+JSON.stringify(fields)+" to inputhandler ");
   bus.on(events.INPUT_EVENT , createInputEventHandler(fields).bind(this) );
 
 };
