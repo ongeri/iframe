@@ -99,10 +99,11 @@ module.exports = Card;
 module.exports = {
     cvv: require('./src/cvv.js'),
     pan: require('./src/pan.js'),
-    pin: require('./src/pin.js')
+    pin: require('./src/pin.js'),
+    exp: require('./src/exp.js')
 };
 
-},{"./src/cvv.js":3,"./src/pan.js":5,"./src/pin.js":6}],3:[function(require,module,exports){
+},{"./src/cvv.js":3,"./src/exp.js":4,"./src/pan.js":6,"./src/pin.js":7}],3:[function(require,module,exports){
 'use strict';
 
 var DEFAULT_MAX = 3;
@@ -158,6 +159,66 @@ var check = function check(value, maxlen) {
 module.exports = check;
 
 },{}],4:[function(require,module,exports){
+"use strict";
+
+var verification = function verification(isPotentiallyValid, isValid) {
+    return {
+        isPotentiallyValid: isPotentiallyValid,
+        isValid: isValid
+    };
+};
+
+var Exp = function Exp(value) {
+
+    if (typeof value !== 'string') {
+        return verification(false, false);
+    }
+
+    if (value.length == 0) {
+
+        return verification(false, false);
+    }
+
+    if (value.length <= 2) {
+        if (!/^\d*$/.test(value)) return verification(false, false);
+        return verification(true, false);
+    }
+
+    var month = value.substring(0, 2);
+    var year = value.substring(3);
+
+    //if there is any character
+    if (month.length > 0 && !/^\d*$/.test(month)) {
+        return verification(false, false);
+    }
+    if (year.length > 0 && !/^\d*$/.test(year)) {
+        return verification(false, false);
+    }
+
+    if (year.length < 2) {
+        return verification(true, false);
+    }
+
+    var presentDate = new Date();
+    var presentMonth = presentDate.getMonth();
+    var presentYear = presentDate.getYear();
+
+    presentMonth = presentMonth.length == 1 ? "0" + presentMonth : presentMonth;
+    presentYear %= 100;
+
+    if (year < presentYear) {
+        return verification(false, false);
+    } else {
+
+        if (parseInt(month) >= 1 && parseInt(month) < 12 && parseInt(month) >= parseInt(presentMonth)) {
+            return verification(true, true);
+        } else {
+            return verification(false, false);
+        }
+    }
+};
+
+},{}],5:[function(require,module,exports){
 /*
  * Luhn algorithm implementation in JavaScript
  * Copyright (c) 2009 Nicholas C. Zakas
@@ -210,7 +271,7 @@ function luhn10(identifier) {
 
 module.exports = luhn10;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var getCardTypes = require('../../card-type');
@@ -271,7 +332,7 @@ var Pan = function Pan(value) {
 
 module.exports = Pan;
 
-},{"../../card-type":1,"./luhn-10.js":4}],6:[function(require,module,exports){
+},{"../../card-type":1,"./luhn-10.js":5}],7:[function(require,module,exports){
 'use strict';
 
 var verification = function verification(isPotentiallyValid, isValid) {
@@ -311,7 +372,7 @@ var Pin = function Pin(value) {
 
 module.exports = Pin;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -322,7 +383,7 @@ module.exports = {
     PAY_REQUEST: "PAY_REQUEST"
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 var comp = function comp(a, b) {
@@ -355,7 +416,7 @@ var comp = function comp(a, b) {
 
 module.exports = comp;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
@@ -492,6 +553,29 @@ BaseInput.prototype._addDOMKeypressListeners = function () {
 BaseInput.prototype._addDOMInputListeners = function () {
   this.element.addEventListener(this._getDOMChangeEvent(), function () {
     var valueChanged = this.getUnformattedValue();
+
+    if (this.type === "exp" && valueChanged && valueChanged.length > 0) {
+      if (!this.hasSlash) {
+        this.hasSlash = true;
+
+        valueChanged = valueChanged.charAt(0) === '0' || valueChanged.charAt(0) === '1' ? valueChanged : "0" + valueChanged;
+
+        if (valueChanged.length > 1) {
+          valueChanged = valueChanged.substring(0, 2) + "/" + valueChanged.substring(2, valueChanged.length);
+        } else {
+          //
+          this.hasSlash = false;
+        }
+      } else {
+
+        if (valueChanged.length == 2) {
+
+          valueChanged = valueChanged.substring(0, 1);
+          this.hasSlash = false;
+        }
+      }
+    }
+    this.formatter.setValue(valueChanged);
     this.updateModel('value', valueChanged);
   }.bind(this), false);
 };
@@ -574,7 +658,7 @@ module.exports = {
   BaseInput: BaseInput
 };
 
-},{"../../libs/class-toggle.js":24,"../../libs/constants":25,"../../libs/create-restricted-input.js":26,"../../libs/is-ie9.js":28,"framebus":39}],10:[function(require,module,exports){
+},{"../../libs/class-toggle.js":25,"../../libs/constants":26,"../../libs/create-restricted-input.js":27,"../../libs/is-ie9.js":29,"framebus":40}],11:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -594,14 +678,15 @@ module.exports = {
     CVVINPUT: cvvInput
 };
 
-},{"./base-input.js":9}],11:[function(require,module,exports){
+},{"./base-input.js":10}],12:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
-var MAX_SIZE = 4;
+var MAX_SIZE = 5;
 
 var expInput = function expInput() {
     this.MAX_SIZE = MAX_SIZE;
+    this.hasSlash = false;
 
     BaseInput.apply(this, arguments);
 };
@@ -613,7 +698,7 @@ module.exports = {
     EXP: expInput
 };
 
-},{"./base-input.js":9}],12:[function(require,module,exports){
+},{"./base-input.js":10}],13:[function(require,module,exports){
 'use strict';
 
 var LabelComponent = require('./label.js');
@@ -641,7 +726,7 @@ module.exports = {
     FieldComponent: fieldComponent
 };
 
-},{"../../libs/constants":25,"./input-components.js":13,"./label.js":14}],13:[function(require,module,exports){
+},{"../../libs/constants":26,"./input-components.js":14,"./label.js":15}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -651,7 +736,7 @@ module.exports = {
     exp: require('./exp.js').EXP
 };
 
-},{"./cvv.js":10,"./exp.js":11,"./pan.js":15,"./pin.js":16}],14:[function(require,module,exports){
+},{"./cvv.js":11,"./exp.js":12,"./pan.js":16,"./pin.js":17}],15:[function(require,module,exports){
 "use strict";
 
 var label = function label(options) {
@@ -666,7 +751,7 @@ var label = function label(options) {
 
 module.exports = label;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -687,7 +772,7 @@ module.exports = {
     PAN: panInput
 };
 
-},{"./base-input.js":9}],16:[function(require,module,exports){
+},{"./base-input.js":10}],17:[function(require,module,exports){
 'use strict';
 
 var BaseInput = require('./base-input.js').BaseInput;
@@ -706,7 +791,7 @@ module.exports = {
     PIN: pinInput
 };
 
-},{"./base-input.js":9}],17:[function(require,module,exports){
+},{"./base-input.js":10}],18:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -717,7 +802,7 @@ module.exports = {
 
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
@@ -821,7 +906,7 @@ module.exports = {
     initialize: initialize
 };
 
-},{"../hosted-fields/events.js":7,"../request":34,"./components/field-component.js":12,"./get-frame-name.js":17,"./models/credit-card-form.js":21,"./pack-iframes.js":23,"framebus":39,"inject-stylesheet":40}],19:[function(require,module,exports){
+},{"../hosted-fields/events.js":8,"../request":35,"./components/field-component.js":13,"./get-frame-name.js":18,"./models/credit-card-form.js":22,"./pack-iframes.js":24,"framebus":40,"inject-stylesheet":41}],20:[function(require,module,exports){
 'use strict';
 
 var hostedFields = require('./hosted-internal-fields.js');
@@ -829,7 +914,7 @@ window.interswitch = {
     hostedFields: hostedFields
 };
 
-},{"./hosted-internal-fields.js":18}],20:[function(require,module,exports){
+},{"./hosted-internal-fields.js":19}],21:[function(require,module,exports){
 "use strict";
 
 var obj = {
@@ -865,7 +950,7 @@ var obj = {
 
 module.exports = obj;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 var EventedModel = require('./evented-model');
@@ -1028,7 +1113,7 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
     console.log("on validating cvv ");
     validationResult = this._validateCvv(value);
     console.log(validationResult);
-  } else if (fieldKey === 'expirationDate') {
+  } else if (fieldKey === 'exp') {
     //validationResult = validate(splitDate(value));
   } else {
     //validate pan , pin
@@ -1152,7 +1237,7 @@ module.exports = {
   CreditCardForm: CreditCardForm
 };
 
-},{"../../card-type":1,"../../card-validator":2,"../../libs/constants.js":25,"../compare-card-type.js":8,"./card-default.js":20,"./evented-model":22,"framebus":39}],22:[function(require,module,exports){
+},{"../../card-type":1,"../../card-validator":2,"../../libs/constants.js":26,"../compare-card-type.js":9,"./card-default.js":21,"./evented-model":23,"framebus":40}],23:[function(require,module,exports){
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -1278,7 +1363,7 @@ EventedModel.prototype.resetAttributes = function resetAttributes() {
 
 module.exports = EventedModel;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 
 var packIframes = function packIframes(win) {
@@ -1304,7 +1389,7 @@ module.exports = {
     packIframes: packIframes
 };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1361,7 +1446,7 @@ module.exports = {
     toggle: toggle
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 var constants = {
@@ -1421,7 +1506,7 @@ var constants = {
 
 module.exports = constants;
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var FakeRestrictedInput = require('./fake-restricted-input');
@@ -1432,7 +1517,7 @@ module.exports = function (options) {
     return new FakeRestrictedInput(options);
 };
 
-},{"./fake-restricted-input":27}],27:[function(require,module,exports){
+},{"./fake-restricted-input":28}],28:[function(require,module,exports){
 "use strict";
 
 function FakeRestrictedInput(options) {
@@ -1443,11 +1528,15 @@ FakeRestrictedInput.prototype.getUnformattedValue = function () {
   return this.inputElement.value;
 };
 
+FakeRestrictedInput.prototype.setValue = function (val) {
+  this.inputElement.value = val;
+};
+
 FakeRestrictedInput.prototype.setPattern = function () {};
 
 module.exports = FakeRestrictedInput;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 module.exports = function isIe9(userAgent) {
@@ -1455,7 +1544,7 @@ module.exports = function isIe9(userAgent) {
   return userAgent.indexOf('MSIE 9') !== -1;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -1468,7 +1557,7 @@ module.exports = function (fn) {
     };
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -1547,7 +1636,7 @@ module.exports = {
     stringify: stringify
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1564,7 +1653,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1671,7 +1760,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":30,"./parse-body.js":37,"./prep-body.js":38}],33:[function(require,module,exports){
+},{"../libs/query-string.js":31,"./parse-body.js":38,"./prep-body.js":39}],34:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1680,7 +1769,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1745,7 +1834,7 @@ module.exports = function (options, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/once.js":29,"./ajax-driver.js":32,"./get-user-agent.js":33,"./is-http.js":35,"./jsonp-driver.js":36}],35:[function(require,module,exports){
+},{"../libs/once.js":30,"./ajax-driver.js":33,"./get-user-agent.js":34,"./is-http.js":36,"./jsonp-driver.js":37}],36:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1754,7 +1843,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1885,7 +1974,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../libs/query-string.js":30,"../libs/uuid.js":31}],37:[function(require,module,exports){
+},{"../libs/query-string.js":31,"../libs/uuid.js":32}],38:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1899,7 +1988,7 @@ module.exports = function (body) {
     return body;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -1913,7 +2002,7 @@ module.exports = function (method, body) {
     return body;
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -2191,7 +2280,7 @@ module.exports = function (method, body) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 var injectStylesheet = require('./lib/inject-stylesheet');
@@ -2201,7 +2290,7 @@ module.exports = {
   injectWithBlacklist: function (styles, list) { return injectStylesheet(styles, list, false); }
 };
 
-},{"./lib/inject-stylesheet":43}],41:[function(require,module,exports){
+},{"./lib/inject-stylesheet":44}],42:[function(require,module,exports){
 'use strict';
 
 module.exports = function filterStyleKeys(styleObject, propertyList, isWhitelist) {
@@ -2228,7 +2317,7 @@ module.exports = function filterStyleKeys(styleObject, propertyList, isWhitelist
   return result;
 };
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * CSS attack vectors: (please add if you find more)
  *
@@ -2281,7 +2370,7 @@ function filterStyleValues(dirty) {
 
 module.exports = filterStyleValues;
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 var validateSelector = require('./validate-selector');
@@ -2356,7 +2445,7 @@ function injectStylesheet(styles, propertyList, isWhitelist) {
 
 module.exports = injectStylesheet;
 
-},{"./filter-style-keys":41,"./filter-style-values":42,"./validate-selector":44}],44:[function(require,module,exports){
+},{"./filter-style-keys":42,"./filter-style-values":43,"./validate-selector":45}],45:[function(require,module,exports){
 'use strict';
 
 function validateSelector(selector) {
@@ -2371,4 +2460,4 @@ function validateSelector(selector) {
 
 module.exports = validateSelector;
 
-},{}]},{},[19]);
+},{}]},{},[20]);

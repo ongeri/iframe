@@ -136,6 +136,34 @@ BaseInput.prototype._addDOMKeypressListeners = function(){
 BaseInput.prototype._addDOMInputListeners = function(){
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
+        
+        if(this.type === "exp" && valueChanged && valueChanged.length > 0) {
+          if(!this.hasSlash) {
+            this.hasSlash = true;
+
+            valueChanged = valueChanged.charAt(0) === '0' || valueChanged.charAt(0) === '1' ? valueChanged : "0"+valueChanged;
+            
+            if(valueChanged.length > 1) {
+              valueChanged = valueChanged.substring(0, 2) + "/" + valueChanged.substring(2, valueChanged.length);
+            }
+            else {
+              //
+              this.hasSlash = false;
+            }
+            
+          }
+          else {
+            
+            if(valueChanged.length == 2){
+
+              valueChanged = valueChanged.substring(0, 1);
+              this.hasSlash = false;
+            }
+
+          }
+          
+        }
+        this.formatter.setValue(valueChanged);
         this.updateModel('value', valueChanged);
     }.bind(this), false);
 };
