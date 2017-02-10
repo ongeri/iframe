@@ -1,13 +1,15 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-module.exports = {
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+module.exports = _defineProperty({
 
     READY: "READY",
     FRAME_SET: "FRAME_SET",
     INPUT_EVENT: "INPUT_EVENT",
     PAY_REQUEST: "PAY_REQUEST"
-};
+}, "INPUT_EVENT", "INPUT_EVENT");
 
 },{}],2:[function(require,module,exports){
 'use strict';
@@ -67,7 +69,6 @@ var createInputEventHandler = function createInputEventHandler(fields) {
     var emittedBy = merchantPayload.emittedBy;
     var container = fields[emittedBy].containerElement;
 
-    console.log("received from internal.js for INPUT event--- " + container);
     console.log(JSON.stringify(eventData));
 
     Object.keys(merchantPayload.fields).forEach(function (key) {
@@ -80,9 +81,17 @@ var createInputEventHandler = function createInputEventHandler(fields) {
 
     console.log(!field.isPotentiallyValid + "-" + field.isValid);
     //change class of elements here
-    toggler.toggle(container, "valid", field.isFocused);
-    toggler.toggle(container, "valid", field.isValid);
-    toggler.toggle(container, "inValid", !field.isPotentiallyValid);
+
+    var classGroup = container.classList;
+
+    //toggler.toggle(container, "focused", field.isFocused);
+
+    container.classList.toggle("focused", field.isFocused);
+    container.classList.toggle("valid", field.isValid);
+    container.classList.toggle("inValid", !field.isPotentiallyValid);
+
+    //toggler.toggle(container, "valid", field.isValid);
+    //toggler.toggle(container, "inValid", !field.isPotentiallyValid);
 
     this._state = {
       fields: merchantPayload.fields,
@@ -111,7 +120,7 @@ var HostedFields = function HostedFields(options) {
 
   EventEmitter.call(this);
 
-  console.log("Location is " + location.href);
+  //console.log("Location is "+location.href);
 
   this._injectedNodes = [];
 
@@ -165,7 +174,6 @@ var HostedFields = function HostedFields(options) {
       frameElement: frame,
       containerElement: container
     };
-    console.log("field for " + key + " " + fields[key].frameElement + " " + JSON.stringify(fields[key]));
 
     fieldCount += 1;
 
@@ -200,7 +208,6 @@ var HostedFields = function HostedFields(options) {
     }
   });
 
-  console.log("passed " + JSON.stringify(fields) + " to inputhandler ");
   bus.on(events.INPUT_EVENT, createInputEventHandler(fields).bind(this));
 };
 
@@ -217,7 +224,7 @@ HostedFields.prototype.pay = function (options, callback) {
   }
 
   noCallback(callback, 'pay');
-  console.log("pay it ");
+
   var t = handlePayResponse(callback);
   bus.emit("PAY_REQUEST", {}, t);
 
@@ -228,7 +235,7 @@ HostedFields.prototype.pay = function (options, callback) {
 };
 
 var handlePayResponse = function handlePayResponse(data) {
-  console.log("response from paying " + data);
+
   return function (obj) {
     if (obj && obj.error) {
       data(obj.error);
@@ -329,13 +336,10 @@ var add = function add(element) {
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
 
-    console.log("adding class " + toAdd);
-
     var className = _classOf(element).filter(function (c) {
         return toAdd.indexOf(c) === -1;
     }).concat(toAdd).join(' ');
 
-    console.log("final class name " + className);
     element.className = className;
 };
 

@@ -11,7 +11,7 @@ var verification = function(card, isPotentiallyValid, isValid) {
 };
 var Pan = function(value) {
 
-    var potentialTypes, cardType, isValid, i, maxLength;
+    var potentialTypes, cardType, isValid, i, maxLength, isPotentiallyValid;
     if(typeof value === 'number') {
         value = String(value);
     }

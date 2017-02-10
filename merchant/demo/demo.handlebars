@@ -143,23 +143,23 @@
 
             }
             hostedFieldInstance.on("validityChange" , function(event){
-              console.log("a validity change "+JSON.stringify(event));
+              
               var field = event.fields[event.emittedBy];
 
                  var formValid = Object.keys(event.fields).every(function (key) {
                     return event.fields[key].isValid;
                   });
 
-                  if (formValid) {
+                  {{!--if (formValid) {
                     $('.button').show();
                   } else {
                     $('.button').hide();
-                  }
+                  }--}}
               
             });
 
             hostedFieldInstance.on("notEmpty", function(event){
-              console.log("a notEmpty event "+ event.fields[event.emittedBy]);
+              
             });
             console.log("hosted instance in place");
 

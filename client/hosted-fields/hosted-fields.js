@@ -38,7 +38,7 @@ var createInputEventHandler = function(fields) {
     var emittedBy = merchantPayload.emittedBy;
     var container = fields[emittedBy].containerElement;
 
-    console.log("received from internal.js for INPUT event--- "+container);
+    
     console.log(JSON.stringify(eventData));
 
     Object.keys(merchantPayload.fields).forEach(function (key) {
@@ -51,9 +51,17 @@ var createInputEventHandler = function(fields) {
 
     console.log(!field.isPotentiallyValid+"-"+field.isValid);
     //change class of elements here
-    toggler.toggle(container, "valid", field.isFocused);
-    toggler.toggle(container, "valid", field.isValid);
-    toggler.toggle(container, "inValid", !field.isPotentiallyValid);
+
+    var classGroup = container.classList;
+
+    //toggler.toggle(container, "focused", field.isFocused);
+    
+    container.classList.toggle("focused", field.isFocused);
+    container.classList.toggle("valid", field.isValid);
+    container.classList.toggle("inValid", !field.isPotentiallyValid);
+
+    //toggler.toggle(container, "valid", field.isValid);
+    //toggler.toggle(container, "inValid", !field.isPotentiallyValid);
 
     this._state = {
       fields: merchantPayload.fields,
@@ -84,7 +92,7 @@ var HostedFields = function(options){
 
   EventEmitter.call(this);
 
-  console.log("Location is "+location.href);
+  //console.log("Location is "+location.href);
 
   this._injectedNodes = [];
 
@@ -141,7 +149,6 @@ var HostedFields = function(options){
       frameElement: frame,
       containerElement: container
     };
-    console.log("field for "+key+" "+fields[key].frameElement+" "+JSON.stringify(fields[key]));
 
     fieldCount+=1;
 
@@ -177,7 +184,6 @@ var HostedFields = function(options){
     }
   });
 
-  console.log("passed "+JSON.stringify(fields)+" to inputhandler ");
   bus.on(events.INPUT_EVENT , createInputEventHandler(fields).bind(this) );
 
 };
@@ -195,7 +201,7 @@ HostedFields.prototype.pay = function(options, callback){
   }
 
   noCallback(callback, 'pay');
-  console.log("pay it ");
+  
   var t = handlePayResponse(callback);
   bus.emit("PAY_REQUEST", {}, t);
   
@@ -208,7 +214,7 @@ HostedFields.prototype.pay = function(options, callback){
 };
 
 var handlePayResponse = function(data){
-  console.log("response from paying "+data);
+  
   return function(obj){
     if(obj && obj.error) {
       data(obj.error);

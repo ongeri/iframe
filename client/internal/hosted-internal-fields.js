@@ -20,7 +20,7 @@ var builder = function(conf) {
     console.log("---> building started>>>");
 
     var client = conf.client;
-    console.log("client object in builder "+JSON.stringify(conf));
+    //console.log("client object in builder "+JSON.stringify(conf));
 
     var cardForm = new CreditCardForm(conf);
 

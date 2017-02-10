@@ -7,6 +7,7 @@ var validator = require('../../card-validator');
 var CardDefault = require('./card-default.js');
 var getCardTypes = require('../../card-type');
 var comparePossibleCardTypes = require('../compare-card-type.js');
+var events = require('../../hosted-fields/events.js');
 
 var CreditCardForm = function(conf){
     
@@ -104,7 +105,7 @@ CreditCardForm.prototype.emitEvent = function(fieldKey, eventType){
 
   var possibleCardTypes = this.get('possibleCardTypes');
   var fields = this._fieldKeys.reduce(function (result, key) {
-    console.log("iterating for key "+key);
+    
     var fieldData = this.get(key);
 
     if(fieldData) {
@@ -130,7 +131,7 @@ CreditCardForm.prototype.emitEvent = function(fieldKey, eventType){
 
   console.log("before emitting INPUT_EVENT "+JSON.stringify(fields));  
 
-  bus.emit("INPUT_EVENT", {
+  bus.emit(events.INPUT_EVENT, {
     merchantPayload: {
       cards: cards,
       emittedBy: fieldKey,
@@ -161,22 +162,17 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
     console.log("on validating cvv ");
     validationResult = this._validateCvv(value);
     console.log(validationResult);
-  } else if (fieldKey === 'exp') {
-    validationResult = validate(value);
-  } else {
-    //validate pan , pin
+  } 
+  else {
+    //validate pan , pin, exp
     validationResult = validate(value);
   }
 
-  if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
-    //this._onSplitDateChange();
-  } else {
-    
-    console.log("The validation resule::::::"+JSON.stringify(validationResult));
-    this.set(fieldKey + '.isValid', validationResult.isValid);
-    this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
-  }
-};
+  console.log("The validation resule::::::"+JSON.stringify(validationResult));
+  this.set(fieldKey + '.isValid', validationResult.isValid);
+  this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
+  
+  };
 
 CreditCardForm.prototype._validateCvv = function (value) {
   console.log("validating cvv");
@@ -280,7 +276,6 @@ function onEmptyChange(form, field) {
  */
 function onFieldStateChange(form, field) {
   return function(){
-    console.log("firing validity change");
     form.emitEvent(field, externalEvents.VALIDITY_CHANGE);
   };
 }

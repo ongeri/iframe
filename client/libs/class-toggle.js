@@ -16,14 +16,14 @@ var add = function(element){
 
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
-
-    console.log("adding class "+toAdd);
+    
 
     var className = _classOf(element).filter(function(c){
         return toAdd.indexOf(c) === -1;
     }).concat(toAdd).join(' ');
 
-    console.log("final class name "+className);
+    
+
     element.className = className;
 };
 
@@ -31,9 +31,14 @@ var remove = function(element){
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
 
+    
+
+
     var className = _classOf(element).filter(function(c){
         return toAdd.indexOf(c) === -1;
     }).join(' ');
+
+    
 
     element.className = className;
 };

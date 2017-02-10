@@ -169,51 +169,64 @@ var verification = function verification(isPotentiallyValid, isValid) {
 };
 
 var Exp = function Exp(value) {
-    console.log("validating the exmp field " + value);
+    console.log("validating the exp field " + value);
 
     if (typeof value !== 'string') {
+        console.log("exp is not a string");
         return verification(false, false);
     }
 
     if (value.length == 0) {
 
+        console.log("exp is empty");
         return verification(false, false);
     }
 
     if (value.length <= 2) {
+        console.log("month is 1-2");
         if (!/^\d*$/.test(value)) return verification(false, false);
         return verification(true, false);
     }
 
     var month = value.substring(0, 2);
     var year = value.substring(3);
+    console.log("month " + month);
+    console.log("year " + year);
 
     //if there is any character
     if (month.length > 0 && !/^\d*$/.test(month)) {
+        console.log("month is not all digits ");
         return verification(false, false);
     }
     if (year.length > 0 && !/^\d*$/.test(year)) {
+        console.log("year is not all digits ");
         return verification(false, false);
     }
 
     if (year.length < 2) {
+        console.log("no year so valid");
         return verification(true, false);
     }
 
     var presentDate = new Date();
-    var presentMonth = presentDate.getMonth();
+    var presentMonth = presentDate.getMonth() + 1;
     var presentYear = presentDate.getYear();
+    console.log("present month " + presentMonth);
+    console.log("present year " + presentYear);
 
     presentMonth = presentMonth.length == 1 ? "0" + presentMonth : presentMonth;
     presentYear %= 100;
 
     if (year < presentYear) {
+        console.log("year is in the past");
         return verification(false, false);
     } else {
 
-        if (parseInt(month) >= 1 && parseInt(month) < 12 && parseInt(month) >= parseInt(presentMonth)) {
+        if (parseInt(month) >= 1 && parseInt(month) <= 12 && parseInt(month) >= parseInt(presentMonth)) {
+            console.log("month and year are valid");
             return verification(true, true);
         } else {
+            console.log("month and year are Invalid");
             return verification(false, false);
         }
     }
@@ -289,7 +302,7 @@ var verification = function verification(card, isPotentiallyValid, isValid) {
 };
 var Pan = function Pan(value) {
 
-    var potentialTypes, cardType, isValid, i, maxLength;
+    var potentialTypes, cardType, isValid, i, maxLength, isPotentiallyValid;
     if (typeof value === 'number') {
         value = String(value);
     }
@@ -378,13 +391,15 @@ module.exports = Pin;
 },{}],8:[function(require,module,exports){
 "use strict";
 
-module.exports = {
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+module.exports = _defineProperty({
 
     READY: "READY",
     FRAME_SET: "FRAME_SET",
     INPUT_EVENT: "INPUT_EVENT",
     PAY_REQUEST: "PAY_REQUEST"
-};
+}, "INPUT_EVENT", "INPUT_EVENT");
 
 },{}],9:[function(require,module,exports){
 "use strict";
@@ -577,8 +592,10 @@ BaseInput.prototype._addDOMInputListeners = function () {
           this.hasSlash = false;
         }
       }
+
+      this.formatter.setValue(valueChanged);
     }
-    this.formatter.setValue(valueChanged);
+
     this.updateModel('value', valueChanged);
   }.bind(this), false);
 };
@@ -827,7 +844,7 @@ var builder = function builder(conf) {
     console.log("---> building started>>>");
 
     var client = conf.client;
-    console.log("client object in builder " + JSON.stringify(conf));
+    //console.log("client object in builder "+JSON.stringify(conf));
 
     var cardForm = new CreditCardForm(conf);
 
@@ -964,6 +981,7 @@ var validator = require('../../card-validator');
 var CardDefault = require('./card-default.js');
 var getCardTypes = require('../../card-type');
 var comparePossibleCardTypes = require('../compare-card-type.js');
+var events = require('../../hosted-fields/events.js');
 
 var CreditCardForm = function CreditCardForm(conf) {
 
@@ -1059,7 +1077,7 @@ CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
 
   var possibleCardTypes = this.get('possibleCardTypes');
   var fields = this._fieldKeys.reduce(function (result, key) {
-    console.log("iterating for key " + key);
+
     var fieldData = this.get(key);
 
     if (fieldData) {
@@ -1085,7 +1103,7 @@ CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
 
   console.log("before emitting INPUT_EVENT " + JSON.stringify(fields));
 
-  bus.emit("INPUT_EVENT", {
+  bus.emit(events.INPUT_EVENT, {
     merchantPayload: {
       cards: cards,
       emittedBy: fieldKey,
@@ -1116,21 +1134,14 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
     console.log("on validating cvv ");
     validationResult = this._validateCvv(value);
     console.log(validationResult);
-  } else if (fieldKey === 'exp') {
-    validationResult = validate(value);
   } else {
-    //validate pan , pin
+    //validate pan , pin, exp
     validationResult = validate(value);
   }
 
-  if (fieldKey === 'expirationMonth' || fieldKey === 'expirationYear') {
-    //this._onSplitDateChange();
-  } else {
-
-    console.log("The validation resule::::::" + JSON.stringify(validationResult));
-    this.set(fieldKey + '.isValid', validationResult.isValid);
-    this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
-  }
+  console.log("The validation resule::::::" + JSON.stringify(validationResult));
+  this.set(fieldKey + '.isValid', validationResult.isValid);
+  this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
 };
 
 CreditCardForm.prototype._validateCvv = function (value) {
@@ -1229,7 +1240,6 @@ function onEmptyChange(form, field) {
  */
 function onFieldStateChange(form, field) {
   return function () {
-    console.log("firing validity change");
     form.emitEvent(field, externalEvents.VALIDITY_CHANGE);
   };
 }
@@ -1240,7 +1250,7 @@ module.exports = {
   CreditCardForm: CreditCardForm
 };
 
-},{"../../card-type":1,"../../card-validator":2,"../../libs/constants.js":26,"../compare-card-type.js":9,"./card-default.js":21,"./evented-model":23,"framebus":40}],23:[function(require,module,exports){
+},{"../../card-type":1,"../../card-validator":2,"../../hosted-fields/events.js":8,"../../libs/constants.js":26,"../compare-card-type.js":9,"./card-default.js":21,"./evented-model":23,"framebus":40}],23:[function(require,module,exports){
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -1413,13 +1423,10 @@ var add = function add(element) {
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
 
-    console.log("adding class " + toAdd);
-
     var className = _classOf(element).filter(function (c) {
         return toAdd.indexOf(c) === -1;
     }).concat(toAdd).join(' ');
 
-    console.log("final class name " + className);
     element.className = className;
 };
 

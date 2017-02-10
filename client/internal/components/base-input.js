@@ -161,9 +161,11 @@ BaseInput.prototype._addDOMInputListeners = function(){
             }
 
           }
+
           
+          this.formatter.setValue(valueChanged);
         }
-        this.formatter.setValue(valueChanged);
+        
         this.updateModel('value', valueChanged);
     }.bind(this), false);
 };
