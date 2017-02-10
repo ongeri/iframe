@@ -162,7 +162,7 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
     validationResult = this._validateCvv(value);
     console.log(validationResult);
   } else if (fieldKey === 'exp') {
-    //validationResult = validate(splitDate(value));
+    validationResult = validate(value);
   } else {
     //validate pan , pin
     validationResult = validate(value);

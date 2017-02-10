@@ -9,6 +9,7 @@ var verification = function(isPotentiallyValid, isValid){
 };
 
 var Exp = function(value) {
+    console.log("validating the exmp field "+value);
 
     if(typeof value !== 'string') {
         return verification(false, false);
@@ -61,3 +62,5 @@ var Exp = function(value) {
     }
     
 }
+
+module.exports = Exp;

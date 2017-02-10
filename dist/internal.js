@@ -169,6 +169,7 @@ var verification = function verification(isPotentiallyValid, isValid) {
 };
 
 var Exp = function Exp(value) {
+    console.log("validating the exmp field " + value);
 
     if (typeof value !== 'string') {
         return verification(false, false);
@@ -217,6 +218,8 @@ var Exp = function Exp(value) {
         }
     }
 };
+
+module.exports = Exp;
 
 },{}],5:[function(require,module,exports){
 /*
@@ -1114,7 +1117,7 @@ CreditCardForm.prototype._validateField = function (fieldKey) {
     validationResult = this._validateCvv(value);
     console.log(validationResult);
   } else if (fieldKey === 'exp') {
-    //validationResult = validate(splitDate(value));
+    validationResult = validate(value);
   } else {
     //validate pan , pin
     validationResult = validate(value);
