@@ -33,11 +33,7 @@ describe("Card Type Checker", function(){
             expect(card.length).to.equal(1);
         });
 
-        it("Does not match when a card starts with 1 ", function(){
-
-            var card = CardType("1");
-            expect(card.length).to.equal(0);
-        });
+        
     });
 
     it("It returns an empty array if passed a non-string ", function(){
@@ -83,6 +79,37 @@ describe("Card Type Checker", function(){
                 var card = CardType(number);
                 expect(card).to.have.lengthOf(1);
                 expect(card[0].type).to.equal(type);
+            });
+        });
+    });
+
+    describe("Unknown card types ", function(){
+        var unknowns = [
+            '0',
+            '12',
+            '123',
+            '181',
+            '1802',
+            '221',
+            '222099',
+            '2721',
+            '212',
+            '2132',
+            '306',
+            '31',
+            '32',
+            '33',
+            '7',
+            '8',
+            '9'
+        ];
+        var card;
+        unknowns.forEach(function(item){
+            it("Does not match when a for unknow card numbers of value  "+item, function(){
+                
+                card = CardType(item);
+                expect(card).to.have.lengthOf(0);
+                
             });
         });
     });
