@@ -37,7 +37,6 @@ var Pan = function(value) {
         return verification(null, true, false);
     }
 
-    console.log("potential types for "+value+" is "+JSON.stringify(potentialTypes));
     //there is just one card now
     cardType = potentialTypes[0];
 
