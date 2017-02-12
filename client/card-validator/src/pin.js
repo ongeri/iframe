@@ -24,9 +24,6 @@ var Pin = function(value){
     //if not a number return
     if (!/^\d*$/.test(value)) { return verification(false, false); }
 
-    if(value.length == 0 ) {
-        return verification(false, false);
-    }
     if(value.length < 4) {
         return verification(true, false);
     }

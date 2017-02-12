@@ -56,11 +56,7 @@ function runTest(arr) {
         var cvvArr = item[2]
         var actual = cvv(value, cvvArr);
 
-        describe("running for value "+value+" ", function(){
-            it("", function(){
-                expect(actual.isValid).to.equal(isValid);
-            expect(actual.isPotentiallyValid).to.equal(isPValid);
-            });
-        });
+        expect(actual.isValid).to.equal(isValid);
+        expect(actual.isPotentiallyValid).to.equal(isPValid);
     });
 }
