@@ -95,9 +95,12 @@ module.exports = function(grunt) {
         uglify: {
             compile: {
                 options: {
-                    compress: true,
+                    //compress: true,
                     verbose: true,
-                    mangle:true
+                    mangle:true,
+                    compress: {
+                        drop_console: true
+                    }
                 },
                 files: [{
                     src: 'dist/build.js',
