@@ -1,8 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var types = {};
 var VISA = 'visa';
 var MASTERCARD = 'master-card';
@@ -61,7 +59,6 @@ var Card = function Card(val) {
     var type, value, i;
     var prefixResults = [];
     var exactResults = [];
-    console.log("type of number " + (typeof val === 'undefined' ? 'undefined' : _typeof(val)));
     if (!(typeof val === 'string' || val instanceof String)) {
         return [];
     }
@@ -71,7 +68,6 @@ var Card = function Card(val) {
         value = types[type];
 
         if (val.length === 0) {
-            console.log("adding " + JSON.stringify(value));
             prefixResults.push(clone(value));
             continue;
         }
@@ -82,11 +78,7 @@ var Card = function Card(val) {
             prefixResults.push(clone(value));
         }
 
-        if (exactResults.length) {
-            console.log("exact-res " + JSON.stringify(exactResults));
-        } else {
-            console.log("partial-res " + JSON.stringify(prefixResults));
-        }
+        if (exactResults.length) {} else {}
     }
     return exactResults.length ? exactResults : prefixResults;
 };
@@ -159,7 +151,7 @@ var check = function check(value, maxlen) {
 module.exports = check;
 
 },{}],4:[function(require,module,exports){
-"use strict";
+'use strict';
 
 var verification = function verification(isPotentiallyValid, isValid) {
     return {
@@ -169,64 +161,60 @@ var verification = function verification(isPotentiallyValid, isValid) {
 };
 
 var Exp = function Exp(value) {
-    console.log("validating the exp field " + value);
 
     if (typeof value !== 'string') {
-        console.log("exp is not a string");
         return verification(false, false);
     }
 
     if (value.length == 0) {
 
-        console.log("exp is empty");
+        return verification(true, false);
+    }
+
+    if (value.charAt(0) != '0' && value.charAt(0) != '1') {
         return verification(false, false);
     }
 
     if (value.length <= 2) {
-        console.log("month is 1-2");
         if (!/^\d*$/.test(value)) return verification(false, false);
         return verification(true, false);
     }
 
     var month = value.substring(0, 2);
     var year = value.substring(3);
-    console.log("month " + month);
-    console.log("year " + year);
+
+    if (value.charAt(2) !== '/') {
+        return verification(false, false);
+    }
 
     //if there is any character
     if (month.length > 0 && !/^\d*$/.test(month)) {
-        console.log("month is not all digits ");
         return verification(false, false);
     }
     if (year.length > 0 && !/^\d*$/.test(year)) {
-        console.log("year is not all digits ");
         return verification(false, false);
     }
 
     if (year.length < 2) {
-        console.log("no year so valid");
         return verification(true, false);
+    } else if (year.length > 2) {
+        return verification(false, false);
     }
 
     var presentDate = new Date();
     var presentMonth = presentDate.getMonth() + 1;
     var presentYear = presentDate.getYear();
-    console.log("present month " + presentMonth);
-    console.log("present year " + presentYear);
 
     presentMonth = presentMonth.length == 1 ? "0" + presentMonth : presentMonth;
     presentYear %= 100;
 
     if (year < presentYear) {
-        console.log("year is in the past");
         return verification(false, false);
     } else {
 
         if (parseInt(month) >= 1 && parseInt(month) <= 12 && parseInt(month) >= parseInt(presentMonth)) {
-            console.log("month and year are valid");
             return verification(true, true);
         } else {
-            console.log("month and year are Invalid");
             return verification(false, false);
         }
     }
@@ -327,7 +315,6 @@ var Pan = function Pan(value) {
         return verification(null, true, false);
     }
 
-    console.log("potential types for " + value + " is " + JSON.stringify(potentialTypes));
     //there is just one card now
     cardType = potentialTypes[0];
 
@@ -376,9 +363,6 @@ var Pin = function Pin(value) {
         return verification(false, false);
     }
 
-    if (value.length == 0) {
-        return verification(false, false);
-    }
     if (value.length < 4) {
         return verification(true, false);
     }
@@ -943,28 +927,28 @@ var obj = {
         isEmpty: true,
         isFocused: false,
         isValid: false,
-        isPotentiallyValid: false
+        isPotentiallyValid: true
     },
     cvv: {
         value: "",
         isEmpty: true,
         isFocused: false,
         isValid: false,
-        isPotentiallyValid: false
+        isPotentiallyValid: true
     },
     exp: {
         value: "",
         isEmpty: true,
         isFocused: false,
         isValid: false,
-        isPotentiallyValid: false
+        isPotentiallyValid: true
     },
     pin: {
         value: "",
         isEmpty: true,
         isFocused: false,
         isValid: false,
-        isPotentiallyValid: false
+        isPotentiallyValid: true
     }
 };
 
@@ -1403,7 +1387,7 @@ module.exports = {
 };
 
 },{}],25:[function(require,module,exports){
-'use strict';
+"use strict";
 
 /**
  * element is HTML element
@@ -1413,7 +1397,7 @@ module.exports = {
  */
 var _classOf = function _classOf(element) {
     if (element) {
-        return element.className.trim().split('/\s+/');
+        return element.className.trim().split(/\s+/);
     }
 
     return [];
@@ -1422,10 +1406,13 @@ var _classOf = function _classOf(element) {
 var add = function add(element) {
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
+    console.log("add class " + JSON.stringify(_classOf(element)));
 
     var className = _classOf(element).filter(function (c) {
         return toAdd.indexOf(c) === -1;
     }).concat(toAdd).join(' ');
+
+    console.log("add class " + JSON.stringify(_classOf(element)));
 
     element.className = className;
 };
@@ -1434,15 +1421,20 @@ var remove = function remove(element) {
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
 
+    console.log("remove class " + JSON.stringify(_classOf(element)));
+
     var className = _classOf(element).filter(function (c) {
+        console.log("comparing " + toAdd + "-and-" + c + " " + toAdd.indexOf(c));
         return toAdd.indexOf(c) === -1;
     }).join(' ');
 
+    console.log("remove class " + JSON.stringify(_classOf(element)));
     element.className = className;
 };
 
 var toggle = function toggle(element, className, adding) {
 
+    console.log("toggle " + className + " " + adding);
     if (adding) {
         add(element, className);
     } else {
@@ -1468,6 +1460,12 @@ var constants = {
     NOT_EMPTY: 'notEmpty',
     VALIDITY_CHANGE: 'validityChange',
     CARD_TYPE_CHANGE: 'cardTypeChange'
+  },
+
+  externalClasses: {
+    FOCUSED: 'isw-hosted-field-focused',
+    INVALID: 'isw-hosted-field-invalid',
+    VALID: 'isw-hosted-field-valid'
   },
 
   events: {

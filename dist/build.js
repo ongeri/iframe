@@ -42,6 +42,7 @@ var uuid = require('../libs/uuid.js');
 var constants = require('../libs/constants.js');
 var events = require('./events.js');
 var toggler = require('../libs/class-toggle.js');
+var externalClasses = constants.externalClasses;
 
 var createInputEventHandler = function createInputEventHandler(fields) {
   /*
@@ -86,12 +87,14 @@ var createInputEventHandler = function createInputEventHandler(fields) {
 
     //toggler.toggle(container, "focused", field.isFocused);
 
-    container.classList.toggle("focused", field.isFocused);
-    container.classList.toggle("valid", field.isValid);
-    container.classList.toggle("inValid", !field.isPotentiallyValid);
-
+    // container.classList.toggle("focused", field.isFocused);
+    // container.classList.toggle("valid", field.isValid);
+    // container.classList.toggle("inValid", !field.isPotentiallyValid);
     //toggler.toggle(container, "valid", field.isValid);
-    //toggler.toggle(container, "inValid", !field.isPotentiallyValid);
+
+    toggler.toggle(container, externalClasses.FOCUSED, field.isFocused);
+    toggler.toggle(container, externalClasses.VALID, field.isValid);
+    toggler.toggle(container, externalClasses.INVALID, !field.isPotentiallyValid);
 
     this._state = {
       fields: merchantPayload.fields,
@@ -200,10 +203,8 @@ var HostedFields = function HostedFields(options) {
     fieldCount -= 1;
 
     if (fieldCount === 0) {
-      console.log("-first point to create-frames>>>");
       clearTimeout(failureTimeout);
       reply(options);
-      console.log("-finished creating frames-callback to merchant-site>>>");
       self._emit(events.READY);
     }
   });
@@ -316,7 +317,7 @@ window.interswitch.hostedFields = ISWContainerFields;
 window.interswitch.request = request;
 
 },{"./hosted-fields/index.js":4,"./request":16}],6:[function(require,module,exports){
-'use strict';
+"use strict";
 
 /**
  * element is HTML element
@@ -326,7 +327,7 @@ window.interswitch.request = request;
  */
 var _classOf = function _classOf(element) {
     if (element) {
-        return element.className.trim().split('/\s+/');
+        return element.className.trim().split(/\s+/);
     }
 
     return [];
@@ -335,10 +336,13 @@ var _classOf = function _classOf(element) {
 var add = function add(element) {
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
+    console.log("add class " + JSON.stringify(_classOf(element)));
 
     var className = _classOf(element).filter(function (c) {
         return toAdd.indexOf(c) === -1;
     }).concat(toAdd).join(' ');
+
+    console.log("add class " + JSON.stringify(_classOf(element)));
 
     element.className = className;
 };
@@ -347,15 +351,20 @@ var remove = function remove(element) {
 
     var toAdd = Array.prototype.slice.call(arguments, 1);
 
+    console.log("remove class " + JSON.stringify(_classOf(element)));
+
     var className = _classOf(element).filter(function (c) {
+        console.log("comparing " + toAdd + "-and-" + c + " " + toAdd.indexOf(c));
         return toAdd.indexOf(c) === -1;
     }).join(' ');
 
+    console.log("remove class " + JSON.stringify(_classOf(element)));
     element.className = className;
 };
 
 var toggle = function toggle(element, className, adding) {
 
+    console.log("toggle " + className + " " + adding);
     if (adding) {
         add(element, className);
     } else {
@@ -381,6 +390,12 @@ var constants = {
     NOT_EMPTY: 'notEmpty',
     VALIDITY_CHANGE: 'validityChange',
     CARD_TYPE_CHANGE: 'cardTypeChange'
+  },
+
+  externalClasses: {
+    FOCUSED: 'isw-hosted-field-focused',
+    INVALID: 'isw-hosted-field-invalid',
+    VALID: 'isw-hosted-field-valid'
   },
 
   events: {

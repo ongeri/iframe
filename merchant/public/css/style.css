@@ -6,6 +6,42 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.form-container {
+  display: flex;
+  background-color: #EEE;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  flex-direction: column;
+  border: 1em solid #fff;
+  box-sizing: border-box;
+  position: relative;
+  
+}
+
+.input-wrapper {
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.86);
+  height: 2.75em;
+  border: 1px solid #eee;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  padding: 5px 10px;
+  margin-bottom: 1em;
+}
+
+.isw-hosted-field-focused {
+  border-color: blue;
+}
+
+/* Styles the wrapper of the invalid input */
+.isw-hosted-field-invalid {
+  border-color: red;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+
+
 .container {
   display: block;
   max-width: 480px;

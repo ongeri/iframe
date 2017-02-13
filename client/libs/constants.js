@@ -9,6 +9,12 @@ var constants = {
     CARD_TYPE_CHANGE: 'cardTypeChange'
   },
 
+  externalClasses: {
+    FOCUSED: 'isw-hosted-field-focused',
+    INVALID: 'isw-hosted-field-invalid',
+    VALID: 'isw-hosted-field-valid'
+  },
+
   events: {
     TRIGGER_INPUT_FOCUS: 'TRIGGER_INPUT_FOCUS',
     SET_PLACEHOLDER: 'SET_PLACEHOLDER',

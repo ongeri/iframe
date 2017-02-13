@@ -130,7 +130,7 @@ CreditCardForm.prototype.emitEvent = function(fieldKey, eventType){
   }
 
   console.log("before emitting INPUT_EVENT "+JSON.stringify(fields));  
-
+  
   bus.emit(events.INPUT_EVENT, {
     merchantPayload: {
       cards: cards,

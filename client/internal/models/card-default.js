@@ -4,28 +4,28 @@ var obj = {
         isEmpty: true,
         isFocused: false,
         isValid: false,
-        isPotentiallyValid: false
+        isPotentiallyValid: true
     },
     cvv: {
       value: "",
       isEmpty: true,
       isFocused: false,
       isValid: false,
-      isPotentiallyValid: false
+      isPotentiallyValid: true
     },
     exp: {
         value: "",
         isEmpty: true,
         isFocused: false,
         isValid: false,
-        isPotentiallyValid: false
+        isPotentiallyValid: true
     },
     pin: {
         value: "",
         isEmpty: true,
         isFocused: false,
         isValid: false,
-        isPotentiallyValid: false
+        isPotentiallyValid: true
     }
 };
 

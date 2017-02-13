@@ -8,6 +8,7 @@ var uuid = require('../libs/uuid.js');
 var constants = require('../libs/constants.js');
 var events = require('./events.js');
 var toggler = require('../libs/class-toggle.js');
+var externalClasses = constants.externalClasses;
 
 
 
@@ -56,12 +57,14 @@ var createInputEventHandler = function(fields) {
 
     //toggler.toggle(container, "focused", field.isFocused);
     
-    container.classList.toggle("focused", field.isFocused);
-    container.classList.toggle("valid", field.isValid);
-    container.classList.toggle("inValid", !field.isPotentiallyValid);
-
+    // container.classList.toggle("focused", field.isFocused);
+    // container.classList.toggle("valid", field.isValid);
+    // container.classList.toggle("inValid", !field.isPotentiallyValid);
     //toggler.toggle(container, "valid", field.isValid);
-    //toggler.toggle(container, "inValid", !field.isPotentiallyValid);
+    
+    toggler.toggle(container, externalClasses.FOCUSED, field.isFocused);
+    toggler.toggle(container, externalClasses.VALID, field.isValid);
+    toggler.toggle(container, externalClasses.INVALID, !field.isPotentiallyValid);
 
     this._state = {
       fields: merchantPayload.fields,
@@ -176,10 +179,8 @@ var HostedFields = function(options){
     fieldCount -= 1; 
     
     if(fieldCount === 0) {
-      console.log("-first point to create-frames>>>");
       clearTimeout(failureTimeout);
       reply(options);
-      console.log("-finished creating frames-callback to merchant-site>>>");
       self._emit(events.READY);
     }
   });
