@@ -130,7 +130,7 @@ CreditCardForm.prototype.emitEvent = function(fieldKey, eventType){
   }
 
   console.log("before emitting INPUT_EVENT "+JSON.stringify(fields));  
-  
+
   bus.emit(events.INPUT_EVENT, {
     merchantPayload: {
       cards: cards,
@@ -225,11 +225,20 @@ CreditCardForm.prototype.getCardData = function () {
 };
 
 CreditCardForm.prototype.isEmpty = function () {
-  
+  var count = 0;
+  this._fieldKeys.forEach(function(key){
+    if(key && this.get(key).value.length === 0 ) {
+      count += 1;
+    }
+  }.bind(this));
+  return count === this._fieldKeys.length;
 };
 
-CreditCardForm.prototype.invalidFieldKeys = function () {
+CreditCardForm.prototype.getInvalidFormField = function () {
  
+    return this._fieldKeys.filter(function(key){
+        return !this.get(key).isValid;
+    }.bind(this));
 };
 
 function onFieldValueChange(form, fieldKey) {

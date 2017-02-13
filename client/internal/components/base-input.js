@@ -133,9 +133,28 @@ BaseInput.prototype._addDOMKeypressListeners = function(){
 
 };
 
+var validInput = function(value, type){
+  if(value.length > 0) {
+    var lastChar = value.charAt(value.length-1);
+    if(type === "exp") {
+      return (value.length === 3 && lastChar === '/') || !isNaN(lastChar);
+    }
+    else {
+      return !isNaN(lastChar);
+    }
+  }
+  return true;
+};
+
 BaseInput.prototype._addDOMInputListeners = function(){
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
+        
+        if(!validInput(valueChanged, this.type)) {
+          valueChanged = valueChanged.substring(0, valueChanged.length-1);
+          this.formatter.setValue(valueChanged);
+          return; 
+        }
         
         if(this.type === "exp" && valueChanged && valueChanged.length > 0) {
           if(!this.hasSlash) {

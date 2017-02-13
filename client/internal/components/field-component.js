@@ -11,7 +11,7 @@ var fieldComponent = function(options) {
 
     var formMap = constants.formMap[type];
 
-    this.element.appendChild(new LabelComponent(formMap).element);
+    //this.element.appendChild(new LabelComponent(formMap).element);
 
     var inputElem = new InputLabelComponent[type]({
         model: options.model,

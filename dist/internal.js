@@ -552,9 +552,27 @@ BaseInput.prototype._addDOMKeypressListeners = function () {
   }.bind(this), false);
 };
 
+var validInput = function validInput(value, type) {
+  if (value.length > 0) {
+    var lastChar = value.charAt(value.length - 1);
+    if (type === "exp") {
+      return value.length === 3 && lastChar === '/' || !isNaN(lastChar);
+    } else {
+      return !isNaN(lastChar);
+    }
+  }
+  return true;
+};
+
 BaseInput.prototype._addDOMInputListeners = function () {
   this.element.addEventListener(this._getDOMChangeEvent(), function () {
     var valueChanged = this.getUnformattedValue();
+
+    if (!validInput(valueChanged, this.type)) {
+      valueChanged = valueChanged.substring(0, valueChanged.length - 1);
+      this.formatter.setValue(valueChanged);
+      return;
+    }
 
     if (this.type === "exp" && valueChanged && valueChanged.length > 0) {
       if (!this.hasSlash) {
@@ -717,7 +735,7 @@ var fieldComponent = function fieldComponent(options) {
 
     var formMap = constants.formMap[type];
 
-    this.element.appendChild(new LabelComponent(formMap).element);
+    //this.element.appendChild(new LabelComponent(formMap).element);
 
     var inputElem = new InputLabelComponent[type]({
         model: options.model,
@@ -850,6 +868,38 @@ var builder = function builder(conf) {
 var createPayHandler = function createPayHandler(client, cardForm) {
 
     return function (options, reply) {
+
+        var isEmpty = cardForm.isEmpty();
+
+        var invalidKeyData = cardForm.getInvalidFormField();
+        var isValid = invalidKeyData.length === 0 ? true : false;
+
+        if (isEmpty) {
+            var err = new Error({
+                message: "All the fields are empty"
+            });
+
+            var obj = {
+                error: err
+            };
+
+            reply(obj);
+            return;
+        }
+
+        if (!isValid) {
+            var err = new Error({
+                message: "Some fields are Invalid",
+                detail: { data: invalidKeyData }
+            });
+
+            var obj = {
+                error: err
+            };
+
+            reply(obj);
+            return;
+        }
 
         var creditCardDetails = cardForm.getCardData();
 
@@ -1176,9 +1226,22 @@ CreditCardForm.prototype.getCardData = function () {
   return result;
 };
 
-CreditCardForm.prototype.isEmpty = function () {};
+CreditCardForm.prototype.isEmpty = function () {
+  var count = 0;
+  this._fieldKeys.forEach(function (key) {
+    if (key && this.get(key).value.length === 0) {
+      count += 1;
+    }
+  }.bind(this));
+  return count === this._fieldKeys.length;
+};
 
-CreditCardForm.prototype.invalidFieldKeys = function () {};
+CreditCardForm.prototype.getInvalidFormField = function () {
+
+  return this._fieldKeys.filter(function (key) {
+    return !this.get(key).isValid;
+  }.bind(this));
+};
 
 function onFieldValueChange(form, fieldKey) {
 
