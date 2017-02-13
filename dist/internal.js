@@ -210,6 +210,8 @@ var Exp = function Exp(value) {
 
     if (year < presentYear) {
         return verification(false, false);
+    } else if (year > presentYear) {
+        return verification(true, true);
     } else {
 
         if (parseInt(month) >= 1 && parseInt(month) <= 12 && parseInt(month) >= parseInt(presentMonth)) {
@@ -321,7 +323,11 @@ var Pan = function Pan(value) {
     //do a luhn check
     isValid = luhn(value);
 
+    console.log("luhn check: " + isValid);
+
     maxLength = Math.max.apply(null, cardType.lengths);
+
+    console.log("maxLength is: " + maxLength + "----" + (value.length < maxLength));
 
     for (i = 0; i < cardType.lengths.length; i++) {
         if (cardType.lengths[i] === value.length) {
@@ -874,13 +880,12 @@ var createPayHandler = function createPayHandler(client, cardForm) {
         var invalidKeyData = cardForm.getInvalidFormField();
         var isValid = invalidKeyData.length === 0 ? true : false;
 
+        console.log("isempty - isValid " + isEmpty + " " + isValid);
+
         if (isEmpty) {
-            var err = new Error({
-                message: "All the fields are empty"
-            });
 
             var obj = {
-                error: err
+                error: "All the fields are empty"
             };
 
             reply(obj);
@@ -888,15 +893,15 @@ var createPayHandler = function createPayHandler(client, cardForm) {
         }
 
         if (!isValid) {
-            var err = new Error({
-                message: "Some fields are Invalid",
-                detail: { data: invalidKeyData }
-            });
 
             var obj = {
-                error: err
+
+                error: "Some fields are Invalid",
+                detail: { data: invalidKeyData }
+
             };
 
+            console.log("error from source " + JSON.stringify(obj));
             reply(obj);
             return;
         }

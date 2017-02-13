@@ -62,6 +62,9 @@ var Exp = function(value) {
     if(year < presentYear) {
         return verification(false, false); 
     }
+    else if(year > presentYear) {
+        return verification(true, true);
+    }
     else {
 
         if(parseInt(month) >= 1 && parseInt(month) <= 12 && parseInt(month) >= parseInt(presentMonth)) {

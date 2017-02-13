@@ -239,7 +239,12 @@ var handlePayResponse = function handlePayResponse(data) {
 
   return function (obj) {
     if (obj && obj.error) {
-      data(obj.error);
+      console.log("error from payment " + JSON.stringify(obj));
+      var err = new Error({
+        message: obj.error,
+        detail: obj.detail
+      });
+      data(err);
       return;
     } else {
       data(null, obj);

@@ -171,9 +171,9 @@
                 evt.stopPropagation();
 
                 hostedFieldInstance.pay(function(err, payload){
-                  console.log("payload in callback "+JSON.stringify(payload));
                   if(err) {
                     //exception from the server side
+                    console.log(err);
                     return;
                   }
                   else {

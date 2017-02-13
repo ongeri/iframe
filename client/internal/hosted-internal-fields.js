@@ -50,29 +50,29 @@ var createPayHandler = function(client, cardForm){
         var invalidKeyData = cardForm.getInvalidFormField();
         var isValid = invalidKeyData.length === 0 ? true : false;
 
+        console.log("isempty - isValid "+isEmpty+" "+isValid);
+
         if(isEmpty) {
-            var err = new Error({
-                message:"All the fields are empty"
-            });
             
             var obj = {
-                error: err
+                error:"All the fields are empty"
             };
 
+            
             reply(obj);
             return;
         }
 
         if(!isValid) {
-            var err = new Error({
-                message:"Some fields are Invalid",
-                detail: {data: invalidKeyData}
-            });
             
             var obj = {
-                error: err
+                
+                error:"Some fields are Invalid",
+                detail: {data: invalidKeyData}
+                
             };
-
+            
+            console.log("error from source "+JSON.stringify(obj));
             reply(obj);
             return;
         }

@@ -96,13 +96,20 @@ module.exports = function(grunt) {
             compile: {
                 options: {
                     compress: true,
-                    verbose: true
+                    verbose: true,
+                    mangle:true
                 },
                 files: [{
-                    src: 'build/<%= pkg.name %>.js',
-                    dest: 'dist/js/<%= pkg.name %>.js'
+                    src: 'dist/build.js',
+                    dest: 'dist/prod/build.js'
+                },
+                {   src: 'dist/client.js',
+                    dest: 'dist/prod/client.js'
+                },
+                {   src: 'dist/internal.js',
+                    dest: 'dist/prod/internal.js'
                 }
-                    ]
+                ]
             }
         },
 
@@ -148,6 +155,8 @@ module.exports = function(grunt) {
 
 
     grunt.registerTask('server', ['build:dev', 'concurrent:dev']);
+
+    grunt.registerTask('build:prod', ['build:dev', 'uglify']);
 
 
 

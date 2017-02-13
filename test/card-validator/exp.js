@@ -55,7 +55,8 @@ describe("Exp Validation ", function(){
             ["90/3",{isPotentiallyValid: false,isValid: false}],
             ["12/1",{isPotentiallyValid: true,isValid: false}],
             ["11/4566",{isPotentiallyValid: false,isValid: false}],
-            ["11/12",{isPotentiallyValid: false,isValid: false}]
+            ["11/12",{isPotentiallyValid: false,isValid: false}],
+            ["01/19",{isPotentiallyValid: true,isValid: true}]
         ];
 
         runTest(arr);

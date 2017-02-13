@@ -43,8 +43,11 @@ var Pan = function(value) {
     //do a luhn check
     isValid = luhn(value);
 
+    console.log("luhn check: "+isValid);
+
     maxLength = Math.max.apply(null, cardType.lengths);
 
+    console.log("maxLength is: "+maxLength+"----"+(value.length < maxLength));
     
     for (i = 0; i < cardType.lengths.length; i++) {
         if (cardType.lengths[i] === value.length) {
