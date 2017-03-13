@@ -74,8 +74,8 @@
 
   <script src="js/index.js"></script>
   <script src="js/jquery.js"></script>
-  <script src="prod/client.js"></script>
-  <script src="prod/build.js"></script>
+  <script src="client.js"></script>
+  <script src="build.js"></script>
 
   <script>
   //console.log(window);
@@ -84,16 +84,24 @@
 
        jQuery(document).ready(function(){
          
-          // var client=new Interswitch.client({
-          //   authorization:"387864876819698686283434"
-          // });
-          console.log(interswitch);
+          
+          var transactionReference = "1002555990001";
+          var merchantCode = "VNA";
+          var currencyCode = "566";
+          var payableId = "8";
+          var amount = 10000;
+          var merchantCustomerId = "Adetunji Akinde";
+          var channel = "test";
+
           var submit = document.querySelector('button[type="submit"]');
-          //interswitch.request({}, function(){});
+          
           interswitch.client.newInstanceValue({
             authorizationKey:"387864876819698686283434"
           }, function(err, client){
-            
+            /**
+            *
+            * create payment request
+            **/
             if(err) {
               console.log(err);
               //throw some kind of error event
@@ -101,7 +109,6 @@
             }
             console.log("client of callback "+client.request);
             interswitch.hostedFields.newInstance({
-              client: client,
               styles: {
                 'input': {
                   'font-size': '16px',
@@ -136,6 +143,16 @@
                   selector:'#card-pin',
                   placeholder:'PIN'
                 }
+              },
+              payments: { // the values ca be got from button or set in windows super global object
+                transactionReference: transactionReference,
+                merchantCode: merchantCode,
+                merchantCustomerId: merchantCustomerId,
+                payableId:payableId,
+                currencyCode: currencyCode,
+                channel: channel,
+                amount: amount,
+                dateOfPayment: "2016-09-05T10:20:26"
               }
             },
           function(err, hostedFieldInstance){

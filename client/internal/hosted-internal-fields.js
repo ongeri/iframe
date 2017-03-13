@@ -6,6 +6,9 @@ var FieldComponent = require('./components/field-component.js').FieldComponent;
 var events = require('../hosted-fields/events.js');
 var request = require('../request');
 var injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
+var request = require('request');
+var forwarderUrl = require('./constant.js').forwarder.url;
+var forwarderAuth = require('./constant.js').forwarder.auth;
 
 
 var create = function(){
@@ -16,27 +19,75 @@ var create = function(){
 };
 
 var builder = function(conf) {
+    console.log("builder");
+    var payments = conf.payments;
+    console.log(JSON.stringify(payments));
+    //make the payment call here
+    request({
+    url: forwarderUrl,
+    json:true,
+    body: payments,
+    method: 'POST',
+    headers: {
+       'content-type': 'application/json',
+       Authorization: forwarderAuth
+    }
+  }, function(err, res, body){
+    if(err) {
+      //find a way to throw exception message to client
+    }
+    else if(res.statusCode !== 201){
+        //
+    }
+    else {
+      console.log(JSON.stringify(body));
 
-    console.log("---> building started>>>");
+        var client = conf.client;
 
-    var client = conf.client;
-    //console.log("client object in builder "+JSON.stringify(conf));
+        var iD = body.id;
+        var payableId = body.payableId;
+        var amount = body.amount;
+        var surcharge = body.surcharge;
+        var paymentCancelled = body.paymentCancelled;
+        var dateOfPayment = body.dateOfPayment;
+        var remittanceAmount = body.remittanceAmount;
+        var currencyCode = body.currencyCode;
+        var merchantCustomerId = body.merchantCustomerId;
+        var transactionReference = body.transactionReference;
+        var responseCode = body.responseCode;
+        var responseDescription = body.responseDescription;
+        var channel = body.channel;
+        var merchantCode = body.merchantCode;
 
-    var cardForm = new CreditCardForm(conf);
+        var cardForm = new CreditCardForm(conf);
 
-    //pack iframes together
-    var iframes = packIframes.packIframes(window.parent);
+        Object.keys(body).forEach(function(key){
+            console.log("storing "+key+" "+body[key]);
+            cardForm.set(key+".value", body[key]);
+        });
 
-    iframes.forEach(function(frame){
-        frame.interswitch.hostedFields.initialize(cardForm);
-    });
+        //should save some items to the card form
 
-    bus.on(events.PAY_REQUEST, function(options,reply){
+        //pack iframes together
+        var iframes = packIframes.packIframes(window.parent);
 
-        var payHandler = createPayHandler(client, cardForm);
+        iframes.forEach(function(frame){
+            frame.interswitch.hostedFields.initialize(cardForm);
+        });
 
-        payHandler(options, reply);
-    });
+        bus.on(events.PAY_REQUEST, function(options,reply){
+
+            var payHandler = createPayHandler(client, cardForm);
+
+            payHandler(options, reply);
+        });
+
+    }//end of else after making payments request
+  });
+
+    
+
+    
     
 
 };

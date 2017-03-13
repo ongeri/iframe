@@ -172,6 +172,7 @@ var HostedFields = function(options){
 
   failureTimeout = setTimeout(function(){
     //notify analytics that there was a timeout
+    console.log("timeout to set up frame on time");
   }, constants.INTEGRATION_TIMEOUT_MS);
 
   bus.on(events.FRAME_SET, function(args,reply){
