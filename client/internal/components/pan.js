@@ -1,5 +1,5 @@
 var BaseInput = require('./base-input.js').BaseInput;
-var MAX_SIZE = 16;
+var MAX_SIZE = 19;
 
 var panInput = function(){
     this.MAX_SIZE = MAX_SIZE;

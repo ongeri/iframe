@@ -13,6 +13,7 @@ var cardMap = [
 types[VISA] = {
   common: 'Visa',
   type: VISA,
+  start: "4",
   prefixPattern: /^4$/,
   exactPattern: /^4\d*$/,
   gaps: [4, 8, 12],
@@ -26,10 +27,11 @@ types[VISA] = {
 types[MASTERCARD] = {
   common: 'MasterCard',
   type: MASTERCARD,
+  start: "5",
   prefixPattern: /^(5|5[1-5]|2|22|222|222[1-9]|2[3-6]|27[0-1]|2720)$/,
   exactPattern: /^(5[1-5]|222[1-9]|2[3-6]|27[0-1]|2720)\d*$/,
   gaps: [4, 8, 12],
-  lengths: [16],
+  lengths: [19],
   code: {
     name: CVV,
     size: 3
@@ -74,12 +76,16 @@ var Card = function(val){
             continue;
         }
 
-        if(value.exactPattern.test(val)){
+        // if(value.exactPattern.test(val)){
+        //     exactResults.push(clone(value));
+        // }
+        // else if(value.prefixPattern.test(val)){
+        //     prefixResults.push(clone(value))
+        // }
+        if(value.start === val.charAt(0)) {
             exactResults.push(clone(value));
         }
-        else if(value.prefixPattern.test(val)){
-            prefixResults.push(clone(value))
-        }
+        
 
         
         if(exactResults.length){

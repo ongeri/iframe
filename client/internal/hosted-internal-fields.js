@@ -9,6 +9,35 @@ var injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
 var request = require('request');
 var forwarderUrl = require('./constant.js').forwarder.url;
 var forwarderAuth = require('./constant.js').forwarder.auth;
+var SecureManager = require('./secure.js');
+
+var getSecureData = function(options){
+    var pan = options.pan || null;
+    var expDate = options.expDate || null;
+    var cvv = options.cvv || null;
+    var pin = options.pin || null;
+    var amount = options.amount || null;
+    var mobile = options.mobile || null;
+    var ttId = options.ttId || null;
+    var publicModulus = options.publicModulus || null;
+    var publicExponent = options.publicExponent || null;
+	
+	var secureOptions = {
+		expiry: expDate,
+		pan: pan,
+		amount: amount,
+		mobile: mobile,
+		ttId: ttId		
+	};
+	
+	var pinData = {
+		pin: pin,
+		cvv: cvv,
+		expiry: expDate
+	};
+	
+	return SecureManager.generateSecureData(secureOptions, pinData);
+};
 
 
 var create = function(){
@@ -79,6 +108,8 @@ var builder = function(conf) {
 
             var payHandler = createPayHandler(client, cardForm);
 
+            options.payments = body;
+
             payHandler(options, reply);
         });
 
@@ -137,6 +168,17 @@ var createPayHandler = function(client, cardForm){
         console.log("credit card details is "+JSON.stringify(client));
         console.log(client);
         console.log(creditCardDetails);
+
+        var obj = {};
+        Object.keys(creditCardDetails).forEach(function(key){
+            obj[key] = creditCardDetails[key];
+        });
+
+        obj.expDate = obj.exp;
+        obj.amount = options.payments.amount;
+        console.log("obj to pass to secure data "+JSON.stringify(obj));
+
+        var secureData = getSecureData(obj);
 
         request({
             method: "POST",

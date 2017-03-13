@@ -90,10 +90,8 @@ var CreditCardForm = function(conf){
 
     this.on('change:pan.value', this._onNumberChange);
     this.on('change:possibleCardTypes', function () { this._validateField('cvv'); }.bind(this));
-    this.on('change:possibleCardTypes', onCardTypeChange(this, 'pan'));
+    //this.on('change:possibleCardTypes', onCardTypeChange(this, 'pan'));
     
-
-    //should add event listeners on each of the field :TODO
 };
 
 CreditCardForm.prototype = Object.create(EventedModel.prototype);
