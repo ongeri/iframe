@@ -72,6 +72,24 @@ app.post('/api/v1/payment/hosted', function(req, res){
 	});
 });
 
+app.post('/collections/pay', function(req, resp){
+	console.log("request to complete pay is "+JSON.stringify(req.body));
+	request({
+		url: 'https://qa.interswitchng.com/collections/api/v1/pay',
+		json:true,
+		body: req.body,
+		method: 'POST'
+		}, function(err, res, body){
+			if(err) {
+				resp.status(400).json(body);
+			}
+			else {
+			console.log(JSON.stringify(body));
+			resp.status(res.statusCode).json(body);
+			
+		}
+  	});
+});
 app.post('/collections/payment', function(req, resp){
 	console.log("request from internal-hosted-field "+JSON.stringify(req.body));
 	request({

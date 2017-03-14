@@ -52,5 +52,5 @@ var runTest = function(options){
 
 
 //test funtion  runTest(inputObj)
-// var ans = runTest(inputObj);
-// console.log("result from : "+JSON.stringify(ans));
+ var ans = runTest(inputObj);
+ console.log("result from : "+JSON.stringify(ans));

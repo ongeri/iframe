@@ -4,7 +4,7 @@ var packIframes = require('./pack-iframes.js');
 var frameName = require('./get-frame-name.js');
 var FieldComponent = require('./components/field-component.js').FieldComponent;
 var events = require('../hosted-fields/events.js');
-var request = require('../request');
+//var request = require('../request');
 var injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
 var request = require('request');
 var forwarderUrl = require('./constant.js').forwarder.url;
@@ -168,6 +168,9 @@ var createPayHandler = function(client, cardForm){
         console.log("credit card details is "+JSON.stringify(client));
         console.log(client);
         console.log(creditCardDetails);
+        var exp = creditCardDetails.exp;
+
+        creditCardDetails.exp = exp.charAt(3)+exp.charAt(2)+exp.charAt(0)+exp.charAt(1);
 
         var obj = {};
         Object.keys(creditCardDetails).forEach(function(key){
@@ -176,16 +179,22 @@ var createPayHandler = function(client, cardForm){
 
         obj.expDate = obj.exp;
         obj.amount = options.payments.amount;
-        console.log("obj to pass to secure data "+JSON.stringify(obj));
+        console.log("obj to pass to secure data "+JSON.stringify(obj)+" "+obj.pan);
 
         var secureData = getSecureData(obj);
+        secureData.paymentId = options.payments.id;
+        delete secureData.mac;
+
+        console.log(JSON.stringify(secureData));
 
         request({
             method: "POST",
-            data: {
-                creditCardDetails
-            },
-            url: "http://localhost:3000/api/v1/payment/hosted"
+            json: true,
+            body: secureData,
+            url: "http://localhost:3000/collections/pay",
+            header: {
+                'content-type' : 'application/json'
+            }
         }, function(err, res, status){
             if(err) {
                 console.log("error paying "+err);

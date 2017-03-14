@@ -344,6 +344,7 @@ exports.generateSecureData = function(options, pinData)
 {
     console.log("generating secure data "+JSON.stringify(options)+" "+JSON.stringify(pinData));
     var pinBlock, expiry, ttId, pinKey, secureOptions, macData, mac, secure, secureData, publicKeyModulus, publicKeyExponent;
+    var pan,amt;
     expiry = options.expiry || '0000';
     pan = (options.pan == null || options.pan == '') ? '0000000000000000' : options.pan;
     pan = !options.pan || options.pan.replace(/\s/g, '');

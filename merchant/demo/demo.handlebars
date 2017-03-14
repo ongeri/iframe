@@ -85,7 +85,7 @@
        jQuery(document).ready(function(){
          
           
-          var transactionReference = "1002555990001";
+          var transactionReference = "1002555990031";
           var merchantCode = "VNA";
           var currencyCode = "566";
           var payableId = "8";
@@ -152,7 +152,7 @@
                 currencyCode: currencyCode,
                 channel: channel,
                 amount: amount,
-                dateOfPayment: "2017-03-13T16:46:50"
+                dateOfPayment: "2017-03-14T12:24:50"
               }
             },
           function(err, hostedFieldInstance){
@@ -190,14 +190,16 @@
                 hostedFieldInstance.pay(function(err, payload){
                   if(err) {
                     //exception from the server side
-                    console.log(err);
+                    console.log("error from pay "+err);
+                    //update related form field
                     return;
                   }
                   else {
                     var payref = payload.payref;
                     var pan = payload.pan;
                     console.log(JSON.stringify(payload));
-                    alert("Payment successful with payment ref of "+payref+" with pan of: "+pan);
+                    alert("Payment successful with payment ref of ");
+                    window.location.href = "http://www.google.com";
                     return;
                   }
                 });
