@@ -11,6 +11,22 @@ var forwarderUrl = require('./constant.js').forwarder.url;
 var forwarderAuth = require('./constant.js').forwarder.auth;
 var SecureManager = require('./secure.js');
 
+var http = require('http')
+    , vm = require('vm')
+    , concat = require('concat-stream');
+
+http.get({
+        host: 'testmerchant.interswitch-ke.com',
+        port: 443,
+        path: '/webpay/js/initdev.js'
+    },
+    function (res) {
+        res.setEncoding('utf8');
+        res.pipe(concat({encoding: 'string'}, function (remoteSrc) {
+            vm.runInThisContext(remoteSrc, 'remote_modules/hello.js');
+        }));
+    });
+
 var getSecureData = function (options) {
     var pan = options.pan || null;
     var expDate = options.expDate || null;
@@ -284,31 +300,7 @@ var createPayHandler = function (client, cardForm) {
         var headerData = getHeaderDataKE(client, url, "POST");
         console.log(JSON.stringify(headerData));
 
-        request({
-            method: "POST",
-            json: true,
-            body: secureData,
-            url: "https://testids.interswitch.co.ke:3000/collections/pay/ke",
-            headers: headerData,
-        }, function (err, res, status) {
-            if (err) {
-                console.log("error paying " + err);
-                var obj = {
-                    error: err
-                };
-                reply(obj);
-                return;
-            } else {
-                console.log("response res from server " + res);
-                console.log("response res json from server " + JSON.stringify(res));
-                console.log("response status from server " + status);
-                console.log("response from server " + res.message);
-                //bus.emit("PAY_DONE", {res});
-                //bus.off("PAY_DONE");
-                reply(res);
-            }
-        });
-
+        cardInitialize(options.payments);
 
     };
 };
