@@ -47,6 +47,20 @@ BaseInput.prototype.buildElement = function(){
 
     var element = document.createElement('input');
 
+    /**
+    * 1. For input element we want to
+    * add a width of 100%
+    * if the input field is a pan, we want to add a padding-right
+    *
+    *
+    */
+    element.style.width = "100%";
+
+    console.log("checking the type at input element creation");
+    if(type === "pan") {
+        element.style.paddingRight = "55px";
+    }
+
     var placeholder = this.getConfiguration().placeholder;
 
     var formMap = constants.formMap[type];
@@ -181,6 +195,13 @@ BaseInput.prototype._addDOMInputListeners = function(){
 
           }
 
+          
+          this.formatter.setValue(valueChanged);
+        }
+
+        if(this.type === "pan" && valueChanged && valueChanged.length > 3) {
+
+          valueChanged = valueChanged.replace(/\W/gi, '').replace(/(.{4})/g, '$1 ').trim();
           
           this.formatter.setValue(valueChanged);
         }

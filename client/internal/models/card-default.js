@@ -26,7 +26,21 @@ var obj = {
         isFocused: false,
         isValid: false,
         isPotentiallyValid: true
-    }
+    },
+    otp: {
+            value: "",
+            isEmpty: true,
+            isFocused: false,
+            isValid: false,
+            isPotentiallyValid: true
+        },
+    tf1: {
+            value: "",
+            isEmpty: true,
+            isFocused: false,
+            isValid: false,
+            isPotentiallyValid: true
+        }
 };
 
 module.exports = obj;

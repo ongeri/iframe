@@ -27,6 +27,27 @@ var newInstanceValue = function(options, callback){
         return;
     }
 
+    if(!options.MID) {
+        callback(new Error({
+            message: "MID is not set"
+        }));
+        return;
+    }
+
+    /*if(!options.clientId) {
+        callback(new Error({
+            message: "Client Id is not set"
+        }));
+        return;
+    }
+
+    if(!options.clientSecret) {
+        callback(new Error({
+            message: "Client Secret is not set"
+        }));
+        return;
+    }*/
+
     /**
      * do network I/O for configuration data
      */

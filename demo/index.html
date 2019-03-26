@@ -60,7 +60,14 @@
               <label for=''>PIN</label>
               <div id="card-pin"></div>
             </div>
-          </div>
+            <div class='input-group'>
+              <label for=''>TestField1</label>
+              <div id="tf1"></div>
+            </div>
+            <div class='input-group'>
+              <label for=''>OTP</label>
+              <div id="otp"></div>
+            </div>
         </div>
       </div>
       <footer class='footer'>
@@ -87,7 +94,9 @@
           var submit = document.querySelector('button[type="submit"]');
           //interswitch.request({}, function(){});
           interswitch.client.newInstanceValue({
-            authorizationKey:"387864876819698686283434"
+            authorizationKey:"387864876819698686283434",
+            clientId : "IKIAB8FA9382D1FAC6FCA2F30195029B0A1558A9FECA",
+            clientSecret : "dxdmtf12FhLVIFRz8IzhnuAJzNd6AAFVgx/3LlJHc+4="
           }, function(err, client){
             
             if(err) {
@@ -100,37 +109,45 @@
               client: client,
               styles: {
                 'input': {
-                  'font-size': '16px',
+                  'font-size': '12px',
                   'font-family': 'roboto, verdana, sans-serif',
                   'font-weight': 'lighter',
-                  'color': 'black'
+                  'color': 'blue'
                 },
                 ':focus': {
-                  'color': 'black'
+                  'color': 'red'
                 },
                 '.valid': {
                   'color': 'black'
                 },
                 '.invalid': {
-                  'color': 'black'
+                  'color': 'green'
                 }
               },
               fields: {
                 pan: {
                   selector: '#card-pan',
-                  placeholder: '1111 1111 1111 1111'
+                  placeholder: '5555 1111 1111 1111'
                 },
                 cvv: {
                   selector: '#card-cvv',
-                  placeholder: '111'
+                  placeholder: '222'
                 },
                 exp: {
                   selector: '#expiration-date',
                   placeholder: 'MM/YY'
                 },
-                pin:{
+                /*pin:{
                   selector:'#card-pin',
                   placeholder:'PIN'
+                },*/
+                otp:{
+                  selector:'#otp',
+                  placeholder:'OTP'
+                },
+                tf1:{
+                  selector:'#tf1',
+                  placeholder:'TF1'
                 }
               }
             },

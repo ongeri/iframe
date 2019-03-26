@@ -1,13 +1,14 @@
 
 var types = {};
 var VISA = 'visa';
-var MASTERCARD = 'master-card';
+var MASTERCARD = 'mastercard';
 var VERVE = 'verve';
 var CVV = 'CVV';
 
 var cardMap = [
     VISA,
-    MASTERCARD
+    MASTERCARD,
+    VERVE
 ];
 
 types[VISA] = {
@@ -16,8 +17,26 @@ types[VISA] = {
   start: "4",
   prefixPattern: /^4$/,
   exactPattern: /^4\d*$/,
+  patterns: ["4"],
+  luhn: true,
   gaps: [4, 8, 12],
   lengths: [16, 18, 19],
+  code: {
+    name: CVV,
+    size: 3
+  }
+};
+
+types[VERVE] = {
+  common: 'Verve',
+  type: VERVE,
+  start: "5",
+  prefixPattern: /^5$/,
+  exactPattern: /^5\d*$/,
+  patterns: ["506","56"],
+  gaps: [4, 8, 12],
+  lengths: [16, 18, 19],
+  luhn: false,
   code: {
     name: CVV,
     size: 3
@@ -28,15 +47,18 @@ types[MASTERCARD] = {
   common: 'MasterCard',
   type: MASTERCARD,
   start: "5",
-  prefixPattern: /^(5|5[1-5]|2|22|222|222[1-9]|2[3-6]|27[0-1]|2720)$/,
-  exactPattern: /^(5[1-5]|222[1-9]|2[3-6]|27[0-1]|2720)\d*$/,
+  prefixPattern: /^4$/,
+  exactPattern: /^4\d*$/,
+  patterns:["51", "52", "53", "54", "55", "22", "23", "24", "25", "26", "27"],
+  luhn: true,
   gaps: [4, 8, 12],
-  lengths: [19],
+  lengths: [16, 18, 19],
   code: {
     name: CVV,
     size: 3
   }
 };
+
 
 var clone = function(x){
 
@@ -48,7 +70,7 @@ var clone = function(x){
     ret = JSON.parse(JSON.stringify(x));
     ret.exactPattern = exactPattern;
     ret.prefixPattern = prefixPattern;
-    
+
 
     return ret;
 
@@ -70,28 +92,40 @@ var Card = function(val){
         type = cardMap[i];
         value = types[type];
 
-
+        /**
+         * If the length is zero, then give all the card types
+         */
         if(val.length === 0) {
             prefixResults.push(clone(value));
             continue;
         }
 
-        // if(value.exactPattern.test(val)){
-        //     exactResults.push(clone(value));
-        // }
-        // else if(value.prefixPattern.test(val)){
-        //     prefixResults.push(clone(value))
-        // }
-        if(value.start === val.charAt(0)) {
-            exactResults.push(clone(value));
-        }
-        
+        /**
+         * iterate and fetch all matching cards
+         */
+        for(var j=0;j<value.patterns.length;j++) {
+            var m1 = 0;
+            var m2 = 0;
+            var bad = false;
 
-        
-        if(exactResults.length){
+            while(m1 < val.length && m2 < value.patterns[j].length) {
+                if(val.charAt(m1) == value.patterns[j].charAt(m2)) {
+                    m1++;
+                    m2++;
+                }
+                else {
+                    bad = true;
+                    break;
+                }
+            }
+            if(bad) {
+                continue;
+            }else {
+                exactResults.push(clone(value));
+                break;
+            }
         }
-        else {
-        }
+
     }
     return exactResults.length ? exactResults : prefixResults;
     

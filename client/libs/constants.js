@@ -53,7 +53,15 @@ var constants = {
     expYear:{
       name: "expirationYear",
       label: "Expiration Year"
-    }
+    },
+     otp:{
+       name: "otp",
+       label: "OTP"
+     },
+     tf1:{
+       name: "tf1",
+       label: "TF1"
+     }
     
   }
 

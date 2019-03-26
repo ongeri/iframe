@@ -93,6 +93,8 @@ var HostedFields = function(options){
     //throw exception because there should be fields to work with
   }
 
+  console.log("Options are "+options);
+
   EventEmitter.call(this);
 
   //console.log("Location is "+location.href);
@@ -165,7 +167,7 @@ var HostedFields = function(options){
 
     //run atleast after 0secs
     setTimeout(function(){
-      frame.src="http://localhost:3000/file";
+      frame.src="https://testids.interswitch.co.ke:3000/file";
     }, 0); 
 
   }.bind(this));
