@@ -1,11 +1,14 @@
-
-var comp = function(a, b){
+var comp = function (a, b) {
     var aHash;
 
-    if( a !== undefined && b === undefined) { return false; }
+    if (a !== undefined && b === undefined) {
+        return false;
+    }
 
-    if (a.length !== b.length) { return false; }
-    
+    if (a.length !== b.length) {
+        return false;
+    }
+
     /**
      * {
      *  visa: true,

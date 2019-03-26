@@ -7,11 +7,11 @@ var obj = {
         isPotentiallyValid: true
     },
     cvv: {
-      value: "",
-      isEmpty: true,
-      isFocused: false,
-      isValid: false,
-      isPotentiallyValid: true
+        value: "",
+        isEmpty: true,
+        isFocused: false,
+        isValid: false,
+        isPotentiallyValid: true
     },
     exp: {
         value: "",
@@ -28,19 +28,19 @@ var obj = {
         isPotentiallyValid: true
     },
     otp: {
-            value: "",
-            isEmpty: true,
-            isFocused: false,
-            isValid: false,
-            isPotentiallyValid: true
-        },
+        value: "",
+        isEmpty: true,
+        isFocused: false,
+        isValid: false,
+        isPotentiallyValid: true
+    },
     tf1: {
-            value: "",
-            isEmpty: true,
-            isFocused: false,
-            isValid: false,
-            isPotentiallyValid: true
-        }
+        value: "",
+        isEmpty: true,
+        isFocused: false,
+        isValid: false,
+        isPotentiallyValid: true
+    }
 };
 
 module.exports = obj;

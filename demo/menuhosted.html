@@ -1,257 +1,263 @@
 <!doctype html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+      xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta charset="utf-8">
-<title>Web pay</title>
-<link href="webpay/base/jquery-ui.min.css" rel="stylesheet">
-<link href="webpay/font/font-awesome.min.css" rel="stylesheet">
-<link href="webpay/css/index.css" rel="stylesheet">
-<link href="webpay/css/menu.css" rel="stylesheet">
-<script src="webpay/js/jquery-1.12.4.min.js"></script>
-<script src="webpay/js/jquery-ui.min.js"></script>
-<link rel="stylesheet"
-	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script
-	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+    <meta charset="utf-8">
+    <title>Web pay</title>
+    <link href="webpay/base/jquery-ui.min.css" rel="stylesheet">
+    <link href="webpay/font/font-awesome.min.css" rel="stylesheet">
+    <link href="webpay/css/index.css" rel="stylesheet">
+    <link href="webpay/css/menu.css" rel="stylesheet">
+    <script src="webpay/js/jquery-1.12.4.min.js"></script>
+    <script src="webpay/js/jquery-ui.min.js"></script>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-  <link rel='stylesheet prefetch' href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800'>
-  <link rel='stylesheet prefetch' href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+
+    <link rel='stylesheet prefetch' href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800'>
+    <link rel='stylesheet prefetch' href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css'>
 
 </head>
 <body>
-	
-	<div style="left: 21%; transform: translate(0, -50%); position: absolute;">
-	
-		<div id="Layer1" class="center"
-			style="position: absolute; text-align: left; left: 162px; top: 53px; width: 434px; height: 470px; z-index: 47;">
-			
-			<div id='div' style="color:lightgreen"></div>
-			<div id='div1' style="color:red"></div>
-			
-			<div id="wb_Image1"
-				style="position: absolute; left: 34px; top: 23px; width: 54px; height: 54px; z-index: 20;">
-				<img src="images/q.jpg" id="Image1" alt="">
-			</div>
-			<div id="wb_Text1"
-				style="position: absolute; left: 102px; top: 23px; width: 250px; height: 22px; z-index: 21;">
+
+<div style="left: 21%; transform: translate(0, -50%); position: absolute;">
+
+    <div id="Layer1" class="center"
+         style="position: absolute; text-align: left; left: 162px; top: 53px; width: 434px; height: 470px; z-index: 47;">
+
+        <div id='div' style="color:lightgreen"></div>
+        <div id='div1' style="color:red"></div>
+
+        <div id="wb_Image1"
+             style="position: absolute; left: 34px; top: 23px; width: 54px; height: 54px; z-index: 20;">
+            <img src="images/q.jpg" id="Image1" alt="">
+        </div>
+        <div id="wb_Text1"
+             style="position: absolute; left: 102px; top: 23px; width: 250px; height: 22px; z-index: 21;">
 				<span style="color: #808080; font-family: Arial; font-size: 19px;" th:utext="${name}">Issa
 					Mohammed</span>
-			</div>
-			<div id="wb_Text2"
-				style="position: absolute; left: 102px; top: 45px; width: 249px; height: 29px; z-index: 22;">
-				<strong><span style="color: #4F4F4F; font-family: Arial; font-size: 24px;" th:utext="${amountAndCurrency}"><strong></strong></span></strong>
-				<p hidden id="amount" class="amount" th:utext="${amount}">20000</p>
-				<p hidden id="orderId" class="orderId" th:utext="${orderId}">768593</p>
-				<p hidden id="terminalType" class="terminalType">WEB</p>
-				<p hidden id="merchantId" class="merchantId" th:utext="${merchantId}">100</p>
-				<p hidden id="ref" class="ref" th:utext="${paymentReference}">1456</p>
-			</div>
-		</div>
+        </div>
+        <div id="wb_Text2"
+             style="position: absolute; left: 102px; top: 45px; width: 249px; height: 29px; z-index: 22;">
+            <strong><span style="color: #4F4F4F; font-family: Arial; font-size: 24px;"
+                          th:utext="${amountAndCurrency}"><strong></strong></span></strong>
+            <p hidden id="amount" class="amount" th:utext="${amount}">20000</p>
+            <p hidden id="orderId" class="orderId" th:utext="${orderId}">768593</p>
+            <p hidden id="terminalType" class="terminalType">WEB</p>
+            <p hidden id="merchantId" class="merchantId" th:utext="${merchantId}">100</p>
+            <p hidden id="ref" class="ref" th:utext="${paymentReference}">1456</p>
+        </div>
+    </div>
 
-		<div id="Layer2" class="center"
-			style="position: absolute; text-align: left; left: 177px; top: 153px; width: 429px; height: 414px; z-index: 47;">
-			<ul class="nav nav-tabs" style="border-bottom: 0px">
-				<li class="active"><a data-toggle="tab" href="#home">Card</a></li>
-				<li><a data-toggle="tab" href="#menu1">Mobile</a></li>
-				<li><a data-toggle="tab" href="#menu2">Paycode</a></li>
-				<li><a data-toggle="tab" href="#">QR</a></li>
-				<li><a data-toggle="tab" href="#">Bank</a></li>
-			</ul>
-            <form>
-			<div class="tab-content" style="text-align: center;">
-			    
-						
-				
-				<div id="home" class="tab-pane fade in active">
-					
-                   <input type="text" id="card-pan" style="position: absolute; left: 5px; top: 55px; width: 392px; height: 36px; z-index: 12;"
-						name="card-pan" value="" spellcheck="false">
-
-				   <input type="text" id="expiration-date" style="position: absolute; left: 5px; top: 116px; width: 155px; height: 36px; z-index: 15;"
-						name="expiration-date" value="" spellcheck="false" placeholder="MM/YY">
-
-				   <input type="text" id="card-cvv" style="position: absolute; left: 232px; top: 116px; width: 166px; height: 36px; z-index: 12;"
-						name="card-cvv" value="" spellcheck="false" placeholder="">
-
-				   <input type="text" id="card-pin" style="position: absolute; left: 5px; top: 155px; width: 155px; height: 36px; z-index: 12;"
-						name="card-pin" value="" spellcheck="false" placeholder="">
-
-				   <div id="wb_Text3" style="position: absolute; left: 318px; top: 155px; width: 75px; height: 32px; z-index: 11;">
-						<span style="color: #00425F; font-family: Arial; font-size: 13px;">What's this?</span>
-					</div>
-
-				   <input type="submit" id="Button1" name="btn-submit" onclick="javascript:sendCard()" value="Pay"
-						style="position: absolute; left: 5px; top: 200px; width: 392px; height: 45px; z-index: 14;">
-
-				   <div id="wb_Text4" style="position: absolute; left: 170px; top: 263px; width: 61px; height: 16px; text-align: center; z-index: 16;">
-						<span style="color: #808080; font-family: Arial; font-size: 13px;">OR</span>
-					</div>
-
-				   <input type="reset" id="Button2" name="btn-verve" value="Reset form"
-						style="position: absolute; left: 5px; top: 294px; width: 392px; height: 46px; z-index: 17;">
-
-						 
-
-				</div>
+    <div id="Layer2" class="center"
+         style="position: absolute; text-align: left; left: 177px; top: 153px; width: 429px; height: 414px; z-index: 47;">
+        <ul class="nav nav-tabs" style="border-bottom: 0px">
+            <li class="active"><a data-toggle="tab" href="#home">Card</a></li>
+            <li><a data-toggle="tab" href="#menu1">Mobile</a></li>
+            <li><a data-toggle="tab" href="#menu2">Paycode</a></li>
+            <li><a data-toggle="tab" href="#">QR</a></li>
+            <li><a data-toggle="tab" href="#">Bank</a></li>
+        </ul>
+        <form>
+            <div class="tab-content" style="text-align: center;">
 
 
-				<div id="menu1" class="tab-pane fade">
-					<select name="Combobox1" size="1" id="Combobox1"
-						style="position: absolute; left: 6px; top: 55px; width: 392px; height: 36px; z-index: 5;"
-						placeholder="Select a provider">
-						<option value="703">Mpesa</option>
-						<option value="708">Equitel</option>
-					</select> <input type="text" id="Editbox6"
-						style="position: absolute; left: 6px; top: 124px; width: 392px; height: 36px; z-index: 7;"
-						name="txt_number" value="" spellcheck="false"
-						placeholder="Provide your mobile number"> <input
-						type="submit" id="Button4" name="" onclick="javascript:sendMMO()"  value="Pay"
-						style="position: absolute; left: 6px; top: 203px; width: 392px; height: 45px; z-index: 9;">
-						
-						<div id='div' style="color:lightgreen"></div>
-						<div id='div1' style="color:red"></div>
-				</div>
-				<div id="menu2" class="tab-pane fade">
-					<input type="text" id="Editbox4"
-						style="position: absolute; left: 9px; top: 55px; width: 392px; height: 36px; z-index: 0;"
-						name="Editbox4" value="" spellcheck="false"
-						placeholder="Input your paycode"> <input type="text"
-						id="Editbox5"
-						style="position: absolute; left: 9px; top: 124px; width: 392px; height: 36px; z-index: 1;"
-						name="Editbox5" value="" maxlength="4" spellcheck="false"
-						placeholder="Input pin(Optional)"> <input type="submit"
-						id="Button3" name="" onclick="javascript:sendPaycode()" value="Pay"
-						style="position: absolute; left: 9px; top: 204px; width: 392px; height: 45px; z-index: 4;">
-						
-						<div id='div' style="color:lightgreen"></div>
-						<div id='div1' style="color:red"></div>
-				</div>
-				
-				<div id="menu3" class="tab-pane fade"></div>
-			</div>
-			</form>
-			
-		</div>
-		<div id='div' style="color:lightgreen"></div>
-				<div id='div1' style="color:red"></div>
-	</div>
+                <div id="home" class="tab-pane fade in active">
+
+                    <input type="text" id="card-pan"
+                           style="position: absolute; left: 5px; top: 55px; width: 392px; height: 36px; z-index: 12;"
+                           name="card-pan" value="" spellcheck="false">
+
+                    <input type="text" id="expiration-date"
+                           style="position: absolute; left: 5px; top: 116px; width: 155px; height: 36px; z-index: 15;"
+                           name="expiration-date" value="" spellcheck="false" placeholder="MM/YY">
+
+                    <input type="text" id="card-cvv"
+                           style="position: absolute; left: 232px; top: 116px; width: 166px; height: 36px; z-index: 12;"
+                           name="card-cvv" value="" spellcheck="false" placeholder="">
+
+                    <input type="text" id="card-pin"
+                           style="position: absolute; left: 5px; top: 155px; width: 155px; height: 36px; z-index: 12;"
+                           name="card-pin" value="" spellcheck="false" placeholder="">
+
+                    <div id="wb_Text3"
+                         style="position: absolute; left: 318px; top: 155px; width: 75px; height: 32px; z-index: 11;">
+                        <span style="color: #00425F; font-family: Arial; font-size: 13px;">What's this?</span>
+                    </div>
+
+                    <input type="submit" id="Button1" name="btn-submit" onclick="javascript:sendCard()" value="Pay"
+                           style="position: absolute; left: 5px; top: 200px; width: 392px; height: 45px; z-index: 14;">
+
+                    <div id="wb_Text4"
+                         style="position: absolute; left: 170px; top: 263px; width: 61px; height: 16px; text-align: center; z-index: 16;">
+                        <span style="color: #808080; font-family: Arial; font-size: 13px;">OR</span>
+                    </div>
+
+                    <input type="reset" id="Button2" name="btn-verve" value="Reset form"
+                           style="position: absolute; left: 5px; top: 294px; width: 392px; height: 46px; z-index: 17;">
 
 
-	<!--Custom JavaScript -->
-	<script src="webpay/js/api.js"></script>
-	
-	  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+                </div>
 
-  <script src="js/index.js"></script>
-  <script src="js/jquery.js"></script>
-  <script src="../dist/client.js"></script>
-  <script src="../dist/build.js"></script>
 
-  <script>
-  //console.log(window);
+                <div id="menu1" class="tab-pane fade">
+                    <select name="Combobox1" size="1" id="Combobox1"
+                            style="position: absolute; left: 6px; top: 55px; width: 392px; height: 36px; z-index: 5;"
+                            placeholder="Select a provider">
+                        <option value="703">Mpesa</option>
+                        <option value="708">Equitel</option>
+                    </select> <input type="text" id="Editbox6"
+                                     style="position: absolute; left: 6px; top: 124px; width: 392px; height: 36px; z-index: 7;"
+                                     name="txt_number" value="" spellcheck="false"
+                                     placeholder="Provide your mobile number"> <input
+                        type="submit" id="Button4" name="" onclick="javascript:sendMMO()" value="Pay"
+                        style="position: absolute; left: 6px; top: 203px; width: 392px; height: 45px; z-index: 9;">
 
-       jQuery(document).ready(function(){
-         
-          // var client=new Interswitch.client({
-          //   authorization:"387864876819698686283434"
-          // });
-          console.log(interswitch);
-          var submit = document.querySelector('button[type="submit"]');
-          //interswitch.request({}, function(){});
-          interswitch.client.newInstanceValue({
-            authorizationKey:"387864876819698686283434"
-          }, function(err, client){
-            
-            if(err) {
-              console.log(err);
-              //throw some kind of error event
-              return;
+                    <div id='div' style="color:lightgreen"></div>
+                    <div id='div1' style="color:red"></div>
+                </div>
+                <div id="menu2" class="tab-pane fade">
+                    <input type="text" id="Editbox4"
+                           style="position: absolute; left: 9px; top: 55px; width: 392px; height: 36px; z-index: 0;"
+                           name="Editbox4" value="" spellcheck="false"
+                           placeholder="Input your paycode"> <input type="text"
+                                                                    id="Editbox5"
+                                                                    style="position: absolute; left: 9px; top: 124px; width: 392px; height: 36px; z-index: 1;"
+                                                                    name="Editbox5" value="" maxlength="4"
+                                                                    spellcheck="false"
+                                                                    placeholder="Input pin(Optional)"> <input
+                        type="submit"
+                        id="Button3" name="" onclick="javascript:sendPaycode()" value="Pay"
+                        style="position: absolute; left: 9px; top: 204px; width: 392px; height: 45px; z-index: 4;">
+
+                    <div id='div' style="color:lightgreen"></div>
+                    <div id='div1' style="color:red"></div>
+                </div>
+
+                <div id="menu3" class="tab-pane fade"></div>
+            </div>
+        </form>
+
+    </div>
+    <div id='div' style="color:lightgreen"></div>
+    <div id='div1' style="color:red"></div>
+</div>
+
+
+<!--Custom JavaScript -->
+<script src="webpay/js/api.js"></script>
+
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+
+<script src="js/index.js"></script>
+<script src="js/jquery.js"></script>
+<script src="../dist/client.js"></script>
+<script src="../dist/build.js"></script>
+
+<script>
+    //console.log(window);
+
+    jQuery(document).ready(function () {
+
+        // var client=new Interswitch.client({
+        //   authorization:"387864876819698686283434"
+        // });
+        console.log(interswitch);
+        var submit = document.querySelector('button[type="submit"]');
+        //interswitch.request({}, function(){});
+        interswitch.client.newInstanceValue({
+            authorizationKey: "387864876819698686283434"
+        }, function (err, client) {
+
+            if (err) {
+                console.log(err);
+                //throw some kind of error event
+                return;
             }
-            console.log("client of callback "+client.request);
+            console.log("client of callback " + client.request);
             interswitch.hostedFields.newInstance({
-              client: client,
-              styles: {
-                // 'input': {
-                //   'font-size': '12px',
-                //   'font-family': 'roboto, verdana, sans-serif',
-                //   'font-weight': 'lighter',
-                //   'color': 'blue',
-                //   'position': 'absolute',
-                //   'left': '5px',
-                //   'top': '55px',
-                //   'width': '392px',
-                //   'height': '36px',
-                //   'z-index': '12'
-                // },
-                ':focus': {
-                  'color': 'blue'
+                    client: client,
+                    styles: {
+                        // 'input': {
+                        //   'font-size': '12px',
+                        //   'font-family': 'roboto, verdana, sans-serif',
+                        //   'font-weight': 'lighter',
+                        //   'color': 'blue',
+                        //   'position': 'absolute',
+                        //   'left': '5px',
+                        //   'top': '55px',
+                        //   'width': '392px',
+                        //   'height': '36px',
+                        //   'z-index': '12'
+                        // },
+                        ':focus': {
+                            'color': 'blue'
+                        },
+                        '.valid': {
+                            'color': 'green'
+                        },
+                        '.invalid': {
+                            'color': 'red'
+                        }
+                    },
+                    fields: {
+                        pan: {
+                            selector: '#card-pan',
+                            placeholder: '5555 1111 1111 1111'
+                        },
+                        cvv: {
+                            selector: '#card-cvv',
+                            placeholder: '222'
+                        },
+                        exp: {
+                            selector: '#expiration-date',
+                            placeholder: 'MM/YY'
+                        },
+                        pin: {
+                            selector: '#card-pin',
+                            placeholder: 'PIN'
+                        }
+                    }
                 },
-                '.valid': {
-                  'color': 'green'
-                },
-                '.invalid': {
-                  'color': 'red'
-                }
-              },
-              fields: {
-                pan: {
-                  selector: '#card-pan',
-                  placeholder: '5555 1111 1111 1111'
-                },
-                cvv: {
-                  selector: '#card-cvv',
-                  placeholder: '222'
-                },
-                exp: {
-                  selector: '#expiration-date',
-                  placeholder: 'MM/YY'
-                },
-                pin:{
-                  selector:'#card-pin',
-                  placeholder:'PIN'
-                }
-              }
-            },
-          function(err, hostedFieldInstance){
+                function (err, hostedFieldInstance) {
 
-            if(err) {
-              // something is wrong,
+                    if (err) {
+                        // something is wrong,
 
-            }
-            console.log("hosted instance in place");
+                    }
+                    console.log("hosted instance in place");
 
-              submit.addEventListener('click', function(evt){
+                    submit.addEventListener('click', function (evt) {
 
-                evt.preventDefault();
-                evt.stopPropagation();
+                        evt.preventDefault();
+                        evt.stopPropagation();
 
-                hostedFieldInstance.pay(function(err, payload){
-                  if(err) {
-                    //exception from the server side
-                    return;
-                  }
-                  else {
-                    var payref = payload.res.payref;
-                    console.log(payref);
-                    alert("Payment successful with payment ref of "+payref);
-                    return;
-                  }
+                        hostedFieldInstance.pay(function (err, payload) {
+                            if (err) {
+                                //exception from the server side
+                                return;
+                            }
+                            else {
+                                var payref = payload.res.payref;
+                                console.log(payref);
+                                alert("Payment successful with payment ref of " + payref);
+                                return;
+                            }
+                        });
+
+                    }, false)
                 });
-                
-              }, false)
-          });
 
-     });
-            
-         
-       });
-        
-    </script>
+        });
+
+
+    });
+
+</script>
 </body>
 </html>

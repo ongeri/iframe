@@ -6,25 +6,24 @@ var assign = require('./lib/assign');
 
 module.exports = function createFrame(options) {
 
-  console.log("creating Iframe");
+    console.log("creating Iframe");
 
-  //create an iframe element
-  var iframe = document.createElement('iframe');
+    //create an iframe element
+    var iframe = document.createElement('iframe');
 
-  var config = assign({}, defaultAttributes, options);
+    var config = assign({}, defaultAttributes, options);
 
-  if (config.style && typeof config.style !== 'string') {
-    assign(iframe.style, config.style);
-    delete config.style;
-  }
+    if (config.style && typeof config.style !== 'string') {
+        assign(iframe.style, config.style);
+        delete config.style;
+    }
 
-  
 
-  setAttributes(iframe, config);
+    setAttributes(iframe, config);
 
-  if (!iframe.getAttribute('id')) {
-    iframe.id = iframe.name;
-  }
+    if (!iframe.getAttribute('id')) {
+        iframe.id = iframe.name;
+    }
 
-  return iframe;
+    return iframe;
 };

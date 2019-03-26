@@ -1,7 +1,7 @@
-module.exports = function(fn){
+module.exports = function (fn) {
     var called = false;
-    return function(){
-        if(!called) {
+    return function () {
+        if (!called) {
             called = true;
             fn.apply(null, arguments);
         }

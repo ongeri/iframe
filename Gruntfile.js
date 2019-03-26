@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
     require('time-grunt')(grunt); //display elapsed time in the cmd
     require('load-grunt-tasks')(grunt); // loads all the plugins available.
@@ -34,7 +34,7 @@ module.exports = function(grunt) {
                     transform: [['babelify', {presets: ['es2015']}]]
                 }
             }
-            
+
         },
         less: {
             transpile: {
@@ -48,26 +48,26 @@ module.exports = function(grunt) {
         },
         concat: {
             'build/<%= pkg.name %>.js': ['build/vendor.js', 'build/app.js'], /**removed app.js**/
-           	'build/admin.js': ['build/vendor.js', 'build/admin_app.js']
+            'build/admin.js': ['build/vendor.js', 'build/admin_app.js']
         },
         copy: {
-        	options: {
-  				processContentExclude: ['*.{png,gif,jpg,ico}']
-			},
+            options: {
+                processContentExclude: ['*.{png,gif,jpg,ico}']
+            },
             dev: {
-            	options: {
-  					processContentExclude: ['*.{png,gif,jpg,ico}']
+                options: {
+                    processContentExclude: ['*.{png,gif,jpg,ico}']
 
-				},
+                },
                 files: [{
                     src: 'build/<%= pkg.name %>.js',
                     dest: 'public/js/<%= pkg.name %>.js'
                 }, {
                     src: 'build/<%= pkg.name %>.css',
                     dest: 'public/css/<%= pkg.name %>.css'
-                },{
-                	src: 'build/admin.js',
-                	dest: 'public/js/admin.js'
+                }, {
+                    src: 'build/admin.js',
+                    dest: 'public/js/admin.js'
 
                 }, {
                     src: 'client/img/spinner_small.gif',
@@ -97,7 +97,7 @@ module.exports = function(grunt) {
                 options: {
                     //compress: true,
                     verbose: true,
-                    mangle:true,
+                    mangle: true,
                     compress: {
                         drop_console: true
                     }
@@ -106,12 +106,14 @@ module.exports = function(grunt) {
                     src: 'dist/build.js',
                     dest: 'dist/prod/build.js'
                 },
-                {   src: 'dist/client.js',
-                    dest: 'dist/prod/client.js'
-                },
-                {   src: 'dist/internal.js',
-                    dest: 'dist/prod/internal.js'
-                }
+                    {
+                        src: 'dist/client.js',
+                        dest: 'dist/prod/client.js'
+                    },
+                    {
+                        src: 'dist/internal.js',
+                        dest: 'dist/prod/internal.js'
+                    }
                 ]
             }
         },
@@ -120,7 +122,7 @@ module.exports = function(grunt) {
         watch: {
             scripts: {
                 files: ['client/*.js', 'client/**/*.js'],
-                tasks: ['clean:dev','jshint:all','browserify:vendor', 'browserify:internal', 'browserify:client']
+                tasks: ['clean:dev', 'jshint:all', 'browserify:vendor', 'browserify:internal', 'browserify:client']
             }
         },
 
@@ -139,7 +141,7 @@ module.exports = function(grunt) {
         },
         concurrent: {
             dev: {
-                tasks: ['nodemon:dev','watch:scripts'], /** Removed database layer 00 'shell:mongo', **/
+                tasks: ['nodemon:dev', 'watch:scripts'], /** Removed database layer 00 'shell:mongo', **/
                 options: {
                     logConcurrentOutput: true
                 }
@@ -154,13 +156,12 @@ module.exports = function(grunt) {
     grunt.registerTask('init:dev', ['clean:dev', 'npm install', 'browserify:vendor']);
 
 
-    grunt.registerTask('build:dev', ['clean:dev',  'jshint:all', 'browserify:vendor', 'browserify:internal','browserify:client']);
+    grunt.registerTask('build:dev', ['clean:dev', 'jshint:all', 'browserify:vendor', 'browserify:internal', 'browserify:client']);
 
 
     grunt.registerTask('server', ['build:dev', 'concurrent:dev']);
 
     grunt.registerTask('build:prod', ['build:dev', 'uglify']);
-
 
 
 };

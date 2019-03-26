@@ -1,16 +1,14 @@
+module.exports = function (frame, container) {
 
+    var clearboth = document.createElement('div');
 
-module.exports = function(frame, container){
+    var fragment = document.createDocumentFragment();
 
-  var clearboth = document.createElement('div');
-  
-  var fragment = document.createDocumentFragment();
+    clearboth.style.clear = 'both';
 
-  clearboth.style.clear = 'both';
+    fragment.appendChild(frame);
+    fragment.appendChild(clearboth);
 
-  fragment.appendChild(frame);
-  fragment.appendChild(clearboth);
-
-  container.appendChild(fragment);
-  return [frame, container];
+    container.appendChild(fragment);
+    return [frame, container];
 };
