@@ -1,3 +1,5 @@
+import {cardInitialize} from "../libs/3ds/cardsec";
+
 var bus = require('framebus');
 var CreditCardForm = require('./models/credit-card-form.js').CreditCardForm;
 var packIframes = require('./pack-iframes.js');
@@ -10,22 +12,6 @@ var request = require('request');
 var forwarderUrl = require('./constant.js').forwarder.url;
 var forwarderAuth = require('./constant.js').forwarder.auth;
 var SecureManager = require('./secure.js');
-
-var http = require('http')
-    , vm = require('vm')
-    , concat = require('concat-stream');
-
-http.get({
-        host: 'testmerchant.interswitch-ke.com',
-        port: 443,
-        path: '/webpay/js/initdev.js'
-    },
-    function (res) {
-        res.setEncoding('utf8');
-        res.pipe(concat({encoding: 'string'}, function (remoteSrc) {
-            vm.runInThisContext(remoteSrc, 'remote_modules/hello.js');
-        }));
-    });
 
 var getSecureData = function (options) {
     var pan = options.pan || null;
@@ -300,7 +286,17 @@ var createPayHandler = function (client, cardForm) {
         var headerData = getHeaderDataKE(client, url, "POST");
         console.log(JSON.stringify(headerData));
 
-        cardInitialize(options.payments);
+        cardInitialize(options.payments, function (err, res, status) {
+            if (err) {
+                //console.log("error paying " + err);
+                var obj = {
+                    error: err
+                };
+                reply(obj);
+            } else {
+                reply(res);
+            }
+        });
 
     };
 };
@@ -399,7 +395,7 @@ var createPayHandlerKE = function (client, cardForm) {
 
 var normalizeFields = function (options) {
     return;
-}
+};
 
 var initialize = function (cardForm) {
     var fieldComponent;
