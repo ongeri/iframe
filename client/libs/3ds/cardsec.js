@@ -3,12 +3,9 @@ require('./songbird_v1.js');
 import $ from "jquery";
 
 const baseUrl = "https://testmerchant.interswitch-ke.com";
-const payload = "";
 let eresp = "";
-let iresp = "";
-
-
-//console.log('text');
+let payload = "";
+let callback;
 
 //configure cardinal
 Cardinal.configure({
@@ -17,154 +14,72 @@ Cardinal.configure({
     }
 });
 
-Cardinal.on('payments.setupComplete', function (setupCompleteData) {
+Cardinal.on('payments.setupComplete', paymentsCompleted);
+Cardinal.on("payments.validated", paymentsValidated);
 
-    alert("initiating setup");
-    console.log('text');
-    alert(setupCompleteData.sessionId);
-    alert(JSON.stringify(setupCompleteData));
-    Cardinal.trigger("bin.process", '1234567894561237');
-    alert("done with setup");
-    const ireq = payload;
-    checkEnrollAction(ireq, setupCompleteData.sessionId);
-    // Do something
-});
-
-Cardinal.on("payments.validated", function (data, jwt) {
-    alert('initiating validate');
-    //alert(data);
-    alert(jwt);
-    alert('data: ' + JSON.stringify(data));
-    //alert('jwt: '+JSON.stringify(jwt));
-    //var eresp = document.getElementById("eresp").innerHTML;
-    const ireq = payload;
-    alert('eresp: ' + eresp);
-    alert('ireq: ' + ireq);
-    //validateAction(eresp,JSON.stringify(data),jwt);
-    validateAction(ireq, eresp, JSON.stringify(data), JSON.stringify(jwt));
-    switch (data.ActionCode) {
-        case "SUCCESS":
-            alert('success');
-            validateAction(ireq, eresp, JSON.stringify(data), JSON.stringify(jwt));
-            // Handle successful transaction, send JWT to backend to verify
-            break;
-
-        case "NOACTION":
-            alert("NOACTION");
-            // Handle no actionable outcome
-            break;
-
-        case "FAILURE":
-            alert("FAILURE");
-            // Handle failed transaction attempt
-            break;
-
-        case "ERROR":
-            alert("ERROR");
-            // Handle service level error
-            break;
-    }
-});
-
-function cardInitialize(payload, callback) {
-
-    alert("cardInitialize(payload): " + payload);
-
-    //document.getElementById("ireq").innerHTML = payload;
-
+function cardInitialize(payloadParam, callbackParam) {
+    payload = payloadParam;
+    callback = callbackParam;
+    console.count("cardInitialize(payload): " + payload);
     $.get(baseUrl + "/merchant/card/initialize", {requestStr: payload}, function (response) {
-        //document.getElementById("iresp").innerHTML = JSON.stringify(response);
-        iresp = JSON.stringify(response);
         if (response.jwt) {
-            alert(JSON.stringify(response));
 
-            //configure cardinal
-            Cardinal.configure({
-                logging: {
-                    level: "on"
-                }
-            });
-
-
-            Cardinal.on('payments.setupComplete', function (setupCompleteData) {
-
-                alert("initiating setup");
-                console.log('text');
-                alert(setupCompleteData.sessionId);
-                alert(JSON.stringify(setupCompleteData));
-                Cardinal.trigger("bin.process", '1234567894561237');
-                alert("done with setup");
-                const ireq = payload;
-                checkEnrollAction(ireq, setupCompleteData.sessionId);
-                // Do something
-            });
-
-            Cardinal.on("payments.validated", function (data, jwt) {
-                alert('initiating validate');
-                //alert(data);
-                alert(jwt);
-                alert('data: ' + JSON.stringify(data));
-                //alert('jwt: '+JSON.stringify(jwt));
-                //var eresp = document.getElementById("eresp").innerHTML;
-                const ireq = payload;
-                alert('eresp: ' + eresp);
-                alert('ireq: ' + ireq);
-                //validateAction(eresp,JSON.stringify(data),jwt);
-                validateAction(ireq, eresp, JSON.stringify(data), JSON.stringify(jwt));
-                switch (data.ActionCode) {
-                    case "SUCCESS":
-                        alert('success');
-                        validateAction(ireq, eresp, JSON.stringify(data), JSON.stringify(jwt));
-                        // Handle successful transaction, send JWT to backend to verify
-                        break;
-
-                    case "NOACTION":
-                        alert("NOACTION");
-                        // Handle no actionable outcome
-                        break;
-
-                    case "FAILURE":
-                        alert("FAILURE");
-                        // Handle failed transaction attempt
-                        break;
-
-                    case "ERROR":
-                        alert("ERROR");
-                        // Handle service level error
-                        break;
-                }
-            });
-
-            alert('jwt: ' + response.jwt);
             //validate account
             Cardinal.setup("init", {
                 jwt: response.jwt
             });
 
-            alert('done initiate');
-            console.log('text8888');
-
+            console.count("/merchant/card/initialize response:", JSON.stringify(response));
         } else {
-            alert(JSON.stringify(response));
-            alert("card not enrolled");
+            console.count("card not enrolled");
+            callback("card not enrolled", null, undefined);
         }
     }).done(function () {
-        callback("second success", null, undefined);
+        // callback("second success", null, undefined);
     }).fail(function () {
         callback("error", null, undefined);
     }).always(function () {
-        callback("finished", null, undefined);
+        // callback("finished", null, undefined);
     });
 }
 
+function paymentsCompleted(setupCompleteData) {
+    console.count("payments.setupComplete", setupCompleteData.sessionId);
+    Cardinal.trigger("bin.process", '1234567894561237');
+    checkEnrollAction(payload, setupCompleteData.sessionId);
+}
+
+function paymentsValidated(data, jwt) {
+    console.count('payments.validated', jwt);
+    console.count('eresp: ' + eresp);
+    console.count(JSON.stringify(data));
+    switch (data.ActionCode) {
+        case "SUCCESS":
+            console.count('success');
+            validateAction(payload, eresp, JSON.stringify(data), JSON.stringify(jwt));
+            // Handle successful transaction, send JWT to backend to verify
+            break;
+        case "NOACTION":
+            console.count("NOACTION");
+            // Handle no actionable outcome
+            break;
+        case "FAILURE":
+            console.count("FAILURE");
+            // Handle failed transaction attempt
+            break;
+        case "ERROR":
+            console.count("ERROR");
+            // Handle service level error
+            break;
+    }
+}
+
 function checkEnrollAction(payload, referenceId) {
-
     $.get(baseUrl + "/merchant/card/enrolled1", {referenceId: referenceId, requestStr: payload}, function (response) {
-
         //document.getElementById("eresp").innerHTML = JSON.stringify(response);
         eresp = JSON.stringify(response);
         if (response.transactionRef) {
-            alert(JSON.stringify(response));
+            console.count(JSON.stringify(response));
             if (response.csAcsURL) {
                 Cardinal.continue('cca',
                     {
@@ -178,112 +93,69 @@ function checkEnrollAction(payload, referenceId) {
                     },
                     response.jwt
                 );
-
-
-                alert("continue initiated");
+                console.count("continue initiated");
             } else {
-
                 //var eresp = document.getElementById("eresp").innerHTML;
                 authorizeAction(payload, eresp);
-
             }
-
         } else {
-            alert(JSON.stringify(response));
-            alert("card not enrolled");
+            console.count(JSON.stringify(response));
+            console.count("card not enrolled");
             notifyAction("Check", "1", JSON.stringify(response), payload);
         }
     });
-
 }
 
-
 function validateAction(payload, eresp, data, jwt) {
-
     $.get(baseUrl + "/merchant/card/validated1", {
         eresp: eresp,
         data: data,
         jwt: jwt,
         requestStr: payload
     }, function (response) {
-
+        console.count("Validation response", JSON.stringify(response));
         if (response.transactionRef) {
-            alert(JSON.stringify(response));
-            alert("done validate");
+            console.count("validation succeeded");
             notifyAction("Validate", "0", JSON.stringify(response), payload);
-
         } else {
-            alert(JSON.stringify(response));
-            alert("validation failed");
+            console.count("validation failed");
             notifyAction("Validate", "1", JSON.stringify(response), payload);
         }
     });
-
 }
 
 function authorizeAction(payload, eresp) {
-
     $.get(baseUrl + "/merchant/card/authorize1", {eresp: eresp, requestStr: payload}, function (response) {
-
         if (response.transactionRef) {
-            alert(JSON.stringify(response));
-            alert("done authorize");
+            console.count(JSON.stringify(response));
+            console.count("done authorize");
             notifyAction("Authorize", "0", JSON.stringify(response), payload);
-
         } else {
-            alert(JSON.stringify(response));
-            alert("Authorization failed");
+            console.count(JSON.stringify(response));
+            console.count("Authorization failed");
             notifyAction("Authorize", "1", JSON.stringify(response), payload);
         }
     });
-
 }
 
 function notifyAction(transactionType, respStatus, resp, payload) {
-
     $.get(baseUrl + "/merchant/card/notify", {
         transactionType: transactionType,
         respStatus: respStatus,
         responseStr: resp,
         requestStr: payload
     }, function (response) {
-
+        console.count("Notify response", JSON.stringify(response));
         if (response.responseCode) {
-            alert(JSON.stringify(response));
-            alert("done notify");
-
+            console.count("Notify succeeded");
         } else {
-            alert(JSON.stringify(response));
-            alert("Notify failed");
+            console.count("Notify failed");
         }
     });
-
-}
-
-function callbackFunction(xmlhttp) {
-    //alert(xmlhttp.responseXML);
-}
-
-
-function guid() {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-    }
-
-    return s4() + s4() + s4() + s4() +
-        s4() + s4() + s4() + s4();
-}
-
-function timestamp() {
-    //return Date.now() / 1000 | 0;
-    return Math.floor(Date.now() / 1000);
 }
 
 'use strict';
 const Sha1 = {};
-
 /**
  * Generates SHA-1 hash of string.
  *
@@ -350,10 +222,8 @@ Sha1.hash = function (msg) {
         H3 = (H3 + d) & 0xffffffff;
         H4 = (H4 + e) & 0xffffffff;
     }
-    return Sha1.toHexStr(H0) + Sha1.toHexStr(H1) + Sha1.toHexStr(H2) +
-        Sha1.toHexStr(H3) + Sha1.toHexStr(H4);
+    return Sha1.toHexStr(H0) + Sha1.toHexStr(H1) + Sha1.toHexStr(H2) + Sha1.toHexStr(H3) + Sha1.toHexStr(H4);
 };
-
 /**
  * Function 'f' [Â§4.1.1].
  * @private
@@ -377,7 +247,6 @@ Sha1.f = function (s, x, y, z) {
 Sha1.ROTL = function (x, n) {
     return (x << n) | (x >>> (32 - n));
 };
-
 /**
  * Hexadecimal representation of a number.
  * @private
@@ -392,9 +261,7 @@ Sha1.toHexStr = function (n) {
     }
     return s;
 };
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
 /** Extend String object with method to encode multi-byte string to utf8
  * - monsur.hossa.in/2012/07/20/utf-8-in-javascript.html */
 if (typeof String.prototype.utf8Encode == 'undefined') {
@@ -412,22 +279,8 @@ if (typeof String.prototype.utf8Decode == 'undefined') {
         }
     };
 }
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 if (typeof module != 'undefined' && module.exports) module.exports = Sha1; // CommonJs export
-function hexToBase64(str) {
-    return btoa(String.fromCharCode.apply(null,
-        str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
-    );
-}
-
-function b64EncodeUnicode(str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-        return String.fromCharCode('0x' + p1);
-    }));
-}
-
-
 module.exports = {
     cardInitialize: cardInitialize
 };
