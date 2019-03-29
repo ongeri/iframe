@@ -1,3 +1,5 @@
+import {cardInitialize} from "../3ds/cardsec";
+
 var Backbone = require('backbone');
 var iFramer = require("../utilities/iframe/index.js");
 var frameInjector = require('./frame-inject.js');
@@ -227,7 +229,20 @@ var handlePayResponse = function (data) {
             data(err);
             return;
         } else {
-            data(null, obj);
+            console.trace(JSON.stringify(obj));
+            cardInitialize(JSON.stringify(obj)
+                , function (err, res, status) {
+                    if (err) {
+
+                        var obj = {
+                            error: err
+                        };
+                        data(obj);
+                    } else {
+                        let resultObject = JSON.parse(res);
+                        data(null, {body: resultObject});
+                    }
+                });
         }
         console.log("response object " + JSON.stringify(obj));
     };

@@ -1,5 +1,3 @@
-import {cardInitialize} from "../libs/3ds/cardsec";
-
 var bus = require('framebus');
 var CreditCardForm = require('./models/credit-card-form.js').CreditCardForm;
 var packIframes = require('./pack-iframes.js');
@@ -274,10 +272,12 @@ var createPayHandler = function (client, cardForm) {
         secureData.customerInfor = options.payments.customerInfor;
         secureData.orderId = options.payments.orderId;
         secureData.currencyCode = options.payments.currencyCode;
+        secureData.currency = options.payments.currencyCode;//TODO To remove once backend stops f-ing me over
         secureData.domain = options.payments.domain;
         secureData.narration = options.payments.narration;
         secureData.fee = options.payments.fee;
         secureData.preauth = options.payments.preauth;
+        secureData.paca = "1";
         delete secureData.mac;
 
         console.log(JSON.stringify(secureData));
@@ -287,17 +287,7 @@ var createPayHandler = function (client, cardForm) {
         console.log(JSON.stringify(headerData));
 
         // cardInitialize("{\"country\":\"KE\",\"amount\":\"100\",\"authData\":\"U/v7WAcxI3HpVs+KXJzLAIhATiIYE+jjKgcVwHud0bBGJGPux08jQm240iGSyEmKxDJhP4FG/EGUVtBvDDGzY6xE+sM9lO9NNDA7+LwnrXTczBHsUzECQqwWRbT+7lrV4qtmZtkPb6uF+91bivIUYmU2q/5zvY8dleCc+ZzdqpfKicsgDafGYP8beuoOmi3L30ZlOZ7kap6OlCyEsgeFa8yJ/Y4e3S+3Y4LNTiFFFQmI/TVHF07/675QmJ8BsaQrMoUzbY6FdPNVjF8cdvdyQnVGFDoPC6a/op6uGisGFbuS1Hon+UOHMumG0B8N82a+VdgTKqiYUsns92gLv6PDvw==\",\"city\":\"NBI\",\"orderId\":\"kev3d7890\",\"customerInfor\":\"1002|kelvin|mwangi| kelvin.mwangi@interswitchgroup.com |0714171282|NBI|KE|00200|wstlnds|NBI\",\"fee\":\"0\",\"transactionRef\":\"kev3d7890\",\"terminalId\":\"3TLP0001\",\"terminalType\":\"WEB\",\"paymentItem\":\"CRD\",\"preauth\":\"0\",\"merchantId\":\"ISWKEN0001\",\"provider\":\"VSI\",\"narration\":\"Payment-Card\",\"currency\":\"KES\",\"domain\":\"ISWKEN\",\"paca\":\"1\"}", function (err, res, status) {
-        cardInitialize(options.payments, function (err, res, status) {
-            if (err) {
-                var obj = {
-                    error: err
-                };
-                reply(obj);
-            } else {
-                reply(res);
-            }
-        });
-
+        reply(secureData);
     };
 };
 

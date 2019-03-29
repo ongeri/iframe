@@ -1,6 +1,5 @@
-// require('./jquery-3.3.1.min');
-require('./songbird_v1.js');
-import $ from "jquery";
+require('./songbird_v1.js');// Todo replace with node library import
+// import $ from "jquery";
 
 const baseUrl = "https://testmerchant.interswitch-ke.com";
 let eresp = "";
@@ -53,6 +52,10 @@ function paymentsValidated(data, jwt) {
     console.count('payments.validated', jwt);
     console.count('eresp: ' + eresp);
     console.count(JSON.stringify(data));
+    console.trace("Data action code:", data.ActionCode);
+    if (!data.ActionCode) {
+        callback(null, eresp, null);
+    }
     switch (data.ActionCode) {
         case "SUCCESS":
             console.count('success');
