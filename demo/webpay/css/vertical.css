@@ -1,87 +1,102 @@
-        
 /*  bhoechie tab */
-div.bhoechie-tab-container{
-  z-index: 10;
-  background-color: #ffffff;
-  padding: 0 !important;
-  border-radius: 4px;
-  -moz-border-radius: 4px;
-  border:1px solid #ddd;
-  margin-top: 20px;
-  margin-left: 50px;
-  -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
-  box-shadow: 0 6px 12px rgba(0,0,0,.175);
-  -moz-box-shadow: 0 6px 12px rgba(0,0,0,.175);
-  background-clip: padding-box;
-  opacity: 0.97;
-  filter: alpha(opacity=97);
-  width: 43% !important;
+div.bhoechie-tab-container {
+    z-index: 10;
+    background-color: #ffffff;
+    padding: 0 !important;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    margin-left: 50px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    background-clip: padding-box;
+    opacity: 0.97;
+    filter: alpha(opacity=97);
+    width: 43% !important;
 }
-.reh5{
-  margin-top: 12px;
-  font-weight: bold;
-  font-family: 'Raleway', sans-serif;
+
+.reh5 {
+    margin-top: 12px;
+    font-weight: bold;
+    font-family: 'Raleway', sans-serif;
 
 }
-.logo{
-  width: 150px;
-  height: 90px;
-  position: absolute;
-  left: 153px;
-  top: -13px;
+
+.logo {
+    width: 150px;
+    height: 90px;
+    position: absolute;
+    left: 153px;
+    top: -13px;
 }
-div.bhoechie-tab-menu{
-  
-  padding-left: 0;
-  padding-bottom: 0;
+
+div.bhoechie-tab-menu {
+
+    padding-left: 0;
+    padding-bottom: 0;
 }
+
 a.list-group-item {
     color: #939393;
 }
-div.bhoechie-tab-menu div.list-group{
-  margin-bottom: 0;
+
+div.bhoechie-tab-menu div.list-group {
+    margin-bottom: 0;
 }
- div.list-group h3{
-  color: #fff;
-  font-size: 50px;
-  margin: 0 24px;
-  font-weight: 300;
-      }
-div.bhoechie-tab-menu div.list-group>a{
-  margin-bottom: 0;
+
+div.list-group h3 {
+    color: #fff;
+    font-size: 50px;
+    margin: 0 24px;
+    font-weight: 300;
 }
-div.bhoechie-tab-menu div.list-group>a.windows .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.windows .fa-windows {
-  color: rgb(0,126,185);
+
+div.bhoechie-tab-menu div.list-group > a {
+    margin-bottom: 0;
 }
-div.bhoechie-tab-menu div.list-group>a.windows-server .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.windows-server .fa {
-  color: rgb(43, 51, 133);
+
+div.bhoechie-tab-menu div.list-group > a.windows .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.windows .fa-windows {
+    color: rgb(0, 126, 185);
 }
-div.bhoechie-tab-menu div.list-group>a.office365 .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.office365 .fa {
-  color: rgb(229,126,0);
+
+div.bhoechie-tab-menu div.list-group > a.windows-server .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.windows-server .fa {
+    color: rgb(43, 51, 133);
 }
-div.bhoechie-tab-menu div.list-group>a.sql .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.sql .fa {
-  color: rgb(196,71,69);
+
+div.bhoechie-tab-menu div.list-group > a.office365 .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.office365 .fa {
+    color: rgb(229, 126, 0);
 }
-div.bhoechie-tab-menu div.list-group>a.azure .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.azure .fa {
-  color: rgb(0,156,216);
+
+div.bhoechie-tab-menu div.list-group > a.sql .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.sql .fa {
+    color: rgb(196, 71, 69);
 }
-div.bhoechie-tab-menu div.list-group>a.dev .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.dev .fa {
-  color: rgb(96,47,149);
+
+div.bhoechie-tab-menu div.list-group > a.azure .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.azure .fa {
+    color: rgb(0, 156, 216);
 }
-div.bhoechie-tab-menu div.list-group>a:first-child{
-  border-top-right-radius: 0;
-  -moz-border-top-right-radius: 0;
+
+div.bhoechie-tab-menu div.list-group > a.dev .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.dev .fa {
+    color: rgb(96, 47, 149);
 }
-div.bhoechie-tab-menu div.list-group>a:last-child{
-  border-bottom-right-radius: 0;
-  -moz-border-bottom-right-radius: 0;
+
+div.bhoechie-tab-menu div.list-group > a:first-child {
+    border-top-right-radius: 0;
+    -moz-border-top-right-radius: 0;
 }
+
+div.bhoechie-tab-menu div.list-group > a:last-child {
+    border-bottom-right-radius: 0;
+    -moz-border-bottom-right-radius: 0;
+}
+
 /*div.bhoechie-tab-menu div.list-group>a.active,
 div.bhoechie-tab-menu div.list-group>a.active .glyphicon,
 div.bhoechie-tab-menu div.list-group>a.active .fa{
@@ -89,100 +104,148 @@ div.bhoechie-tab-menu div.list-group>a.active .fa{
   background-image: #1980CF;
   color: #ffffff;
 }*/
-div.bhoechie-tab-menu div.list-group>a.windows.active,
-div.bhoechie-tab-menu div.list-group>a.windows.active.glyphicon,
-div.bhoechie-tab-menu div.list-group>a.windows.active .fa{
-  background-color: rgb(0,126,185);
-  background-image: rgb(0,126,185);
-  color: #ffffff;
-}
-div.bhoechie-tab-menu div.list-group>a.windows-server.active,
-div.bhoechie-tab-menu div.list-group>a.windows-server.active .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.windows-server.active .fa{
-  background-color: rgb(38,45,119);
-  background-image: rgb(38,45,119);
-  color: #ffffff;
-}
-div.bhoechie-tab-menu div.list-group>a.office365.active,
-div.bhoechie-tab-menu div.list-group>a.office365.active .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.office365.active .fa{
-  background-color: rgb(255,140,0);
-  background-image: rgb(255,140,0);
-  color: #ffffff;
-}
-div.bhoechie-tab-menu div.list-group>a.sql.active,
-div.bhoechie-tab-menu div.list-group>a.sql.active .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.sql.active .fa{
-  background-color: rgb(196,71,69);
-  background-image: rgb(196,71,69);
-  color: #ffffff;
-}
-div.bhoechie-tab-menu div.list-group>a.azure.active,
-div.bhoechie-tab-menu div.list-group>a.azure.active .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.azure.active .fa{
-  background-color: rgb(1,174,240);
-  background-image: rgb(1,174,240);
-  color: #ffffff;
-}
-div.bhoechie-tab-menu div.list-group>a.dev.active,
-div.bhoechie-tab-menu div.list-group>a.dev.active .glyphicon,
-div.bhoechie-tab-menu div.list-group>a.dev.active .fa{
-  background-color: rgb(96,47,149);
-  background-image: rgb(96,47,149);
-  color: #ffffff;
-}
-div.bhoechie-tab-menu div.list-group>a.active:after{
-  content: '';
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  margin-top: -13px;
-  border-left: 0;
-  border-bottom: 13px solid transparent;
-  border-top: 13px solid transparent;
-  border-left: 10px solid #1980CF; /*Right arrow*/
-}
-div.bhoechie-tab-menu div.list-group>a.windows.active:after{
-    border-left: 10px solid rgb(0,126,185); /*Right arrow*/
-}
-div.bhoechie-tab-menu div.list-group>a.windows-server.active:after{
-    border-left: 10px solid rgb(38,45,119); /*Right arrow*/
-}
-div.bhoechie-tab-menu div.list-group>a.office365.active:after{
-    border-left: 10px solid rgb(255,140,0); /*Right arrow*/
-}
-div.bhoechie-tab-menu div.list-group>a.sql.active:after{
-    border-left: 10px solid rgb(196,71,69); /*Right arrow*/
-}
-div.bhoechie-tab-menu div.list-group>a.azure.active:after{
-    border-left: 10px solid rgb(0,156,216); /*Right arrow*/
-}
-div.bhoechie-tab-menu div.list-group>a.dev.active:after{
-    border-left: 10px solid rgb(96,47,149); /*Right arrow*/
+div.bhoechie-tab-menu div.list-group > a.windows.active,
+div.bhoechie-tab-menu div.list-group > a.windows.active.glyphicon,
+div.bhoechie-tab-menu div.list-group > a.windows.active .fa {
+    background-color: rgb(0, 126, 185);
+    background-image: rgb(0, 126, 185);
+    color: #ffffff;
 }
 
-
-
-div.bhoechie-tab-content{
-  background-color: #ffffff;
-  /* border: 1px solid #eeeeee; */
-  padding-left: 20px;
-  padding-top: 10px;
+div.bhoechie-tab-menu div.list-group > a.windows-server.active,
+div.bhoechie-tab-menu div.list-group > a.windows-server.active .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.windows-server.active .fa {
+    background-color: rgb(38, 45, 119);
+    background-image: rgb(38, 45, 119);
+    color: #ffffff;
 }
 
-div.bhoechie-tab div.bhoechie-tab-content:not(.active){
-  display: none;
+div.bhoechie-tab-menu div.list-group > a.office365.active,
+div.bhoechie-tab-menu div.list-group > a.office365.active .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.office365.active .fa {
+    background-color: rgb(255, 140, 0);
+    background-image: rgb(255, 140, 0);
+    color: #ffffff;
 }
 
+div.bhoechie-tab-menu div.list-group > a.sql.active,
+div.bhoechie-tab-menu div.list-group > a.sql.active .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.sql.active .fa {
+    background-color: rgb(196, 71, 69);
+    background-image: rgb(196, 71, 69);
+    color: #ffffff;
+}
+
+div.bhoechie-tab-menu div.list-group > a.azure.active,
+div.bhoechie-tab-menu div.list-group > a.azure.active .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.azure.active .fa {
+    background-color: rgb(1, 174, 240);
+    background-image: rgb(1, 174, 240);
+    color: #ffffff;
+}
+
+div.bhoechie-tab-menu div.list-group > a.dev.active,
+div.bhoechie-tab-menu div.list-group > a.dev.active .glyphicon,
+div.bhoechie-tab-menu div.list-group > a.dev.active .fa {
+    background-color: rgb(96, 47, 149);
+    background-image: rgb(96, 47, 149);
+    color: #ffffff;
+}
+
+div.bhoechie-tab-menu div.list-group > a.active:after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    margin-top: -13px;
+    border-left: 0;
+    border-bottom: 13px solid transparent;
+    border-top: 13px solid transparent;
+    border-left: 10px solid #1980CF; /*Right arrow*/
+}
+
+div.bhoechie-tab-menu div.list-group > a.windows.active:after {
+    border-left: 10px solid rgb(0, 126, 185); /*Right arrow*/
+}
+
+div.bhoechie-tab-menu div.list-group > a.windows-server.active:after {
+    border-left: 10px solid rgb(38, 45, 119); /*Right arrow*/
+}
+
+div.bhoechie-tab-menu div.list-group > a.office365.active:after {
+    border-left: 10px solid rgb(255, 140, 0); /*Right arrow*/
+}
+
+div.bhoechie-tab-menu div.list-group > a.sql.active:after {
+    border-left: 10px solid rgb(196, 71, 69); /*Right arrow*/
+}
+
+div.bhoechie-tab-menu div.list-group > a.azure.active:after {
+    border-left: 10px solid rgb(0, 156, 216); /*Right arrow*/
+}
+
+div.bhoechie-tab-menu div.list-group > a.dev.active:after {
+    border-left: 10px solid rgb(96, 47, 149); /*Right arrow*/
+}
+
+div.bhoechie-tab-content {
+    background-color: #ffffff;
+    /* border: 1px solid #eeeeee; */
+    padding-left: 20px;
+    padding-top: 10px;
+}
+
+div.bhoechie-tab div.bhoechie-tab-content:not(.active) {
+    display: none;
+}
 
 /*Process*/
-.process-step .btn:focus{outline:none}
-.process{display:table;width:100%;position:relative}
-.process-row{display:table-row}
-.process-step button[disabled]{opacity:1 !important;filter: alpha(opacity=100) !important}
-.process-row:before{top:40px;bottom:0;position:absolute;content:" ";width:100%;height:1px;background-color:#ccc;z-order:0}
-.process-step{display:table-cell;text-align:center;position:relative}
-.process-step p{margin-top:4px}
-.btn-circle{width:70px;height:70px;text-align:center;font-size:20px;border-radius:50%}
+.process-step .btn:focus {
+    outline: none
+}
+
+.process {
+    display: table;
+    width: 100%;
+    position: relative
+}
+
+.process-row {
+    display: table-row
+}
+
+.process-step button[disabled] {
+    opacity: 1 !important;
+    filter: alpha(opacity=100) !important
+}
+
+.process-row:before {
+    top: 40px;
+    bottom: 0;
+    position: absolute;
+    content: " ";
+    width: 100%;
+    height: 1px;
+    background-color: #ccc;
+    z-order: 0
+}
+
+.process-step {
+    display: table-cell;
+    text-align: center;
+    position: relative
+}
+
+.process-step p {
+    margin-top: 4px
+}
+
+.btn-circle {
+    width: 70px;
+    height: 70px;
+    text-align: center;
+    font-size: 20px;
+    border-radius: 50%
+}
 
     

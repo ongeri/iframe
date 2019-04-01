@@ -1,5 +1,4 @@
-
-var verification = function(isPotentiallyValid, isValid) {
+var verification = function (isPotentiallyValid, isValid) {
     return {
         isPotentiallyValid: isPotentiallyValid,
         isValid: isValid
@@ -8,13 +7,13 @@ var verification = function(isPotentiallyValid, isValid) {
 };
 
 
-var Pin = function(value){
+var Pin = function (value) {
 
-    if(typeof value === 'number') {
+    if (typeof value === 'number') {
         value = String(number);
     }
-    
-    if(typeof value !== 'string') {
+
+    if (typeof value !== 'string') {
         return verification(false, false);
     }
 
@@ -22,9 +21,11 @@ var Pin = function(value){
     value = value.replace(/\s/g, '');
 
     //if not a number return
-    if (!/^\d*$/.test(value)) { return verification(false, false); }
+    if (!/^\d*$/.test(value)) {
+        return verification(false, false);
+    }
 
-    if(value.length < 4) {
+    if (value.length < 4) {
         return verification(true, false);
     }
 

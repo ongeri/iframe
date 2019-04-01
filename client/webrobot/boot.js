@@ -4,13 +4,13 @@ var deferred = require('../libs/deferred.js');
 var Client = require('./client.js');
 /**
  * This module is the entry point to create
- * a client that communicates with interswitch 
+ * a client that communicates with interswitch
  * servers
  * @param options. Options object.
  * @param options.authorizationKey. The merchantId. This is used to uniquely identify each merchant.
  * @param callback. Callback containing the client.
  */
-var newInstanceValue = function(options, callback){
+var newInstanceValue = function (options, callback) {
     //callback(null, null);
     //return;
     //check for no callback
@@ -20,14 +20,14 @@ var newInstanceValue = function(options, callback){
     callback = deferred(callback);
 
     //create instance
-    if(!options.authorizationKey) {
+    if (!options.authorizationKey) {
         callback(new Error({
             message: "Authorization Key is not set"
         }));
         return;
     }
 
-    if(!options.MID) {
+    if (!options.MID) {
         callback(new Error({
             message: "MID is not set"
         }));
@@ -51,21 +51,21 @@ var newInstanceValue = function(options, callback){
     /**
      * do network I/O for configuration data
      */
-    processConfiguration(options, function(err, configuration){
+    processConfiguration(options, function (err, configuration) {
         var client;
-        console.log("response from remote in process  "+JSON.stringify(configuration));
+        console.log("response from remote in process  " + JSON.stringify(configuration));
 
-        if(err) {
+        if (err) {
             callback(err);
             return;
         }
 
-        try{
+        try {
             //create client here
             client = new Client(configuration);
             //console.log("first client created "+client.request());
         }
-        catch(e) {
+        catch (e) {
             callback(e);
             return;
         }
@@ -76,5 +76,5 @@ var newInstanceValue = function(options, callback){
 };
 
 module.exports = {
-    newInstanceValue:newInstanceValue
+    newInstanceValue: newInstanceValue
 };

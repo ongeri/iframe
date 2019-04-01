@@ -1,4 +1,3 @@
-
 var types = {};
 var VISA = 'visa';
 var MASTERCARD = 'master-card';
@@ -12,17 +11,17 @@ var cardMap = [
 ];
 
 types[VISA] = {
-  common: 'Visa',
-  type: VISA,
-  start: "4",
-  prefixPattern: /^4$/,
-  exactPattern: /^4\d*$/,
-  gaps: [4, 8, 12],
-  lengths: [16, 18, 19],
-  code: {
-    name: CVV,
-    size: 3
-  }
+    common: 'Visa',
+    type: VISA,
+    start: "4",
+    prefixPattern: /^4$/,
+    exactPattern: /^4\d*$/,
+    gaps: [4, 8, 12],
+    lengths: [16, 18, 19],
+    code: {
+        name: CVV,
+        size: 3
+    }
 };
 
 /*types[MASTERCARD] = {
@@ -40,44 +39,46 @@ types[VISA] = {
 };*/
 
 types[VERVE] = {
-  common: 'Verve',
-  type: VERVE,
-  start: "5061",
-  prefixPattern: /^4$/,
-  exactPattern: /^4\d*$/,
-  gaps: [4, 8, 12],
-  lengths: [16, 18, 19],
-  code: {
-    name: CVV,
-    size: 3
-  }
+    common: 'Verve',
+    type: VERVE,
+    start: "5061",
+    prefixPattern: /^4$/,
+    exactPattern: /^4\d*$/,
+    gaps: [4, 8, 12],
+    lengths: [16, 18, 19],
+    code: {
+        name: CVV,
+        size: 3
+    }
 };
 
 types[MASTERCARD] = {
-  common: 'MasterCard',
-  type: MASTERCARD,
-  start: "5",
-  prefixPattern: /^4$/,
-  exactPattern: /^4\d*$/,
-  gaps: [4, 8, 12],
-  lengths: [16, 18, 19],
-  code: {
-    name: CVV,
-    size: 3
-  }
+    common: 'MasterCard',
+    type: MASTERCARD,
+    start: "5",
+    prefixPattern: /^4$/,
+    exactPattern: /^4\d*$/,
+    gaps: [4, 8, 12],
+    lengths: [16, 18, 19],
+    code: {
+        name: CVV,
+        size: 3
+    }
 };
 
-var clone = function(x){
+var clone = function (x) {
 
     var exactPattern, prefixPattern, ret;
-    if(!x) {return null;}
+    if (!x) {
+        return null;
+    }
 
     exactPattern = x.exactPattern.source;
     prefixPattern = x.prefixPattern.source;
     ret = JSON.parse(JSON.stringify(x));
     ret.exactPattern = exactPattern;
     ret.prefixPattern = prefixPattern;
-    
+
 
     return ret;
 
@@ -87,7 +88,7 @@ var clone = function(x){
  * Given a pan prefix value,
  * what type of card is this?
  */
-var Card = function(val){
+var Card = function (val) {
     var type, value, i;
     var prefixResults = [];
     var exactResults = [];
@@ -95,12 +96,12 @@ var Card = function(val){
         return [];
     }
 
-    for(i=0;i<cardMap.length;i++){
+    for (i = 0; i < cardMap.length; i++) {
         type = cardMap[i];
         value = types[type];
 
 
-        if(val.length === 0) {
+        if (val.length === 0) {
             prefixResults.push(clone(value));
             continue;
         }
@@ -111,19 +112,18 @@ var Card = function(val){
         // else if(value.prefixPattern.test(val)){
         //     prefixResults.push(clone(value))
         // }
-        if(value.start === val.charAt(0)) {
+        if (value.start === val.charAt(0)) {
             exactResults.push(clone(value));
         }
-        
 
-        
-        if(exactResults.length){
+
+        if (exactResults.length) {
         }
         else {
         }
     }
     return exactResults.length ? exactResults : prefixResults;
-    
+
 };
 
 module.exports = Card;

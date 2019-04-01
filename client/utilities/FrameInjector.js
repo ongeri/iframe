@@ -9,6 +9,7 @@ var FrameInjector = (function () {
         container.appendChild(fragment);
         return [frame, container];
     }
+
     return FrameInjector;
 }());//IIFE
 exports.FrameInjector = FrameInjector;

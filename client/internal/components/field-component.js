@@ -1,9 +1,8 @@
-
 var LabelComponent = require('./label.js');
 var InputLabelComponent = require('./input-components.js');
 var constants = require('../../libs/constants');
 
-var fieldComponent = function(options) {
+var fieldComponent = function (options) {
 
     var type = options.type;
 
@@ -23,36 +22,36 @@ var fieldComponent = function(options) {
         type: type
     });
 
-    console.log("type of input "+type);
+    console.log("type of input " + type);
 
-    if(type === "pan") {
+    if (type === "pan") {
         var spanElement = document.createElement("span");
 
         spanElement.style.position = "absolute";
-        spanElement.style.right="0";
-        spanElement.style.top="1";
-        spanElement.style.width="50px";
+        spanElement.style.right = "0";
+        spanElement.style.top = "1";
+        spanElement.style.width = "50px";
         spanElement.style.backgroundRepeat = "no-repeat";
         spanElement.style.backgroundSize = "35px";
-        spanElement.style.height="50px";
-		spanElement.style.marginTop = "7px";
+        spanElement.style.height = "50px";
+        spanElement.style.marginTop = "7px";
 
         /**
-        * Add event listener to act when a card change happens
-        *
-        **/
+         * Add event listener to act when a card change happens
+         *
+         **/
 
-        options.model.on('change:possibleCardTypes', function(data){
-            console.log("on card type change "+JSON.stringify(data)+" "+data);
-            if(!data){
+        options.model.on('change:possibleCardTypes', function (data) {
+            console.log("on card type change " + JSON.stringify(data) + " " + data);
+            if (!data) {
                 spanElement.style.display = 'none';
                 return;
             }
-            if(data.length == 0) {
+            if (data.length == 0) {
                 //hide span element
                 spanElement.style.display = 'none';
             }
-            else if(data.length > 1){
+            else if (data.length > 1) {
                 spanElement.style.display = 'none';
             }
 
@@ -60,21 +59,21 @@ var fieldComponent = function(options) {
 
                 var simpleName = data[0].type;
                 spanElement.style.display = 'block';
-                var urlName = "../../images/card-brands/"+simpleName+".png";
+                var urlName = "../../images/card-brands/" + simpleName + ".png";
                 console.log(urlName);
-                spanElement.style.backgroundImage = 'url('+urlName+')';
+                spanElement.style.backgroundImage = 'url(' + urlName + ')';
 
             }
         });
 
         /**
-        * set position styles on this element
-        */
+         * set position styles on this element
+         */
         this.element.appendChild(spanElement);
     }
 
     this.element.appendChild(inputElem.element);
 };
 module.exports = {
-    FieldComponent : fieldComponent
+    FieldComponent: fieldComponent
 };
