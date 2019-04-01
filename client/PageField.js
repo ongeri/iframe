@@ -12,5 +12,6 @@ var PageField = (function () {
     function PageField() {
         console.log("Init...Field check ");
     }
+
     return PageField;
 }());

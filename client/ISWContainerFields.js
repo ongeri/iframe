@@ -13,7 +13,7 @@ var ISWContainerFields = (function () {
         var _this = this;
         var keys = Object.keys(fieldConfiguration);
         keys.forEach(function (item) {
-          console.log("a key of config is "+item);
+            console.log("a key of config is " + item);
             _this.hasItemSelector(fieldConfiguration[item]);
         });
         this.inputFieldConfig = fieldConfiguration;
@@ -22,7 +22,7 @@ var ISWContainerFields = (function () {
 
     ISWContainerFields.prototype.hasItemSelector = function (fieldConfigItem) {
 
-      //no no, must use reasonable defaults please
+        //no no, must use reasonable defaults please
         if (fieldConfigItem.selector === undefined || fieldConfigItem.selector === null) {
             throw new Error("Selector property must be present in the Field Object");
         }
@@ -42,7 +42,7 @@ var ISWContainerFields = (function () {
             var frameElement;
             var field;
             field = _this.inputFieldConfig[item]; // The Current Field
-            console.log("Field as shown in iterator "+field);
+            console.log("Field as shown in iterator " + field);
             selectorElementContainer = document.querySelector(field.selector);
             if (!selectorElementContainer) {
                 throw new Error("Selector failed to match an existing element. [" + field.selector + "]");
@@ -61,7 +61,7 @@ var ISWContainerFields = (function () {
 
             //Append the iframe to the div
             new FrameInjector(frameElement, selectorElementContainer);
-            console.log(frameElement+" created");
+            console.log(frameElement + " created");
             setTimeout(function () {
                 //frameElement.src = (_this.internalInstance.getSettings().assetsUrl + "?2376857857575157723");
                 frameElement.src = "https://assets.braintreegateway.com/web/3.6.3/html/hosted-fields-frame.html#f50f566c-add0-4b1c-ba2c-86e5578d8d82";

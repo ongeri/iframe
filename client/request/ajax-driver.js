@@ -1,13 +1,12 @@
-
 var queryString = require('../libs/query-string.js');
 var isXHRAvailable = global.XMLHttpRequest && 'withCredentials' in new global.XMLHttpRequest();
 var parseBody = require('./parse-body.js');
 var prepBody = require('./prep-body.js');
-var getRequestObject = function(){
+var getRequestObject = function () {
     return isXHRAvailable ? new XMLHttpRequest() : new XDomainRequest();
 };
-var request = function(options, cb){
-    console.log("XHR enabled ? "+isXHRAvailable);
+var request = function (options, cb) {
+    console.log("XHR enabled ? " + isXHRAvailable);
     var status, resBody;
 
     var method = options.method;
@@ -18,20 +17,20 @@ var request = function(options, cb){
     var req = getRequestObject();
     var callback = cb;
 
-    console.log("Request method: "+method);
-    console.log("url is: "+url);
+    console.log("Request method: " + method);
+    console.log("url is: " + url);
 
-    if(method === "GET") {
+    if (method === "GET") {
         url = queryString.querify(url, body);
         body = null;
     }
 
     //set up event listeners for XHR
-    if(isXHRAvailable) {
+    if (isXHRAvailable) {
 
-        req.onreadystatechange = function(){
+        req.onreadystatechange = function () {
 
-            if(req.readyState !== XMLHttpRequest.DONE) {//this should evaluate to 4
+            if (req.readyState !== XMLHttpRequest.DONE) {//this should evaluate to 4
                 //request is not complete
                 return;
             }
@@ -39,9 +38,9 @@ var request = function(options, cb){
             status = req.status;
             resBody = parseBody(req.responseText);
 
-            if(status >= 400 || status < 200) {//non-200
-                console.log("an error occured in http request "+status);
-                callback(resBody||'error', null, status||500);
+            if (status >= 400 || status < 200) {//non-200
+                console.log("an error occured in http request " + status);
+                callback(resBody || 'error', null, status || 500);
             }
             else {
                 console.log(" a good response came back");
@@ -52,16 +51,16 @@ var request = function(options, cb){
         };
     }
     else { //set up listeners for XDR
-        req.onload = function(){
+        req.onload = function () {
             callback(null, parseBody(req.responseText), req.status);
         };
-        req.onerror = function(){
+        req.onerror = function () {
             callback('error', null, 500);
         };
-        req.onprogress = function(){
+        req.onprogress = function () {
             //do nothing
         };
-        req.ontimeout = function(){
+        req.ontimeout = function () {
             callback('timeout', null, -1);//
         };
     }
@@ -72,7 +71,7 @@ var request = function(options, cb){
     req.timeout = timeout;
 
     //set the headers one last time
-    if(isXHRAvailable) {
+    if (isXHRAvailable) {
         req.setRequestHeader("Content-Type", "application/json");
         // TODO: Make this work in IE9.
         //
@@ -84,23 +83,23 @@ var request = function(options, cb){
         // ...to this URL:
         // /my/endpoint?content_type=text%2Fxml&authorization:Bearer+123456
 
-        Object.keys(headers).forEach(function(headerKey){
+        Object.keys(headers).forEach(function (headerKey) {
             req.setRequestHeader(headerKey, headers[headerKey]);
         });
     }
 
-    try{
+    try {
         //body should be a string
         req.send(prepBody(method, body));
     }
-    catch(e) {
+    catch (e) {
         //do nothing
     }
-    
+
 };//end of request method
 
 
 module.exports = {
     request: request,
-    queryString : queryString
+    queryString: queryString
 };

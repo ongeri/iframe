@@ -1,7 +1,7 @@
 var BaseInput = require('./base-input.js').BaseInput;
 var MAX_SIZE = 5;
 
-var expInput = function(){
+var expInput = function () {
     this.MAX_SIZE = MAX_SIZE;
     this.hasSlash = false;
 

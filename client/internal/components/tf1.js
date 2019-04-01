@@ -1,7 +1,7 @@
 var BaseInput = require('./base-input.js').BaseInput;
 var MAX_SIZE = 7;
 
-var tf1Input = function(){
+var tf1Input = function () {
     this.MAX_SIZE = MAX_SIZE;
 
     BaseInput.apply(this, arguments);

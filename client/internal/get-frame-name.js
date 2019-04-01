@@ -1,7 +1,7 @@
 module.exports = {
-    getFrameName: function(){
+    getFrameName: function () {
 
         return window.name.replace('isw-hosted-field-', '');
     }
-    
+
 };
