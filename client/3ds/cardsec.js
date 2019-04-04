@@ -52,10 +52,8 @@ function paymentsValidated(data, jwt) {
     console.count('payments.validated', jwt);
     console.count('eresp: ' + eresp);
     console.count(JSON.stringify(data));
-    console.trace("Data action code:", data.ActionCode);
-    if (!data.ActionCode) {
-        callback(null, eresp, null);
-    }
+    console.log("Data action code:", data.ActionCode);
+    validateAction(payload, eresp, JSON.stringify(data), JSON.stringify(jwt));
     switch (data.ActionCode) {
         case "SUCCESS":
             console.count('success');
@@ -69,10 +67,12 @@ function paymentsValidated(data, jwt) {
         case "FAILURE":
             console.count("FAILURE");
             // Handle failed transaction attempt
+            callback(data);
             break;
         case "ERROR":
             console.count("ERROR");
             // Handle service level error
+            callback(data);
             break;
     }
 }
@@ -131,18 +131,26 @@ function authorizeAction(payload, eresp) {
     $.get(baseUrl + "/merchant/card/authorize1", {eresp: eresp, requestStr: payload}, function (response) {
         if (response.transactionRef) {
             console.count(JSON.stringify(response));
-            console.count("done authorize");
+            console.count("Successfully authorized" + response);
+            callback(null, eresp, null);
             notifyAction("Authorize", "0", JSON.stringify(response), payload);
         } else {
             console.count(JSON.stringify(response));
             console.count("Authorization failed");
             notifyAction("Authorize", "1", JSON.stringify(response), payload);
+            callback("3D secure Authorize error", response);
         }
     });
 }
 
 function notifyAction(transactionType, respStatus, resp, payload) {
     console.log("Notifying outcome for " + transactionType + ", result status: " + respStatus + " response: " + resp);
+    if (respStatus === "0") {
+        console.count("Notify succeeded");
+        callback(null, resp, null);
+    } else {
+        callback("Transaction failed");
+    }
     $.get(baseUrl + "/merchant/card/notify", {
         transactionType: transactionType,
         respStatus: respStatus,
@@ -156,9 +164,6 @@ function notifyAction(transactionType, respStatus, resp, payload) {
             console.count("Notify failed");
         }
     });
-    if (respStatus === "1") {
-        callback("3D secure " + transactionType + " error", null, undefined);
-    }
 }
 
 'use strict';
