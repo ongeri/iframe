@@ -93,7 +93,7 @@ var HostedFields = function (options) {
         //throw exception because there should be fields to work with
     }
 
-    console.log("Options are " + options);
+    console.log("Options are ", options);
 
     EventEmitter.call(this);
 
@@ -129,15 +129,20 @@ var HostedFields = function (options) {
         //console.log("associated selector "+container);
 
         if (!container) {
+            frame.interswitch.hostedFields.initialize(cardForm);
+            console.log("No container element with id ", field.selector, " was found for field ", key);
             throw new Error({
                 message: "The Field " + field.selector + " does not exist."
             });
         }
         else if (container.querySelector('iframe[name^="isw-"]')) {
+            console.log("Multiple container elements with id ", field.selector, " ware found for field ", key);
             throw new Error({
                 message: "Duplicate " + field.selector + " already contains an iframe."
             });
         }
+
+        console.log("Creating field using key and field values in container", key, field, container);
 
         frame = iFramer({
             type: key,
@@ -167,7 +172,7 @@ var HostedFields = function (options) {
 
         //run atleast after 0secs
         setTimeout(function () {
-            frame.src = "https://testids.interswitch.co.ke:3000/file";
+            frame.src = "http://localhost:3000/file";
         }, 0);
 
     }.bind(this));

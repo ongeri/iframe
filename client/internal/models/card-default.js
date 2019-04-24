@@ -6,6 +6,13 @@ var obj = {
         isValid: false,
         isPotentiallyValid: true
     },
+    token: {
+        value: "",
+        isEmpty: true,
+        isFocused: false,
+        isValid: false,
+        isPotentiallyValid: true
+    },
     cvv: {
         value: "",
         isEmpty: true,

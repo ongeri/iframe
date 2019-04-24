@@ -17,12 +17,12 @@ var fieldComponent = function (options) {
 
     //this.element.appendChild(new LabelComponent(formMap).element);
 
+    console.log("type of input " + type);
+
     var inputElem = new InputLabelComponent[type]({
         model: options.model,
         type: type
     });
-
-    console.log("type of input " + type);
 
     if (type === "pan") {
         var spanElement = document.createElement("span");

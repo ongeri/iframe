@@ -7,6 +7,8 @@
  *
  *
  **/
+require('./internal/index.js');
+require('./webrobot/index.js');
 var ISWContainerFields = require('./hosted-fields/index.js');
 //var client=require('./webrobot');
 var request = require('./request');

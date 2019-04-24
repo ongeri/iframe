@@ -34,6 +34,10 @@ var constants = {
             name: "Pan",
             label: "PAN"
         },
+        token: {
+            name: "Token",
+            label: "TOKEN"
+        },
         cvv: {
             name: "cvv",
             label: "CVV"

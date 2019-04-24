@@ -22,7 +22,6 @@
     "node-forge": "^0.7.5",
     "serve-favicon": "^2.5.0",
     "serve-static": "^1.13.2",
-    "songbird": "^1.0.7",
     "uuid": "^3.2.1"
   },
   "devDependencies": {

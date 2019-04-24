@@ -25,7 +25,7 @@ var processConfiguration = function (options, callback) {
         url: configUrl,
         method: "GET",
         data:configuration
-    }, 
+    },
     function(err, res, status){
         if(err) {
             console.log("error in getting configuration data "+JSON.stringify(err));
@@ -40,7 +40,7 @@ var processConfiguration = function (options, callback) {
 
     //var merchantConfigUrl = "http://172.16.112.4:3000/api/v1/merchant/configuration";
 
-    var merchantConfigUrl = "https://testids.interswitch.co.ke:3000/api/v1/merchant/configuration/new";
+    var merchantConfigUrl = "http://localhost:3000/api/v1/merchant/configuration/new";
 
     var url = "http://testids.interswitch.co.ke:9080/api/v1/merchant/mfb/config/" + options.MID;
 
@@ -91,9 +91,9 @@ var processConfiguration = function (options, callback) {
                             equitelPaybill: config.equitelPaybill,
                             clientId: config.clientId,
                             clientSecret: config.clientSecret,
-                            tokenize: config.tokenizeStatus.toString(),
-                            cardauth: config.cardauthStatus.toString(),
-                            preauth: config.cardPreauth.toString()
+                            tokenize: isNaN(config.tokenizeStatus) ? "" : config.tokenizeStatus.toString(),
+                            cardauth: isNaN(config.cardauthStatus) ? "" : config.cardauthStatus.toString(),
+                            preauth: isNaN(config.cardPreauth) ? "" : config.cardPreauth.toString()
                         }
 
                     ];
