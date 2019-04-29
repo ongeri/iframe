@@ -291,4 +291,4 @@ BaseInput.prototype.setPlaceholder = function (type, placeholder) {
 
 module.exports = {
     BaseInput: BaseInput
-}
+};

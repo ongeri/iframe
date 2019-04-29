@@ -12,69 +12,37 @@ var events = require('./events.js');
 var toggler = require('../libs/class-toggle.js');
 var externalClasses = constants.externalClasses;
 
-
 var createInputEventHandler = function (fields) {
-    /*
-    *
-    * for example
-    *
-    * fields[cardCVV] = {
-    *    frameElement: frame
-    *    containerElement: container
-    * }
-    *
-    * #remember that container points to the primary div that the merchant passed in initially.
-    *
-    *
-    *
-    *
-    *
-    *
-    **/
-
     return function (eventData) {
-
-        var field;
-        var merchantPayload = eventData.merchantPayload;
-        var emittedBy = merchantPayload.emittedBy;
-        var container = fields[emittedBy].containerElement;
-
+        const field = eventData.merchantPayload.fields[eventData.merchantPayload.emittedBy];
+        const container = fields[eventData.merchantPayload.emittedBy].containerElement;
 
         console.log(JSON.stringify(eventData));
 
-        Object.keys(merchantPayload.fields).forEach(function (key) {
-            merchantPayload.fields[key].container = fields[key].containerElement;
+        Object.keys(eventData.merchantPayload.fields).forEach(function (key) {
+            eventData.merchantPayload.fields[key].container = fields[key].containerElement;
         });
 
-        field = merchantPayload.fields[emittedBy];
-
-        console.log("emmited by " + emittedBy + " event name " + eventData.type);
+        console.log("emmited by " + eventData.merchantPayload.emittedBy + " event name " + eventData.type);
 
         console.log(!field.isPotentiallyValid + "-" + field.isValid);
+
         //change class of elements here
-
         var classGroup = container.classList;
-
-        //toggler.toggle(container, "focused", field.isFocused);
-
-        // container.classList.toggle("focused", field.isFocused);
-        // container.classList.toggle("valid", field.isValid);
-        // container.classList.toggle("inValid", !field.isPotentiallyValid);
-        //toggler.toggle(container, "valid", field.isValid);
 
         toggler.toggle(container, externalClasses.FOCUSED, field.isFocused);
         toggler.toggle(container, externalClasses.VALID, field.isValid);
         toggler.toggle(container, externalClasses.INVALID, !field.isPotentiallyValid);
 
         this._state = {
-            fields: merchantPayload.fields,
-            cards: merchantPayload.cards
+            fields: eventData.merchantPayload.fields,
+            cards: eventData.merchantPayload.cards
         };
 
-        this._emit(eventData.type, merchantPayload);
-
+        this._emit(eventData.type, eventData.merchantPayload);
     };
 };
+
 var HostedFields = function (options) {
 
     var failureTimeout;
@@ -110,7 +78,7 @@ var HostedFields = function (options) {
         fields: {}
     };
 
-    //when we tear this down, we also want to teardown all backbone listener :TODO
+    // TODO: when we tear this down, we also want to teardown all backbone listener
     this._client = options.client;
 
 
@@ -153,7 +121,7 @@ var HostedFields = function (options) {
 
         this._injectedNodes = this._injectedNodes.concat(frameInjector(frame, container));
 
-        //attach event listener on the label associated with the  container :TODO
+        // TODO: Attach event listener on the label associated with the  container
 
         fields[key] = {
             frameElement: frame,

@@ -140,7 +140,7 @@ app.get('/api/v1/merchant/configuration/new', function (req, resp) {
     req.headers.host = "testids.interswitch.co.ke:9080";
     //headers: req.headers,
     request({
-        url: 'http://172.16.112.36:19082/api/v1/merchant/mfb/config/' + req.query.MID,
+        url: 'https://'+req.headers.host + '/api/v1/merchant/mfb/config/' + req.query.MID,
         json: true,
         body: req.body,
         headers: req.headers,
@@ -148,6 +148,7 @@ app.get('/api/v1/merchant/configuration/new', function (req, resp) {
     }, function (err, res, body) {
 
         if (err) {
+            console.log(err);
             resp.status(400).json(body);
             console.log(JSON.stringify(body));
         }
@@ -298,7 +299,7 @@ app.post('/collections/pay/ke', function (req, resp) {
 	// 		else {
 	// 		console.log(JSON.stringify(body));
 	// 		resp.status(res.statusCode).json(body);
-			
+
 	// 	}
  //  	});
 });*/
