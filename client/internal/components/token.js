@@ -7,9 +7,10 @@ function buildElement() {
 
     // Create dropdopwn element
     const element = document.createElement('select');
+    // Parse the passed token string into an array of tokens and add the parsed token array to our model
+    this.model.conf.tokens = JSON.parse(this.model.conf.cardTokensJson);
     // For each token provided add an option
-    const tokens = JSON.parse(this.model.conf.cardTokensJson);
-    tokens.forEach(token => {
+    this.model.conf.tokens.forEach(token => {
         element.options[element.options.length] = new Option(token.panFirst6Digits + '******' + token.panLast4Digits, token.token);
     });
 

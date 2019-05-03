@@ -151,13 +151,20 @@ BaseInput.prototype._addDOMKeypressListeners = function () {
 
 };
 
-var validInput = function (value, type) {
+var validInput = (value, type, context) => {
     if (value.length > 0) {
         var lastChar = value.charAt(value.length - 1);
         if (type === "exp") {
             return (value.length === 3 && lastChar === '/') || !isNaN(lastChar);
         }
         if (type === "token") {
+            if (context) {
+                const selectedTokenObject = context.model.conf.tokens.find((token) => {
+                    return token.token === value
+                });
+                console.log("matched token object: ", selectedTokenObject);
+                context.model.set("exp.value", selectedTokenObject.expiry);
+            }
             return true;
         }
         else {
@@ -171,7 +178,7 @@ BaseInput.prototype._addDOMInputListeners = function () {
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
         var valueChanged = this.getUnformattedValue();
 
-        if (!validInput(valueChanged, this.type)) {
+        if (!validInput(valueChanged, this.type, this)) {
             valueChanged = valueChanged.substring(0, valueChanged.length - 1);
             this.formatter.setValue(valueChanged);
             return;
