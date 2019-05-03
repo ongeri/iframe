@@ -157,6 +157,9 @@ var validInput = function (value, type) {
         if (type === "exp") {
             return (value.length === 3 && lastChar === '/') || !isNaN(lastChar);
         }
+        if (type === "token") {
+            return true;
+        }
         else {
             return !isNaN(lastChar);
         }

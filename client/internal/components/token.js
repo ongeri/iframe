@@ -1,27 +1,16 @@
 const BaseInput = require('./base-input.js').BaseInput;
-const MAX_SIZE = 19;
 const constants = require('../../libs/constants');
 
 function buildElement() {
 
     console.info("Overriden method called");
 
-    let inputType = this.getConfiguration().type || 'tel';
-
     // Create dropdopwn element
     const element = document.createElement('select');
     // For each token provided add an option
-    const tokens = [
-        {
-            pan: '411111******1111',
-            token: 'somereallylongnumber'
-        },
-        {
-            pan: 'someothermaskedpan',
-            token: 'someotherreallylongnumber'
-        }];
+    const tokens = JSON.parse(this.model.conf.cardTokensJson);
     tokens.forEach(token => {
-        element.options[element.options.length] = new Option(token.pan, token.token);
+        element.options[element.options.length] = new Option(token.panFirst6Digits + '******' + token.panLast4Digits, token.token);
     });
 
     element.style.width = "100%";
@@ -31,11 +20,6 @@ function buildElement() {
     const name = formMap.name;
 
     const attributes = {
-        type: inputType,
-        autocomplete: 'off',
-        autocorrect: 'off',
-        autocapitalize: 'none',
-        spellcheck: 'false',
         'class': this.type,
         'data-isw-name': this.type,
         name: name,
@@ -50,8 +34,6 @@ function buildElement() {
 }
 
 const tokenInput = function () {
-    this.MAX_SIZE = MAX_SIZE;
-
     // Override buildElement from BaseInput to render our dropdown input
     this.buildElement = buildElement;
 
