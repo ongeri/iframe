@@ -1,82 +1,16 @@
-var bus = require('framebus');
-var CreditCardForm = require('./models/credit-card-form.js').CreditCardForm;
-var packIframes = require('./pack-iframes.js');
-var frameName = require('./get-frame-name.js');
-var FieldComponent = require('./components/field-component.js').FieldComponent;
-var events = require('../hosted-fields/events.js');
+const bus = require('framebus');
+const CreditCardForm = require('./models/credit-card-form.js').CreditCardForm;
+const packIframes = require('./pack-iframes.js');
+const frameName = require('./get-frame-name.js');
+const FieldComponent = require('./components/field-component.js').FieldComponent;
+const events = require('../hosted-fields/events.js');
 //var request = require('../request');
-var injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
-var request = require('request');
-var forwarderUrl = require('./constant.js').forwarder.url;
-var forwarderAuth = require('./constant.js').forwarder.auth;
-var SecureManager = require('./secure.js');
+const injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
+const request = require('request');
+const forwarderUrl = require('./constant.js').forwarder.url;
+const forwarderAuth = require('./constant.js').forwarder.auth;
 
-var getSecureData = function (options) {
-    var pan = options.pan || null;
-    var expDate = options.expDate || null;
-    var cvv = options.cvv || null;
-    var pin = options.pin || null;
-    var amount = options.amount || null;
-    var mobile = options.mobile || null;
-    var ttId = options.ttId || null;
-    var publicModulus = options.publicModulus || null;
-    var publicExponent = options.publicExponent || null;
-
-    var secureOptions = {
-        expiry: expDate,
-        pan: pan,
-        amount: amount,
-        mobile: mobile,
-        ttId: ttId
-    };
-
-    var pinData = {
-        pin: pin,
-        cvv: cvv,
-        expiry: expDate
-    };
-
-    return SecureManager.generateSecureData(secureOptions, pinData);
-};
-
-var getSecureDataKE = function (options) {
-    var pan = options.pan || null;
-    var expDate = options.expDate || null;
-    var cvv = options.cvv || null;
-    var pin = options.pin || null;
-    var amount = options.amount || null;
-    var mobile = options.mobile || null;
-    var ttId = options.ttId || null;
-    var publicModulus = options.publicModulus || null;
-    var publicExponent = options.publicExponent || null;
-
-    var secureOptions = {
-        expiry: expDate,
-        pan: pan,
-        amount: amount,
-        mobile: mobile,
-        ttId: ttId
-    };
-
-    var pinData = {
-        pin: pin,
-        cvv: cvv,
-        expiry: expDate
-    };
-
-    return SecureManager.generateSecureDataKE(secureOptions, pinData);
-};
-
-var getHeaderDataKE = function (client, url, httpMethod) {
-    var client = client;
-    var url = url;
-    var httpMethod = httpMethod;
-
-    return SecureManager.generateHeadersKE(client, url, httpMethod);
-};
-
-
-var create = function () {
+const create = function () {
 
     bus.emit(events.FRAME_SET, {}, builder);
 
@@ -84,7 +18,7 @@ var create = function () {
 
 var builder = function (conf) {
     console.log("builder");
-    var payments = {
+    const payments = {
         transactionReference: conf.transactionReference || "",
         merchantCode: conf.merchantCode || "",
         currencyCode: conf.currencyCode || "",
@@ -128,36 +62,7 @@ var builder = function (conf) {
         else {
             console.log(JSON.stringify(body));
 
-            var client = conf.client;
-
-            var iD = body.id;
-            var payableId = body.payableId;
-            var amount = body.amount;
-            var surcharge = body.surcharge;
-            var paymentCancelled = body.paymentCancelled;
-            var dateOfPayment = body.dateOfPayment;
-            var remittanceAmount = body.remittanceAmount;
-            var currencyCode = body.currencyCode;
-            var merchantCustomerId = body.merchantCustomerId;
-            var transactionReference = body.transactionReference;
-            var responseCode = body.responseCode;
-            var responseDescription = body.responseDescription;
-            var channel = body.channel;
-            var merchantCode = body.merchantCode;
-
-            var orderId = body.orderId;
-            var terminalId = body.terminalId;
-            var paymentItem = body.paymentItem;
-            var provider = body.provider;
-            var customerInfor = body.customerInfor;
-            var domain = body.domain;
-            var narration = body.narration;
-            var fee = body.fee;
-            var preauth = body.preauth;
-            var tokenize = body.tokenize;
-            var tranleg = body.tranleg;
-
-            var cardForm = new CreditCardForm(conf);
+            const cardForm = new CreditCardForm(conf);
 
             Object.keys(body).forEach(function (key) {
                 console.log("storing " + key + " " + body[key]);
@@ -167,7 +72,7 @@ var builder = function (conf) {
             //should save some items to the card form
 
             //pack iframes together
-            var iframes = packIframes.packIframes(window.parent);
+            const iframes = packIframes.packIframes(window.parent);
 
             iframes.forEach(function (frame) {
                 frame.interswitch.hostedFields.initialize(cardForm);
@@ -175,7 +80,7 @@ var builder = function (conf) {
 
             bus.on(events.PAY_REQUEST, function (options, reply) {
 
-                var payHandler = createPayHandler(client, cardForm);
+                const payHandler = createPayHandler(client, cardForm);
 
                 options.payments = body;
 
@@ -192,10 +97,10 @@ var createPayHandler = function (client, cardForm) {
 
     return function (options, reply) {
 
-        var isEmpty = cardForm.isEmpty();
+        const isEmpty = cardForm.isEmpty();
 
-        var invalidKeyData = cardForm.getInvalidFormField();
-        var isValid = invalidKeyData.length === 0 ? true : false;
+        const invalidKeyData = cardForm.getInvalidFormField();
+        let isValid = invalidKeyData.length === 0 ? true : false;
 
         console.log("isempty - isValid " + isEmpty + " " + isValid);
 
@@ -225,7 +130,7 @@ var createPayHandler = function (client, cardForm) {
         }
 
 
-        var creditCardDetails = cardForm.getCardData();
+        const creditCardDetails = cardForm.getCardData();
 
         options = options || {};
 
@@ -233,7 +138,7 @@ var createPayHandler = function (client, cardForm) {
         console.log("credit card details is " + JSON.stringify(client));
         console.log(client);
         console.log(creditCardDetails);
-        var exp = creditCardDetails.exp;
+        const exp = creditCardDetails.exp;
 
         //creditCardDetails.exp = exp.charAt(3)+exp.charAt(2)+exp.charAt(0)+exp.charAt(1);0221
         creditCardDetails.exp = exp.charAt(3) + exp.charAt(4) + exp.charAt(0) + exp.charAt(1);
@@ -247,7 +152,7 @@ var createPayHandler = function (client, cardForm) {
         obj.amount = options.payments.amount;
         console.log("obj to pass to secure data " + JSON.stringify(obj) + " " + obj.pan);
 
-        var secureData = getSecureDataKE(obj);
+        const secureData = getSecureDataKE(obj);
         secureData.paymentId = options.payments.id;
         /*
         amount = amount
@@ -282,8 +187,8 @@ var createPayHandler = function (client, cardForm) {
 
         console.log(JSON.stringify(secureData));
 
-        var url = "http://testids.interswitch.co.ke:9080/api/v1/merchant/transact/cards";
-        var headerData = getHeaderDataKE(client, url, "POST");
+        const url = "http://testids.interswitch.co.ke:9080/api/v1/merchant/transact/cards";
+        const headerData = getHeaderDataKE(client, url, "POST");
         console.log(JSON.stringify(headerData));
 
         // cardInitialize("{\"country\":\"KE\",\"amount\":\"100\",\"authData\":\"U/v7WAcxI3HpVs+KXJzLAIhATiIYE+jjKgcVwHud0bBGJGPux08jQm240iGSyEmKxDJhP4FG/EGUVtBvDDGzY6xE+sM9lO9NNDA7+LwnrXTczBHsUzECQqwWRbT+7lrV4qtmZtkPb6uF+91bivIUYmU2q/5zvY8dleCc+ZzdqpfKicsgDafGYP8beuoOmi3L30ZlOZ7kap6OlCyEsgeFa8yJ/Y4e3S+3Y4LNTiFFFQmI/TVHF07/675QmJ8BsaQrMoUzbY6FdPNVjF8cdvdyQnVGFDoPC6a/op6uGisGFbuS1Hon+UOHMumG0B8N82a+VdgTKqiYUsns92gLv6PDvw==\",\"city\":\"NBI\",\"orderId\":\"kev3d7890\",\"customerInfor\":\"1002|kelvin|mwangi| kelvin.mwangi@interswitchgroup.com |0714171282|NBI|KE|00200|wstlnds|NBI\",\"fee\":\"0\",\"transactionRef\":\"kev3d7890\",\"terminalId\":\"3TLP0001\",\"terminalType\":\"WEB\",\"paymentItem\":\"CRD\",\"preauth\":\"0\",\"merchantId\":\"ISWKEN0001\",\"provider\":\"VSI\",\"narration\":\"Payment-Card\",\"currency\":\"KES\",\"domain\":\"ISWKEN\",\"paca\":\"1\"}", function (err, res, status) {
@@ -291,106 +196,11 @@ var createPayHandler = function (client, cardForm) {
     };
 };
 
-var createPayHandlerKE = function (client, cardForm) {
 
-    return function (options, reply) {
+const initialize = function (cardForm) {
+    let fieldComponent;
 
-        var isEmpty = cardForm.isEmpty();
-
-        var invalidKeyData = cardForm.getInvalidFormField();
-        var isValid = invalidKeyData.length === 0 ? true : false;
-
-        console.log("isempty - isValid " + isEmpty + " " + isValid);
-
-        if (isEmpty) {
-
-            var obj = {
-                error: "All the fields are empty"
-            };
-
-
-            reply(obj);
-            return;
-        }
-
-        if (!isValid) {
-
-            var obj = {
-
-                error: "Some fields are Invalid",
-                detail: {data: invalidKeyData}
-
-            };
-
-            console.log("error from source " + JSON.stringify(obj));
-            reply(obj);
-            return;
-        }
-
-
-        var creditCardDetails = cardForm.getCardData();
-
-        options = options || {};
-
-        //post response
-        console.log("credit card details is " + JSON.stringify(client));
-        console.log(client);
-        console.log(creditCardDetails);
-        var exp = creditCardDetails.exp;
-
-        creditCardDetails.exp = exp.charAt(3) + exp.charAt(2) + exp.charAt(0) + exp.charAt(1);
-
-        var obj = {};
-        Object.keys(creditCardDetails).forEach(function (key) {
-            obj[key] = creditCardDetails[key];
-        });
-
-        obj.expDate = obj.exp;
-        obj.amount = options.payments.amount;
-        console.log("obj to pass to secure data " + JSON.stringify(obj) + " " + obj.pan);
-
-        var secureData = getSecureDataKE(obj);
-        secureData.paymentId = options.payments.id;
-        delete secureData.mac;
-
-        console.log(JSON.stringify(secureData));
-
-        request({
-            method: "POST",
-            json: true,
-            body: secureData,
-            url: "https://testids.interswitch.co.ke:3000/collections/pay",
-            header: {
-                'content-type': 'application/json'
-            }
-        }, function (err, res, status) {
-            if (err) {
-                console.log("error paying " + err);
-                var obj = {
-                    error: err
-                };
-                reply(obj);
-                return;
-            } else {
-                console.log("response from server " + res.message);
-                //bus.emit("PAY_DONE", {res});
-                //bus.off("PAY_DONE");
-                reply(res);
-            }
-        });
-
-
-    };
-};
-
-var normalizeFields = function (options) {
-    return;
-};
-
-var initialize = function (cardForm) {
-    var fieldComponent;
-
-    var blacklist = ['background', 'display'];
+    const blacklist = ['background', 'display'];
 
     //inject merchant provided styles
     injectWithBlacklist(

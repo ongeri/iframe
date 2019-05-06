@@ -72,6 +72,10 @@ var fieldComponent = function (options) {
         this.element.appendChild(spanElement);
     }
 
+    if (!inputElem.model.fieldComponents)
+        inputElem.model.fieldComponents = [];
+    inputElem.element.fieldType = type;
+    inputElem.model.fieldComponents.push(inputElem.element);
     this.element.appendChild(inputElem.element);
 };
 module.exports = {

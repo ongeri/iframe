@@ -158,13 +158,6 @@ var validInput = (value, type, context) => {
             return (value.length === 3 && lastChar === '/') || !isNaN(lastChar);
         }
         if (type === "token") {
-            if (context) {
-                const selectedTokenObject = context.model.conf.tokens.find((token) => {
-                    return token.token === value
-                });
-                console.log("matched token object: ", selectedTokenObject);
-                context.model.set("exp.value", selectedTokenObject.expiry);
-            }
             return true;
         }
         if (type === constants.formMap.cardvstokenradio.name) {
@@ -202,7 +195,7 @@ BaseInput.prototype._addDOMInputListeners = function () {
             }
             else {
 
-                if (valueChanged.length == 2) {
+                if (valueChanged.length === 2) {
 
                     valueChanged = valueChanged.substring(0, 1);
                     this.hasSlash = false;
@@ -220,7 +213,29 @@ BaseInput.prototype._addDOMInputListeners = function () {
 
             this.formatter.setValue(valueChanged);
         }
+        if (this.type === "token") {
+            const selectedTokenObject = this.model.conf.tokens.find((token) => {
+                return token.token === valueChanged
+            });
+            const expInputField = this.model.fieldComponents.find((fieldComponent) => {
+                return fieldComponent.fieldType === 'exp';
+            });
+            expInputField.value = selectedTokenObject.expiry;
+            console.log("matched token object: ", selectedTokenObject);
+        }
 
+        if (this.type === constants.formMap.cardvstokenradio.name) {
+            const expInputField = this.model.fieldComponents.find((fieldComponent) => {
+                return fieldComponent.fieldType === 'exp';
+            });
+            if (valueChanged === 'token') {
+                // Disable expiry input and set it using token expiry
+                expInputField.disabled = true;// TODO Check selected token and set its expiry date value here before disabling
+            } else {
+                expInputField.disabled = false;
+                expInputField.value = "";// TODO Not working
+            }
+        }
         this.updateModel('value', valueChanged);
     }.bind(this), false);
 };

@@ -97,7 +97,6 @@ var HostedFields = function (options) {
         //console.log("associated selector "+container);
 
         if (!container) {
-            frame.interswitch.hostedFields.initialize(cardForm);
             console.log("No container element with id ", field.selector, " was found for field ", key);
             throw new Error({
                 message: "The Field " + field.selector + " does not exist."
