@@ -13,6 +13,13 @@ var obj = {
         isValid: false,
         isPotentiallyValid: true
     },
+    cardvstokenradio: {
+        value: "",
+        isEmpty: false,
+        isFocused: false,
+        isValid: true,
+        isPotentiallyValid: true
+    },
     cvv: {
         value: "",
         isEmpty: true,

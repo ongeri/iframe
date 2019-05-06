@@ -167,9 +167,10 @@ var validInput = (value, type, context) => {
             }
             return true;
         }
-        else {
-            return !isNaN(lastChar);
+        if (type === constants.formMap.cardvstokenradio.name) {
+            return true;
         }
+        return !isNaN(lastChar);
     }
     return true;
 };
@@ -252,6 +253,9 @@ BaseInput.prototype.modelOnChange = function (property, callback) {
 
 BaseInput.prototype.render = function () {
     var modelData = this.model.get(this.type);
+    if (!modelData) {
+        modelData = {};
+    }
     var isValid = modelData.isValid;
     var isPotentiallyValid = modelData.isPotentiallyValid;
 
