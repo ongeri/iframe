@@ -228,12 +228,22 @@ BaseInput.prototype._addDOMInputListeners = function () {
             const expInputField = this.model.fieldComponents.find((fieldComponent) => {
                 return fieldComponent.fieldType === 'exp';
             });
+            const cardInputContainer = this.model.fieldComponents.find((fieldComponent) => {
+                return fieldComponent.fieldType === 'pan';
+            });
+            const tokenInputContainer = this.model.fieldComponents.find((fieldComponent) => {
+                return fieldComponent.fieldType === 'token';
+            });
             if (valueChanged === 'token') {
+                cardInputContainer.style.display = 'none';
+                tokenInputContainer.style.display = 'block';
                 // Disable expiry input and set it using token expiry
                 expInputField.disabled = true;// TODO Check selected token and set its expiry date value here before disabling
             } else {
+                cardInputContainer.style.display = 'block';
+                tokenInputContainer.style.display = 'none';
                 expInputField.disabled = false;
-                expInputField.value = "";// TODO Not working
+                expInputField.value = "";
             }
         }
         this.updateModel('value', valueChanged);
