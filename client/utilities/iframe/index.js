@@ -18,8 +18,10 @@ module.exports = function createFrame(options) {
         delete config.style;
     }
 
-
     setAttributes(iframe, config);
+    const resizer = document.createElement("script");
+    resizer.text = 'setTimeout(() => {iFrameResize({log: true}, "#' + iframe.name + '")}, 5000);';
+    document.body.appendChild(resizer);
 
     if (!iframe.getAttribute('id')) {
         iframe.id = iframe.name;

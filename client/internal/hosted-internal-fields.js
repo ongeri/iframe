@@ -84,6 +84,7 @@ var builder = function (conf) {
             });
             cardvstokenradioContainer.children.card.checked = true;
             fireEvent(cardvstokenradioContainer, 'input');
+            fireEvent(cardvstokenradioContainer.children.card, 'change');
 
             bus.on(events.PAY_REQUEST, function (options, reply) {
 

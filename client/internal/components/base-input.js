@@ -231,13 +231,17 @@ BaseInput.prototype._addDOMInputListeners = function () {
             });
             if (valueChanged === 'token') {
                 cardInputContainer.style.display = 'none';
+                // cardInputContainer.offsetParent.offsetParent.style.height = '0px';
                 tokenInputContainer.style.display = 'block';
+                // tokenInputContainer.offsetParent.offsetParent.style.height = 'auto';
                 fireEvent(tokenInputContainer, 'input');
                 // Disable expiry input and set it using token expiry
                 expInputField.disabled = true;
             } else {
                 cardInputContainer.style.display = 'block';
+                // cardInputContainer.offsetParent.offsetParent.style.height = 'auto';
                 tokenInputContainer.style.display = 'none';
+                // tokenInputContainer.offsetParent.offsetParent.style.height = '0px';
                 expInputField.disabled = false;
                 expInputField.value = "";
                 fireEvent(expInputField, 'input');
