@@ -9,6 +9,7 @@ const injectWithBlacklist = require('inject-stylesheet').injectWithBlacklist;
 const request = require('request');
 const forwarderUrl = require('./constant.js').forwarder.url;
 const forwarderAuth = require('./constant.js').forwarder.auth;
+const constants = require('../libs/constants');
 
 const create = function () {
 
@@ -78,6 +79,12 @@ var builder = function (conf) {
                 frame.interswitch.hostedFields.initialize(cardForm);
             });
 
+            const cardvstokenradioContainer = cardForm.fieldComponents.find((fieldComponent) => {
+                return fieldComponent.fieldType === constants.formMap.cardvstokenradio.name;
+            });
+            cardvstokenradioContainer.children.card.checked = true;
+            fireEvent(cardvstokenradioContainer, 'input');
+
             bus.on(events.PAY_REQUEST, function (options, reply) {
 
                 const payHandler = createPayHandler(client, cardForm);
@@ -89,9 +96,21 @@ var builder = function (conf) {
 
         }//end of else after making payments request
     });
-
-
 };
+
+function fireEvent(element, event) {
+    let evt;
+    if (document.createEventObject) {
+        // dispatch for IE
+        evt = document.createEventObject();
+        return element.fireEvent('on' + event, evt)
+    } else {
+        // dispatch for firefox + others
+        evt = document.createEvent("HTMLEvents");
+        evt.initEvent(event, true, true); // event type,bubbling,cancelable
+        return !element.dispatchEvent(evt);
+    }
+}
 
 var createPayHandler = function (client, cardForm) {
 

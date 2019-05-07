@@ -15,6 +15,7 @@ function buildElement() {
     });
 
     element.style.width = "100%";
+    element.style.color = "black";
 
     const formMap = constants.formMap[this.type];
 

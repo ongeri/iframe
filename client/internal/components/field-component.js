@@ -47,7 +47,7 @@ var fieldComponent = function (options) {
                 spanElement.style.display = 'none';
                 return;
             }
-            if (data.length == 0) {
+            if (data.length === 0) {
                 //hide span element
                 spanElement.style.display = 'none';
             }

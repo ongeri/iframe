@@ -26,6 +26,7 @@ function buildElement() {
         const radioInputLabel = document.createElement('label');
         radioInputLabel.setAttribute('for', radioValue);
         radioInputLabel.innerHTML = radioValue;
+        radioInputLabel.style.color = 'black';
         element.appendChild(radioInput);
         element.appendChild(radioInputLabel);
     });

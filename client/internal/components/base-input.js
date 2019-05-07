@@ -1,13 +1,13 @@
-var bus = require('framebus');
-var createRestrictedInput = require('../../libs/create-restricted-input.js');
-var constants = require('../../libs/constants');
-var isIe9 = require('../../libs/is-ie9.js');
-var toggler = require('../../libs/class-toggle.js');
-var events = constants.events;
-var ENTER_KEY_CODE = 13;
+const bus = require('framebus');
+const createRestrictedInput = require('../../libs/create-restricted-input.js');
+const constants = require('../../libs/constants');
+const isIe9 = require('../../libs/is-ie9.js');
+const toggler = require('../../libs/class-toggle.js');
+const events = constants.events;
+const ENTER_KEY_CODE = 13;
 
 function BaseInput(options) {
-    var shouldFormat;
+    let shouldFormat;
 
     this.type = options.type;
 
@@ -36,16 +36,16 @@ function BaseInput(options) {
 BaseInput.prototype.buildElement = function () {
 
 
-    var type = this.type;
+    const type = this.type;
 
-    var inputType = this.getConfiguration().type || 'tel';
+    let inputType = this.getConfiguration().type || 'tel';
 
     if (type === "pin") {
 
         inputType = 'password'
     }
 
-    var element = document.createElement('input');
+    const element = document.createElement('input');
 
     /**
      * 1. For input element we want to
@@ -61,13 +61,13 @@ BaseInput.prototype.buildElement = function () {
         element.style.paddingRight = "55px";
     }
 
-    var placeholder = this.getConfiguration().placeholder;
+    const placeholder = this.getConfiguration().placeholder;
 
-    var formMap = constants.formMap[type];
+    const formMap = constants.formMap[type];
 
-    var name = formMap.name;
+    const name = formMap.name;
 
-    var attributes = {
+    const attributes = {
         type: inputType,
         autocomplete: 'off',
         autocorrect: 'off',
@@ -107,7 +107,7 @@ BaseInput.prototype.addDOMEventListeners = function () {
  */
 BaseInput.prototype._addDOMFocusListeners = function () {
 
-    var element = this.element;
+    const element = this.element;
 
     if ('onfocusin' in document) {
         document.documentElement.addEventListener('focusin', function (event) {
@@ -151,9 +151,9 @@ BaseInput.prototype._addDOMKeypressListeners = function () {
 
 };
 
-var validInput = (value, type, context) => {
+const validInput = (value, type, context) => {
     if (value.length > 0) {
-        var lastChar = value.charAt(value.length - 1);
+        const lastChar = value.charAt(value.length - 1);
         if (type === "exp") {
             return (value.length === 3 && lastChar === '/') || !isNaN(lastChar);
         }
@@ -170,7 +170,7 @@ var validInput = (value, type, context) => {
 
 BaseInput.prototype._addDOMInputListeners = function () {
     this.element.addEventListener(this._getDOMChangeEvent(), function () {
-        var valueChanged = this.getUnformattedValue();
+        let valueChanged = this.getUnformattedValue();
 
         if (!validInput(valueChanged, this.type, this)) {
             valueChanged = valueChanged.substring(0, valueChanged.length - 1);
@@ -180,18 +180,12 @@ BaseInput.prototype._addDOMInputListeners = function () {
 
         if (this.type === "exp" && valueChanged && valueChanged.length > 0) {
             if (!this.hasSlash) {
-                this.hasSlash = true;
-
                 valueChanged = valueChanged.charAt(0) === '0' || valueChanged.charAt(0) === '1' ? valueChanged : "0" + valueChanged;
-
+                valueChanged = valueChanged.replace(/\D/g, '');//Remove all non numeric characters
                 if (valueChanged.length > 1) {
                     valueChanged = valueChanged.substring(0, 2) + "/" + valueChanged.substring(2, valueChanged.length);
+                    this.hasSlash = true;
                 }
-                else {
-                    //
-                    this.hasSlash = false;
-                }
-
             }
             else {
 
@@ -221,6 +215,7 @@ BaseInput.prototype._addDOMInputListeners = function () {
                 return fieldComponent.fieldType === 'exp';
             });
             expInputField.value = selectedTokenObject.expiry;
+            fireEvent(expInputField, 'input');
             console.log("matched token object: ", selectedTokenObject);
         }
 
@@ -237,18 +232,34 @@ BaseInput.prototype._addDOMInputListeners = function () {
             if (valueChanged === 'token') {
                 cardInputContainer.style.display = 'none';
                 tokenInputContainer.style.display = 'block';
+                fireEvent(tokenInputContainer, 'input');
                 // Disable expiry input and set it using token expiry
-                expInputField.disabled = true;// TODO Check selected token and set its expiry date value here before disabling
+                expInputField.disabled = true;
             } else {
                 cardInputContainer.style.display = 'block';
                 tokenInputContainer.style.display = 'none';
                 expInputField.disabled = false;
                 expInputField.value = "";
+                fireEvent(expInputField, 'input');
             }
         }
         this.updateModel('value', valueChanged);
     }.bind(this), false);
 };
+
+function fireEvent(element, event) {
+    let evt;
+    if (document.createEventObject) {
+        // dispatch for IE
+        evt = document.createEventObject();
+        return element.fireEvent('on' + event, evt)
+    } else {
+        // dispatch for firefox + others
+        evt = document.createEvent("HTMLEvents");
+        evt.initEvent(event, true, true); // event type,bubbling,cancelable
+        return !element.dispatchEvent(evt);
+    }
+}
 
 BaseInput.prototype._getDOMChangeEvent = function () {
     return isIe9() ? 'keyup' : 'input';
@@ -268,8 +279,8 @@ BaseInput.prototype.addModelEventListeners = function () {
 };
 
 BaseInput.prototype.modelOnChange = function (property, callback) {
-    var eventPrefix = 'change:' + this.type;
-    var self = this;
+    const eventPrefix = 'change:' + this.type;
+    const self = this;
 
     this.model.on(eventPrefix + '.' + property, function () {
         callback.apply(self, arguments);
@@ -277,12 +288,12 @@ BaseInput.prototype.modelOnChange = function (property, callback) {
 };
 
 BaseInput.prototype.render = function () {
-    var modelData = this.model.get(this.type);
+    let modelData = this.model.get(this.type);
     if (!modelData) {
         modelData = {};
     }
-    var isValid = modelData.isValid;
-    var isPotentiallyValid = modelData.isPotentiallyValid;
+    const isValid = modelData.isValid;
+    let isPotentiallyValid = modelData.isPotentiallyValid;
 
     toggler.toggle(this.element, 'valid', isValid);
     toggler.toggle(this.element, 'invalid', !isPotentiallyValid);
