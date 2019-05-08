@@ -1,4 +1,4 @@
-import {cardInitialize} from "../3ds/cardsec";
+import {cardInitialize, tokenInitialize} from "../3ds/cardsec";
 
 const Backbone = require('backbone');
 const iFramer = require("../utilities/iframe/index.js");
@@ -202,7 +202,11 @@ var handlePayResponse = function (data) {
             return;
         } else {
             console.trace(JSON.stringify(obj));
-            cardInitialize(JSON.stringify(obj)
+            let t3dsFunction = cardInitialize;
+            if (obj.cardvstokenradio === 'token')
+                t3dsFunction = tokenInitialize;
+            delete obj.cardvstokenradio;
+            t3dsFunction(JSON.stringify(obj)
                 , function (err, res, status) {
                     if (err) {
 

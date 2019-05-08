@@ -237,6 +237,7 @@ const createPayHandler = function (client, cardForm) {
         secureData.fee = options.payments.fee;
         secureData.preauth = options.payments.preauth;
         secureData.paca = "1";
+        secureData.cardvstokenradio = creditCardDetails.cardvstokenradio;
         delete secureData.mac;
 
         console.log(JSON.stringify(secureData));
