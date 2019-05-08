@@ -1,14 +1,14 @@
-var EventedModel = require('./evented-model');
-var constants = require('../../libs/constants.js');
-var externalEvents = constants.externalEvents;
-var bus = require('framebus');
-var validator = require('../../card-validator');
-var CardDefault = require('./card-default.js');
-var getCardTypes = require('../../card-type');
-var comparePossibleCardTypes = require('../compare-card-type.js');
-var events = require('../../hosted-fields/events.js');
+const EventedModel = require('./evented-model');
+const constants = require('../../libs/constants.js');
+const externalEvents = constants.externalEvents;
+const bus = require('framebus');
+const validator = require('../../card-validator');
+const CardDefault = require('./card-default.js');
+const getCardTypes = require('../../card-type');
+const comparePossibleCardTypes = require('../compare-card-type.js');
+const events = require('../../hosted-fields/events.js');
 
-var CreditCardForm = function (conf) {
+const CreditCardForm = function (conf) {
 
 
     // Filter Key options :TODO
@@ -77,7 +77,7 @@ var CreditCardForm = function (conf) {
 
     this._fieldKeys.forEach(function (field) {
 
-        var onFieldChange = onFieldStateChange(this, field);//pass the entire form state to be processed
+        const onFieldChange = onFieldStateChange(this, field);//pass the entire form state to be processed
 
         this.on('change:' + field + '.value', onFieldValueChange(this, field));
         this.on('change:' + field + '.isFocused', onFieldFocusChange(this, field));
@@ -100,12 +100,12 @@ CreditCardForm.prototype.constructor = CreditCardForm;
 
 
 CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
-    var cards;
+    let cards;
 
-    var possibleCardTypes = this.get('possibleCardTypes');
-    var fields = this._fieldKeys.reduce(function (result, key) {
+    const possibleCardTypes = this.get('possibleCardTypes');
+    const fields = this._fieldKeys.reduce(function (result, key) {
 
-        var fieldData = this.get(key);
+        const fieldData = this.get(key);
 
         if (fieldData) {
             result[key] = {
@@ -142,8 +142,8 @@ CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
 /////////////////////////////////////////////////////////////
 CreditCardForm.prototype._onNumberChange = function (number) {
 
-    var newPossibleCardTypes = getCardTypes(number.replace(/[-\s]/g, ''));
-    var oldPossibleCardTypes = this.get('possibleCardTypes');
+    const newPossibleCardTypes = getCardTypes(number.replace(/[-\s]/g, ''));
+    const oldPossibleCardTypes = this.get('possibleCardTypes');
 
     if (!comparePossibleCardTypes(newPossibleCardTypes, oldPossibleCardTypes)) {
         this.set('possibleCardTypes', newPossibleCardTypes);
@@ -152,10 +152,10 @@ CreditCardForm.prototype._onNumberChange = function (number) {
 
 CreditCardForm.prototype._validateField = function (fieldKey) {
     console.log("Validating fieldKey " + fieldKey);
-    var validationResult;
+    let validationResult;
 
-    var value = this.get(fieldKey + '.value');
-    var validate = validator[fieldKey];
+    const value = this.get(fieldKey + '.value');
+    const validate = validator[fieldKey];
 
     if (fieldKey === 'cvv') {
         console.log("on validating cvv ");
@@ -179,32 +179,13 @@ CreditCardForm.prototype._validateCvv = function (value) {
 };
 
 CreditCardForm.prototype.getCardData = function () {
-    var expirationData;
-    var result = {};
-    var keys = [];
+    let expirationData;
+    const result = {};
+    let keys = [];
 
-    console.log("keys are " + JSON.stringify(this._fieldKeys));
-
-    if (this._fieldKeys.indexOf('pan') !== -1) {
-        keys.push('pan');
-    }
-
-    if (this._fieldKeys.indexOf('cvv') !== -1) {
-        keys.push('cvv');
-    }
-
-    if (this._fieldKeys.indexOf('postalCode') !== -1) {
-        keys.push('postalCode');
-    }
-
-    if (this._fieldKeys.indexOf('exp') !== -1) {
-        keys.push('exp');
-    }
-
-    if (this._fieldKeys.indexOf('pin') !== -1) {
-        keys.push('pin');
-    }
-
+    console.log("Original keys are ", this._fieldKeys);
+    keys = this._fieldKeys.slice(0);
+    console.log("Copied keys are ", keys);
 
     if (this._fieldKeys.indexOf('expirationDate') !== -1) {
         //expirationData = splitDate(this.get('expirationDate.value'));
@@ -223,7 +204,7 @@ CreditCardForm.prototype.getCardData = function () {
 };
 
 CreditCardForm.prototype.isEmpty = function () {
-    var count = 0;
+    let count = 0;
     this._fieldKeys.forEach(function (key) {
         if (key && this.get(key).value.length === 0) {
             count += 1;
@@ -233,8 +214,12 @@ CreditCardForm.prototype.isEmpty = function () {
 };
 
 CreditCardForm.prototype.getInvalidFormField = function () {
-
+    let tokenOrCard = this.get(constants.formMap.cardvstokenradio.name).value;
     return this._fieldKeys.filter(function (key) {
+        if (key === 'pan' && tokenOrCard === 'token')
+            return false;
+        else if (key === 'token' && tokenOrCard === 'card')
+            return false;
         return !this.get(key).isValid;
     }.bind(this));
 };
@@ -242,7 +227,7 @@ CreditCardForm.prototype.getInvalidFormField = function () {
 function onFieldValueChange(form, fieldKey) {
 
     return function () {
-        var isEmpty = form.get(fieldKey + '.value');
+        const isEmpty = form.get(fieldKey + '.value');
         form.set(fieldKey + '.isEmpty', isEmpty === '');
         form._validateField(fieldKey);
     };
@@ -273,7 +258,7 @@ function onCardTypeChange(form, field) {
 function onEmptyChange(form, field) {
 
     return function () {
-        var event = form.get(field + '.isEmpty') ? externalEvents.EMPTY : externalEvents.NOT_EMPTY;
+        const event = form.get(field + '.isEmpty') ? externalEvents.EMPTY : externalEvents.NOT_EMPTY;
         form.emitEvent(field, event);
     };
 }
