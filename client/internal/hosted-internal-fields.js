@@ -10,6 +10,72 @@ const request = require('request');
 const forwarderUrl = require('./constant.js').forwarder.url;
 const forwarderAuth = require('./constant.js').forwarder.auth;
 const constants = require('../libs/constants');
+var SecureManager = require('./secure.js');
+
+var getSecureData = function (options) {
+    var pan = options.pan || null;
+    var expDate = options.expDate || null;
+    var cvv = options.cvv || null;
+    var pin = options.pin || null;
+    var amount = options.amount || null;
+    var mobile = options.mobile || null;
+    var ttId = options.ttId || null;
+    var publicModulus = options.publicModulus || null;
+    var publicExponent = options.publicExponent || null;
+
+    var secureOptions = {
+        expiry: expDate,
+        pan: pan,
+        amount: amount,
+        mobile: mobile,
+        ttId: ttId
+    };
+
+    var pinData = {
+        pin: pin,
+        cvv: cvv,
+        expiry: expDate
+    };
+
+    return SecureManager.generateSecureData(secureOptions, pinData);
+};
+
+var getSecureDataKE = function (options) {
+    var pan = options.pan || null;
+    var expDate = options.expDate || null;
+    var cvv = options.cvv || null;
+    var pin = options.pin || null;
+    var amount = options.amount || null;
+    var mobile = options.mobile || null;
+    var ttId = options.ttId || null;
+    var publicModulus = options.publicModulus || null;
+    var publicExponent = options.publicExponent || null;
+
+    var secureOptions = {
+        expiry: expDate,
+        pan: pan,
+        amount: amount,
+        mobile: mobile,
+        ttId: ttId
+    };
+
+    var pinData = {
+        pin: pin,
+        cvv: cvv,
+        expiry: expDate
+    };
+
+    return SecureManager.generateSecureDataKE(secureOptions, pinData);
+};
+
+var getHeaderDataKE = function (client, url, httpMethod) {
+    var client = client;
+    var url = url;
+    var httpMethod = httpMethod;
+
+    return SecureManager.generateHeadersKE(client, url, httpMethod);
+};
+
 
 const create = function () {
 
@@ -62,6 +128,7 @@ var builder = function (conf) {
         }
         else {
             console.log(JSON.stringify(body));
+            var client = conf.client;
 
             const cardForm = new CreditCardForm(conf);
 
@@ -216,6 +283,102 @@ var createPayHandler = function (client, cardForm) {
     };
 };
 
+
+var createPayHandlerKE = function (client, cardForm) {
+
+    return function (options, reply) {
+
+        var isEmpty = cardForm.isEmpty();
+
+        var invalidKeyData = cardForm.getInvalidFormField();
+        var isValid = invalidKeyData.length === 0 ? true : false;
+
+        console.log("isempty - isValid " + isEmpty + " " + isValid);
+
+        if (isEmpty) {
+
+            var obj = {
+                error: "All the fields are empty"
+            };
+
+
+            reply(obj);
+            return;
+        }
+
+        if (!isValid) {
+
+            var obj = {
+
+                error: "Some fields are Invalid",
+                detail: {data: invalidKeyData}
+
+            };
+
+            console.log("error from source " + JSON.stringify(obj));
+            reply(obj);
+            return;
+        }
+
+
+        var creditCardDetails = cardForm.getCardData();
+
+        options = options || {};
+
+        //post response
+        console.log("credit card details is " + JSON.stringify(client));
+        console.log(client);
+        console.log(creditCardDetails);
+        var exp = creditCardDetails.exp;
+
+        creditCardDetails.exp = exp.charAt(3) + exp.charAt(2) + exp.charAt(0) + exp.charAt(1);
+
+        var obj = {};
+        Object.keys(creditCardDetails).forEach(function (key) {
+            obj[key] = creditCardDetails[key];
+        });
+
+        obj.expDate = obj.exp;
+        obj.amount = options.payments.amount;
+        console.log("obj to pass to secure data " + JSON.stringify(obj) + " " + obj.pan);
+
+        var secureData = getSecureDataKE(obj);
+        secureData.paymentId = options.payments.id;
+        delete secureData.mac;
+
+        console.log(JSON.stringify(secureData));
+
+        request({
+            method: "POST",
+            json: true,
+            body: secureData,
+            url: "https://testids.interswitch.co.ke:3000/collections/pay",
+            header: {
+                'content-type': 'application/json'
+            }
+        }, function (err, res, status) {
+            if (err) {
+                console.log("error paying " + err);
+                var obj = {
+                    error: err
+                };
+                reply(obj);
+                return;
+            } else {
+                console.log("response from server " + res.message);
+                //bus.emit("PAY_DONE", {res});
+                //bus.off("PAY_DONE");
+                reply(res);
+            }
+        });
+
+
+    };
+};
+
+var normalizeFields = function (options) {
+    return;
+};
 
 const initialize = function (cardForm) {
     let fieldComponent;
