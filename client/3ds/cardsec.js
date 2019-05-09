@@ -53,8 +53,8 @@ function tokenInitialize(payloadParam, callbackParam) {
             Cardinal.setup("init", {
                 jwt: response.jwt
             });
-
-            console.count("/merchant/token/initialize response:", JSON.stringify(response));
+            payload = JSON.stringify(response);
+            console.count("Response and new payload" + payload);
         } else {
             console.count("Token card not enrolled");
             callback("Token card not enrolled", null, undefined);
