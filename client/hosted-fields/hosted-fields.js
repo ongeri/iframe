@@ -1,18 +1,18 @@
-import {cardInitialize} from "../3ds/cardsec";
+import {cardInitialize, tokenInitialize} from "../3ds/cardsec";
 
-var Backbone = require('backbone');
-var iFramer = require("../utilities/iframe/index.js");
-var frameInjector = require('./frame-inject.js');
-var bus = require('framebus');
-var EventEmitter = require('../libs/event-emitter.js');
-var noCallback = require('../libs/no-callback.js');
-var uuid = require('../libs/uuid.js');
-var constants = require('../libs/constants.js');
-var events = require('./events.js');
-var toggler = require('../libs/class-toggle.js');
-var externalClasses = constants.externalClasses;
+const Backbone = require('backbone');
+const iFramer = require("../utilities/iframe/index.js");
+const frameInjector = require('./frame-inject.js');
+const bus = require('framebus');
+const EventEmitter = require('../libs/event-emitter.js');
+const noCallback = require('../libs/no-callback.js');
+const uuid = require('../libs/uuid.js');
+const constants = require('../libs/constants.js');
+const events = require('./events.js');
+const toggler = require('../libs/class-toggle.js');
+const externalClasses = constants.externalClasses;
 
-var createInputEventHandler = function (fields) {
+const createInputEventHandler = function (fields) {
     return function (eventData) {
         const field = eventData.merchantPayload.fields[eventData.merchantPayload.emittedBy];
         const container = fields[eventData.merchantPayload.emittedBy].containerElement;
@@ -28,7 +28,7 @@ var createInputEventHandler = function (fields) {
         console.log(!field.isPotentiallyValid + "-" + field.isValid);
 
         //change class of elements here
-        var classGroup = container.classList;
+        const classGroup = container.classList;
 
         toggler.toggle(container, externalClasses.FOCUSED, field.isFocused);
         toggler.toggle(container, externalClasses.VALID, field.isValid);
@@ -43,15 +43,15 @@ var createInputEventHandler = function (fields) {
     };
 };
 
-var HostedFields = function (options) {
+const HostedFields = function (options) {
 
-    var failureTimeout;
+    let failureTimeout;
 
 
-    var self = this;
-    var fields = {};
-    var fieldCount = 0;
-    var componentId = uuid();
+    const self = this;
+    const fields = {};
+    let fieldCount = 0;
+    const componentId = uuid();
 
     if (!options.client) {
         //throw exception because we need client for certain https calls
@@ -83,7 +83,7 @@ var HostedFields = function (options) {
 
 
     Object.keys(options.fields).forEach(function (key) {
-        var field, container, frame;
+        let field, container, frame;
 
         /**
          * we can validate on fields
@@ -97,7 +97,6 @@ var HostedFields = function (options) {
         //console.log("associated selector "+container);
 
         if (!container) {
-            frame.interswitch.hostedFields.initialize(cardForm);
             console.log("No container element with id ", field.selector, " was found for field ", key);
             throw new Error({
                 message: "The Field " + field.selector + " does not exist."
@@ -179,7 +178,7 @@ HostedFields.prototype.pay = function (options, callback) {
 
     noCallback(callback, 'pay');
 
-    var t = handlePayResponse(callback);
+    const t = handlePayResponse(callback);
     bus.emit("PAY_REQUEST", {}, t);
 
 
@@ -203,11 +202,15 @@ var handlePayResponse = function (data) {
             return;
         } else {
             console.trace(JSON.stringify(obj));
-            cardInitialize(JSON.stringify(obj)
+            let t3dsFunction = cardInitialize;
+            if (obj.cardvstokenradio === 'token')
+                t3dsFunction = tokenInitialize;
+            delete obj.cardvstokenradio;
+            t3dsFunction(JSON.stringify(obj)
                 , function (err, res, status) {
                     if (err) {
 
-                        var obj = {
+                        const obj = {
                             error: err
                         };
                         data(obj);

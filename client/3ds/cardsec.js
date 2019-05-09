@@ -42,6 +42,32 @@ function cardInitialize(payloadParam, callbackParam) {
     });
 }
 
+function tokenInitialize(payloadParam, callbackParam) {
+    payload = payloadParam;
+    callback = callbackParam;
+    console.count("cardInitialize(payload): " + payload);
+    $.get(baseUrl + "/merchant/token/initialize", {requestStr: payload}, function (response) {
+        if (response.jwt) {
+
+            //validate account
+            Cardinal.setup("init", {
+                jwt: response.jwt
+            });
+            payload = JSON.stringify(response);
+            console.count("Response and new payload" + payload);
+        } else {
+            console.count("Token card not enrolled");
+            callback("Token card not enrolled", null, undefined);
+        }
+    }).done(function () {
+        // callback("second success", null, undefined);
+    }).fail(function () {
+        callback("error", null, undefined);
+    }).always(function () {
+        // callback("finished", null, undefined);
+    });
+}
+
 function paymentsCompleted(setupCompleteData) {
     console.count("payments.setupComplete", setupCompleteData.sessionId);
     Cardinal.trigger("bin.process", '1234567894561237');
@@ -294,5 +320,6 @@ if (typeof String.prototype.utf8Decode == 'undefined') {
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 if (typeof module != 'undefined' && module.exports) module.exports = Sha1; // CommonJs export
 module.exports = {
-    cardInitialize: cardInitialize
+    cardInitialize: cardInitialize,
+    tokenInitialize: tokenInitialize
 };

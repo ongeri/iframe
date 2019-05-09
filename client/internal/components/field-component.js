@@ -47,7 +47,7 @@ var fieldComponent = function (options) {
                 spanElement.style.display = 'none';
                 return;
             }
-            if (data.length == 0) {
+            if (data.length === 0) {
                 //hide span element
                 spanElement.style.display = 'none';
             }
@@ -72,6 +72,10 @@ var fieldComponent = function (options) {
         this.element.appendChild(spanElement);
     }
 
+    if (!inputElem.model.fieldComponents)
+        inputElem.model.fieldComponents = [];
+    inputElem.element.fieldType = type;
+    inputElem.model.fieldComponents.push(inputElem.element);
     this.element.appendChild(inputElem.element);
 };
 module.exports = {

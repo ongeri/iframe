@@ -38,6 +38,10 @@ var constants = {
             name: "Token",
             label: "TOKEN"
         },
+        cardvstokenradio: {
+            name: "cardvstokenradio",
+            label: "CARDVSTOKENRADIO"
+        },
         cvv: {
             name: "cvv",
             label: "CVV"

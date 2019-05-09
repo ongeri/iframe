@@ -5,13 +5,13 @@ function EventedModel() {
     this._listeners = {};
 }
 
+// TODO: What the heck does this do? It iterates over the properties of the passed object and then saves them in a local variable that is then lost for ever?
 EventedModel.prototype.initialize = function (obj) {
 
     if (!obj) {
-        return
+        return;
     }
-    ;
-
+    // This local variable will be lost after function finishes executing... was it meant to be returned or saved back to attributes?
     var traversal = this._attributes;
 
 
@@ -76,6 +76,7 @@ EventedModel.prototype.set = function set(compoundKey, value) {
     key = keys[i];
 
     if (traversal[key] !== value) {
+        console.log('change ' + key + "'s old value: ", traversal[key], ' to new value: ' + value);
         traversal[key] = value;
         //the value associated with this field has just changed
         //this.emit('change');
@@ -120,7 +121,7 @@ EventedModel.prototype.emit = function emit(event) {
     }
 
 
-}
+};
 
 EventedModel.prototype.resetAttributes = function resetAttributes() {
     return {};
