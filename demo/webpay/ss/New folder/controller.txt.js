@@ -15,7 +15,7 @@ function doAuthorize() {
     var settings = {
         "async": true,
         "crossDomain": true,
-        "url": url
+        "url": url,
         "method": "POST",
         "headers": {
 

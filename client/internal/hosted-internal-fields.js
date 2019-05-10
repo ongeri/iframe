@@ -29,7 +29,8 @@ const getSecureDataKE = function (options) {
         amount: amount,
         mobile: mobile,
         ttId: ttId,
-        tokenize: options.tokenize
+        tokenize: options.tokenize,
+        cardvstokenradio: options.cardvstokenradio
     };
 
     const pinData = {

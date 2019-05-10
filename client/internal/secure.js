@@ -263,8 +263,12 @@ SecureManager.authDataKE = function (options, pan, pin, expiry, cvv) {
     //TODO Temporary Activate eCash
 
     //String authDataCipher = pan + "D" + cvv2 + "D" + expiryDate + "D" + pin ;
-
-    var authString = pan + 'D' + cvv + 'D' + expiry + 'D' + pin + "D" + options.tokenize;
+    let authString;
+    if (options.cardvstokenradio === 'token') {
+        authString = pan + ',' + cvv + ',' + expiry + ',' + pin;
+    } else {
+        authString = pan + 'D' + cvv + 'D' + expiry + 'D' + pin + "D" + options.tokenize;
+    }
     console.log("Auth-string: " + authString);
     var vv = SecureManager.toHex(authString);
     //var vv = SecureManager.toHex(options.authData);

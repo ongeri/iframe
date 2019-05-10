@@ -23,10 +23,15 @@ function buildElement() {
         radioInput.setAttribute('value', radioValue);
         radioInput.checked = true;
         radioInput.style.width = "auto";
+        radioInput.style.verticalAlign = "middle";
         const radioInputLabel = document.createElement('label');
         radioInputLabel.setAttribute('for', radioValue);
         radioInputLabel.innerHTML = radioValue;
         radioInputLabel.style.color = 'black';
+        radioInputLabel.style.textTransform = 'capitalize';
+        radioInputLabel.style.verticalAlign = "middle";
+        radioInputLabel.style.color = "#888";
+        radioInputLabel.style.fontFamily = "inherit";
         element.appendChild(radioInput);
         element.appendChild(radioInputLabel);
     });

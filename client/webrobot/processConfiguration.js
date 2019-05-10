@@ -40,7 +40,7 @@ var processConfiguration = function (options, callback) {
 
     //var merchantConfigUrl = "http://172.16.112.4:3000/api/v1/merchant/configuration";
 
-    var merchantConfigUrl = "http://localhost:3000/api/v1/merchant/configuration/new";
+    var merchantConfigUrl = "https://testids.interswitch.co.ke:3000/api/v1/merchant/configuration/new";
 
     var url = "http://testids.interswitch.co.ke:9080/api/v1/merchant/mfb/config/" + options.MID;
 
