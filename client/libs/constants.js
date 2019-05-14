@@ -9,6 +9,10 @@ var constants = {
         CARD_TYPE_CHANGE: 'cardTypeChange'
     },
 
+    config: {
+        host: "https://testids.interswitch.co.ke:3000"
+    },
+
     externalClasses: {
         FOCUSED: 'isw-hosted-field-focused',
         INVALID: 'isw-hosted-field-invalid',
