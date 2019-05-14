@@ -220,6 +220,9 @@ CreditCardForm.prototype.getInvalidFormField = function () {
             return false;
         else if (key === 'token' && tokenOrCard === 'card')
             return false;
+        if (key === 'save') {
+            return false;// Save is always valid since it is a boolean checkbox
+        }
         return !this.get(key).isValid;
     }.bind(this));
 };

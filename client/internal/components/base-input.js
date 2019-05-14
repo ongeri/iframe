@@ -163,6 +163,9 @@ const validInput = (value, type, context) => {
         if (type === constants.formMap.cardvstokenradio.name) {
             return true;
         }
+        if (type === constants.formMap.save.name) {
+            return true;
+        }
         return !isNaN(lastChar);
     }
     return true;
@@ -229,6 +232,9 @@ BaseInput.prototype._addDOMInputListeners = function () {
             const tokenInputContainer = this.model.fieldComponents.find((fieldComponent) => {
                 return fieldComponent.fieldType === 'token';
             });
+            const saveCardInputContainer = this.model.fieldComponents.find((fieldComponent) => {
+                return fieldComponent.fieldType === 'save';
+            });
             if (valueChanged === 'token') {
                 cardInputContainer.style.display = 'none';
                 // cardInputContainer.offsetParent.offsetParent.style.height = '0px';
@@ -236,6 +242,10 @@ BaseInput.prototype._addDOMInputListeners = function () {
                 // tokenInputContainer.offsetParent.offsetParent.style.height = 'auto';
                 fireEvent(tokenInputContainer, 'input');
                 // Disable expiry input and set it using token expiry
+                if (saveCardInputContainer) {
+                    saveCardInputContainer.style.display = 'none';
+                    fireEvent(saveCardInputContainer, 'input');
+                }
                 expInputField.disabled = true;
             } else {
                 cardInputContainer.style.display = 'block';
@@ -243,6 +253,10 @@ BaseInput.prototype._addDOMInputListeners = function () {
                 tokenInputContainer.style.display = 'none';
                 // tokenInputContainer.offsetParent.offsetParent.style.height = '0px';
                 expInputField.disabled = false;
+                if (saveCardInputContainer) {// It may be null depending on merchant config
+                    saveCardInputContainer.style.display = 'block';
+                    fireEvent(saveCardInputContainer, 'input');
+                }
                 expInputField.value = "";
                 fireEvent(expInputField, 'input');
             }

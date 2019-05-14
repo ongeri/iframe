@@ -8,6 +8,9 @@ FakeRestrictedInput.prototype.getUnformattedValue = function () {
     if (this.inputElement.attributes.name.value === constants.formMap.cardvstokenradio.name) {
         return document.querySelector('input[name="' + constants.formMap.cardvstokenradio.name + '"]:checked').value
     }
+    if (this.inputElement.attributes.name.value === constants.formMap.save.name) {
+        return document.querySelector('input[name="' + constants.formMap.save.name + '"]').checked
+    }
     return this.inputElement.value;
 };
 

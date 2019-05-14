@@ -28,7 +28,6 @@ function buildElement() {
         const radioInputLabel = document.createElement('label');
         radioInputLabel.setAttribute('for', radioValue);
         radioInputLabel.innerHTML = radioValue === 'token' ? 'Saved Card' : radioValue === 'card' ? 'New Card' : radioValue;
-        radioInputLabel.style.color = 'black';
         radioInputLabel.style.textTransform = 'capitalize';
         radioInputLabel.style.verticalAlign = "middle";
         radioInputLabel.style.color = "#888";

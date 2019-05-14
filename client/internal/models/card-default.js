@@ -54,6 +54,13 @@ var obj = {
         isFocused: false,
         isValid: false,
         isPotentiallyValid: true
+    },
+    save: {
+        value: true,
+        isEmpty: true,
+        isFocused: false,
+        isValid: true,
+        isPotentiallyValid: true
     }
 };
 

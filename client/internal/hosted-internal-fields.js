@@ -114,9 +114,11 @@ const builder = function (conf) {
             const cardvstokenradioContainer = cardForm.fieldComponents.find((fieldComponent) => {
                 return fieldComponent.fieldType === constants.formMap.cardvstokenradio.name;
             });
-            cardvstokenradioContainer.children.card.checked = true;
-            fireEvent(cardvstokenradioContainer, 'input');
-            fireEvent(cardvstokenradioContainer.children.card, 'change');
+            if (cardvstokenradioContainer) {
+                cardvstokenradioContainer.children.card.checked = true;
+                fireEvent(cardvstokenradioContainer, 'input');
+                fireEvent(cardvstokenradioContainer.children.card, 'change');
+            }
 
             bus.on(events.PAY_REQUEST, function (options, reply) {
 
@@ -202,7 +204,13 @@ const createPayHandler = function (client, cardForm) {
 
         obj.expDate = obj.exp;
         obj.amount = options.payments.amount;
-        obj.tokenize = 1;// TODO Get this information from the user or merchant config
+        if (client._configuration.tokenize == '1') {// Optional tokenization, check user's choice
+            obj.tokenize = obj.save ? '1' : '0';
+        } else if (client._configuration.tokenize == '2') {// Never tokenize
+            obj.tokenize = '0';
+        } else {// Otherwise assume tokenize
+            obj.tokenize = '1';
+        }
         console.log("obj to pass to secure data " + JSON.stringify(obj) + " " + obj.pan);
         if (obj.cardvstokenradio === 'token') {
             obj.pan = obj.token;
