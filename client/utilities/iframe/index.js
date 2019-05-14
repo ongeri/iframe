@@ -20,7 +20,8 @@ module.exports = function createFrame(options) {
 
     setAttributes(iframe, config);
     const resizer = document.createElement("script");
-    resizer.text = 'setTimeout(() => {iFrameResize({log: true}, "#' + iframe.name + '")}, 5000);';
+    // resizer.text = 'setTimeout(() => {iFrameResize({log: true}, "#' + iframe.name + '")}, 5000);';
+    resizer.text = 'setTimeout(() => {try {iFrameResize({log: true}, "#' + iframe.name + '")} catch (err) {console.log("Failed to register resizer for ' + iframe.name + '")}}, 5000);';
     document.body.appendChild(resizer);
 
     if (!iframe.getAttribute('id')) {

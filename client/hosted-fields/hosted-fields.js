@@ -139,7 +139,7 @@ const HostedFields = function (options) {
 
         //run atleast after 0secs
         setTimeout(function () {
-            frame.src = "http://localhost:3000/file";
+            frame.src = constants.config.host + "/file";
         }, 0);
 
     }.bind(this));
