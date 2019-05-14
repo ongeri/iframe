@@ -137,10 +137,10 @@ app.get('/api/v1/merchant/configuration/new', function (req, resp) {
     console.log("request to get config MID is " + req.query.MID);
     //console.log("header to complete pay is "+JSON.stringify(req.headers));
     //console.log("header host to complete pay is "+req.headers.host);
-    req.headers.host = "testids.interswitch.co.ke:9080";
+    req.headers.host = "http://172.16.112.4:9080";
     //headers: req.headers,
     request({
-        url: 'https://'+req.headers.host + '/api/v1/merchant/mfb/config/' + req.query.MID,
+        url: req.headers.host + '/api/v1/merchant/mfb/config/' + req.query.MID,
         json: true,
         body: req.body,
         headers: req.headers,
@@ -230,9 +230,8 @@ app.post('/collections/pay', function (req, resp) {
 app.post('/collections/pay/ke', function (req, resp) {
     console.log("request to complete pay is " + JSON.stringify(req.body));
     console.log("header to complete pay is " + JSON.stringify(req.headers));
-    req.headers.host = "testids.interswitch.co.ke:9080";
     request({
-        url: 'http://172.16.112.4:9080/api/v1/merchant/transact/cards',
+        url: req.headers.host + '/api/v1/merchant/transact/cards',
         json: true,
         body: req.body,
         headers: req.headers,
