@@ -3,7 +3,7 @@ const constants = require('../../libs/constants');
 
 function buildElement() {
 
-    console.info("Overriden method called");
+//    console.info("Overriden method called");
 
     // Create dropdopwn element
     const element = document.createElement('select');
@@ -38,9 +38,9 @@ function buildElement() {
     // Callback function to execute when mutations are observed
     const callback = function (mutationsList, observer) {
         for (let mutation of mutationsList) {
-            console.log('A mutation occurred', mutation);
+//            console.log('A mutation occurred', mutation);
             if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                console.log('The element\'s style changed');
+//                console.log('The element\'s style changed');
                 if (element.style.display === 'none') {
                     //    Hide parent body
                     document.body.style.display = 'none';

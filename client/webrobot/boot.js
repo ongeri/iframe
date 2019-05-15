@@ -53,7 +53,7 @@ var newInstanceValue = function (options, callback) {
      */
     processConfiguration(options, function (err, configuration) {
         var client;
-        console.log("response from remote in process  " + JSON.stringify(configuration));
+//        console.log("response from remote in process  " + JSON.stringify(configuration));
 
         if (err) {
             callback(err);

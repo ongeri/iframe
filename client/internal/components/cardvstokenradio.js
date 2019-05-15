@@ -3,7 +3,7 @@ const constants = require('../../libs/constants');
 
 function buildElement() {
 
-    console.info("Overriden method called");
+//    console.info("Overriden method called");
 
     const formMap = constants.formMap[this.type];
 

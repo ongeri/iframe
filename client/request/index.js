@@ -8,7 +8,7 @@ var ajaxIsAvailable;
 var ajaxAvailable = function () {
 
     if (ajaxIsAvailable == null) {
-        console.log(global.navigator.userAgent);
+//        console.log(global.navigator.userAgent);
         ajaxIsAvailable = !(isHTTP() && /MSIE\s(8|9)/.test(getUserAgent()));
     }
 
@@ -23,7 +23,7 @@ module.exports = function (options, callback) {
 
     if (ajaxAvailable()) {
         //IE more likely
-        console.log("normal browser or IE");
+//        console.log("normal browser or IE");
         // var root = {
         //     name: {
         //         first: "arthur",
@@ -55,7 +55,7 @@ module.exports = function (options, callback) {
     }
     else {
         //use jsondriver
-        console.log("use jsonp");
+//        console.log("use jsonp");
         JSONPDriver.request(options, callback);
     }
 

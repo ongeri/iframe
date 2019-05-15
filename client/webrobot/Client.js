@@ -10,7 +10,7 @@ var Client = function (configuration) {
     if (!urlConf) {
         throw new Error("Client missing Url configuration object");
     }
-    console.log("constructed client instance");
+//    console.log("constructed client instance");
     this._configuration = configuration;
     this._request = request;
     this._baseUrl = urlConf.clienturl;

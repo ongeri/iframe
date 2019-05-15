@@ -50,7 +50,7 @@ var stringify = function (obj, namespace) {
             query.push(encodeURIComponent(k) + "=" + encodeURIComponent(v));
         }
     }
-    console.log("final query " + query.join("&"));
+//    console.log("final query " + query.join("&"));
     return query.join("&");
 };
 

@@ -12,7 +12,7 @@ var ISWClient = (function () {
     }
 
     ISWClient.prototype.send = function (callbackFunction) {
-        console.log("send function of the client");
+//        console.log("send function of the client");
         var _this = this;
         if (this._authorization === null || this._authorization === undefined) {
             throw new Error("Authorization must be set before making a call");
@@ -25,7 +25,7 @@ var ISWClient = (function () {
             _this._settings = response.data;
             callbackFunction(_this._settings);
         }, function (error) {
-            console.log(error);
+//            console.log(error);
             callbackFunction(error);
         });
     };

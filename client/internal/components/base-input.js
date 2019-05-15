@@ -19,7 +19,7 @@ function BaseInput(options) {
         this.element.setAttribute('maxlength', this.MAX_SIZE);
     }
     shouldFormat = this.getConfiguration().formatInput !== false && this.element instanceof HTMLInputElement;
-    console.log("shouldFormat " + shouldFormat);
+//    console.log("shouldFormat " + shouldFormat);
     this.formatter = createRestrictedInput({
         shouldFormat: false,
         element: this.element,
@@ -56,7 +56,7 @@ BaseInput.prototype.buildElement = function () {
      */
     element.style.width = "100%";
 
-    console.log("checking the type at input element creation");
+//    console.log("checking the type at input element creation");
     if (type === "pan") {
         element.style.paddingRight = "55px";
     }
@@ -219,7 +219,7 @@ BaseInput.prototype._addDOMInputListeners = function () {
             });
             expInputField.value = selectedTokenObject.expiry;
             fireEvent(expInputField, 'input');
-            console.log("matched token object: ", selectedTokenObject);
+//            console.log("matched token object: ", selectedTokenObject);
         }
 
         if (this.type === constants.formMap.cardvstokenradio.name) {

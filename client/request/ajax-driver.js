@@ -6,7 +6,7 @@ var getRequestObject = function () {
     return isXHRAvailable ? new XMLHttpRequest() : new XDomainRequest();
 };
 var request = function (options, cb) {
-    console.log("XHR enabled ? " + isXHRAvailable);
+//    console.log("XHR enabled ? " + isXHRAvailable);
     var status, resBody;
 
     var method = options.method;
@@ -17,8 +17,8 @@ var request = function (options, cb) {
     var req = getRequestObject();
     var callback = cb;
 
-    console.log("Request method: " + method);
-    console.log("url is: " + url);
+//    console.log("Request method: " + method);
+//    console.log("url is: " + url);
 
     if (method === "GET") {
         url = queryString.querify(url, body);
@@ -39,11 +39,11 @@ var request = function (options, cb) {
             resBody = parseBody(req.responseText);
 
             if (status >= 400 || status < 200) {//non-200
-                console.log("an error occured in http request " + status);
+//                console.log("an error occured in http request " + status);
                 callback(resBody || 'error', null, status || 500);
             }
             else {
-                console.log(" a good response came back");
+//                console.log(" a good response came back");
                 callback(null, resBody, status);
             }
 

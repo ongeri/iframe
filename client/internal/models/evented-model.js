@@ -15,7 +15,7 @@ EventedModel.prototype.initialize = function (obj) {
     var traversal = this._attributes;
 
 
-    console.log(typeof obj);
+//    console.log(typeof obj);
 
     for (var key in obj) {
 
@@ -58,7 +58,7 @@ EventedModel.prototype.get = function get(compoundKey) {
  * a change of type:field
  */
 EventedModel.prototype.set = function set(compoundKey, value) {
-    console.log("Setting " + compoundKey + " " + value);
+//    console.log("Setting " + compoundKey + " " + value);
     var i, key, keys;
     var traversal = this._attributes;
 
@@ -76,14 +76,14 @@ EventedModel.prototype.set = function set(compoundKey, value) {
     key = keys[i];
 
     if (traversal[key] !== value) {
-        console.log('change ' + key + "'s old value: ", traversal[key], ' to new value: ' + value);
+//        console.log('change ' + key + "'s old value: ", traversal[key], ' to new value: ' + value);
         traversal[key] = value;
         //the value associated with this field has just changed
         //this.emit('change');
 
         for (i = 1; i <= keys.length; i++) {
             key = keys.slice(0, i).join('.');
-            console.log('change:' + key + "----" + JSON.stringify(this.get(key)));
+//            console.log('change:' + key + "----" + JSON.stringify(this.get(key)));
             this.emit('change:' + key, this.get(key));
         }
     }
