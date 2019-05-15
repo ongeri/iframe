@@ -211,7 +211,7 @@ const createPayHandler = function (client, cardForm) {
         } else {// Otherwise assume tokenize
             obj.tokenize = '1';
         }
-        console.log("obj to pass to secure data " + JSON.stringify(obj) + " " + obj.pan);
+        console.log("obj to pass tlocalhost:7784o secure data " + JSON.stringify(obj) + " " + obj.pan);
         if (obj.cardvstokenradio === 'token') {
             obj.pan = obj.token;
         }

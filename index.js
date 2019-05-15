@@ -17,6 +17,7 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, '/server/public'));
 //app.enable('view cache');
 app.use(serveStatic(path.join(__dirname, 'dist')));
+app.use(express.static('public'));
 
 var hbs = exphbs.create({
 
