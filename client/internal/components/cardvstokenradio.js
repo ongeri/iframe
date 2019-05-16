@@ -33,7 +33,7 @@ function buildElement() {
         radioInputLabel.style.color = "#888";
         radioInputLabel.style.fontFamily = "sans-serif";
         radioInputLabel.style.fontSize = "small";
-        radioInputLabel.style.marginRight = "25px";
+        radioInputLabel.style.marginRight = "10px";
         element.appendChild(radioInput);
         element.appendChild(radioInputLabel);
     });

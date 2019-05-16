@@ -29,7 +29,7 @@ function buildElement() {
 
     const label = document.createElement('label');
     label.htmlFor = saveCheckbox.getAttribute("id");
-    label.appendChild(document.createTextNode('Save'));
+    label.appendChild(document.createTextNode('Save Card'));
     label.style.verticalAlign = 'middle';
     label.style.color = "#888";
     label.style.fontFamily = "sans-serif";
