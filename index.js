@@ -12,6 +12,9 @@ var exphbs = require('express-handlebars');
 const uuidV4 = require('uuid/v4');
 var request = require('request');
 
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = false;
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
 app.disable('X-Powered-By');
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, '/server/public'));
@@ -44,8 +47,10 @@ app.use(function (req, res, next) {
     var allowedOrigins = ['https://testids.interswitch.co.ke:7784', 'http://localhost:7784', 'http://154.118.230.214:8006', 'http://154.118.230.18:8006', 'https://flutterwavestagingv2.com', 'http://flutterwavestagingv2.com', 'https://testmerchant.interswitch-ke.com:7787', 'https://testmerchant.interswitch-ke.com'];
     var origin = req.headers.origin;
     console.log("Request origin is : " + origin);
-    if (allowedOrigins.indexOf(origin) > -1) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
+    if (true) {//(allowedOrigins.indexOf(origin) > -1) {
+        if (origin) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+        }
     }
     //res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Timestamp, Nonce, Authorization, Signature, SignatureMethod");
@@ -138,7 +143,10 @@ app.get('/api/v1/merchant/configuration/new', function (req, resp) {
     console.log("request to get config MID is " + req.query.MID);
     //console.log("header to complete pay is "+JSON.stringify(req.headers));
     //console.log("header host to complete pay is "+req.headers.host);
-    req.headers.host = "http://172.16.112.4:9080";
+    // req.headers.host = "https://172.16.111.36:19082"
+    // req.headers.host = "https://esb.interswitch-ke.com:18082";
+    // req.headers.host = "https://172.16.111.36:19082";
+    req.headers.host = "https://esb.interswitch.co.ke:19082";
     //headers: req.headers,
     request({
         url: req.headers.host + '/api/v1/merchant/mfb/config/' + req.query.MID,
@@ -150,6 +158,7 @@ app.get('/api/v1/merchant/configuration/new', function (req, resp) {
 
         if (err) {
             console.log(err);
+            console.log(req.headers.host);
             resp.status(400).json(body);
             console.log(JSON.stringify(body));
         }
@@ -371,4 +380,4 @@ app.get('/file', function (req, res) {
 
 app.listen(3000, function () {
     console.log('Server up and running on port 3000!')
-})
+});

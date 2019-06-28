@@ -1,6 +1,6 @@
 function doAuthorize() {
     var httpMethod = "POST";
-    var url = "http://172.16.112.4:9080/api/v1/merchant/transact/bills";
+    var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/bills";
     url = url.replace("http://", "https://");
     url = encodeURIComponent(url);
 

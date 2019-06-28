@@ -1,6 +1,6 @@
  function doAuthorize() {
             var httpMethod = "POST";
-            var url = "http://172.16.112.4:9080/api/v1/merchant/transact/bills";
+            var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/bills";
             url = url.replace("http://", "https://");
             url = encodeURIComponent(url);
 
@@ -9,7 +9,7 @@
             var clientId = "IKIAB8FA9382D1FAC6FCA2F30195029B0A1558A9FECA";
             var authorization = "InterswitchAuth" + " " + b64EncodeUnicode(clientId);
             var clientSecret = "dxdmtf12FhLVIFRz8IzhnuAJzNd6AAFVgx/3LlJHc+4=";
-            
+
 
                  var signatureCipher = httpMethod + "&" + url + "&" + timestamp + "&" + nonce + "&" + clientId + "&" + clientSecret;
                 var settings = {
@@ -18,7 +18,7 @@
                       "url": url
                       "method": "POST",
                       "headers": {
-         
+
                     "Authorization": "InterswitchAuth SUtJQUI4RkE5MzgyRDFGQUM2RkNBMkYzMDE5NTAyOUIwQTE1NThBOUZFQ0E=",
                     "Content-Type": "application/json",
                     "Signature": "7rLCKvXBOQl/MUiqtSt0LLl+LTI=",
@@ -36,7 +36,7 @@
                   console.log(response);
 });
         }
-        
+
 
 function guid() {
             function s4() {

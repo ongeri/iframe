@@ -1,7 +1,7 @@
 function sendMMO2(clientId, clientSecret, ItemJSON) {
     var httpMethod = "POST";
-    var url1 = "http://172.16.112.4:9080/api/v1/merchant/transact/bills";
-    var url = "http://172.16.112.4:9080/api/v1/merchant/transact/bills";
+    var url1 = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/bills";
+    var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/bills";
     url = url.replace("http://", "https://");
     url = encodeURIComponent(url);
 
@@ -44,8 +44,8 @@ function sendMMO2(clientId, clientSecret, ItemJSON) {
 
 function sendPaycode2(clientId, clientSecret, ItemJSON) {
     var httpMethod = "POST";
-    var url1 = "http://172.16.112.4:9080/api/v1/merchant/transact/paycodes";
-    var url = "http://172.16.112.4:9080/api/v1/merchant/transact/paycodes";
+    var url1 = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/paycodes";
+    var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/paycodes";
     url = url.replace("http://", "https://");
     url = encodeURIComponent(url);
 
@@ -89,8 +89,8 @@ function sendPaycode2(clientId, clientSecret, ItemJSON) {
 
 function sendMMO() {
     var httpMethod = "POST";
-    var url1 = "http://172.16.112.4:9080/api/v1/merchant/transact/bills";
-    var url = "http://172.16.112.4:9080/api/v1/merchant/transact/bills";
+    var url1 = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/bills";
+    var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/bills";
     url = url.replace("http://", "https://");
     url = encodeURIComponent(url);
 
@@ -174,8 +174,8 @@ function sendMMO() {
 
 function sendPaycode() {
     var httpMethod = "POST";
-    var url1 = "http://172.16.112.4:9080/api/v1/merchant/transact/paycodes";
-    var url = "http://172.16.112.4:9080/api/v1/merchant/transact/paycodes";
+    var url1 = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/paycodes";
+    var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/paycodes";
     url = url.replace("http://", "https://");
     url = encodeURIComponent(url);
 
@@ -265,8 +265,8 @@ function sendPaycode() {
 
 function sendCard() {
     var httpMethod = "POST";
-    var url1 = "http://172.16.112.4:9080/api/v1/merchant/transact/cards";
-    var url = "http://172.16.112.4:9080/api/v1/merchant/transact/cards";
+    var url1 = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/cards";
+    var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/cards";
     url = url.replace("http://", "https://");
     url = encodeURIComponent(url);
 

@@ -10,7 +10,7 @@ var constants = {
     },
 
     config: {
-        host: "https://testids.interswitch.co.ke:3000"
+        host: "https://merchant.interswitch-ke.com:3000"
     },
 
     externalClasses: {

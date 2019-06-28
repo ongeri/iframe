@@ -1,7 +1,7 @@
 require('./songbird_v1.js');// Todo replace with node library import
 // import $ from "jquery";
 
-const baseUrl = "https://testmerchant.interswitch-ke.com";
+const baseUrl = "https://merchant.interswitch-ke.com";
 let eresp = "";
 let payload = "";
 let callback;

@@ -251,7 +251,7 @@ const createPayHandler = function (client, cardForm) {
 
 //        console.log(JSON.stringify(secureData));
 
-        const url = "http://testids.interswitch.co.ke:9080/api/v1/merchant/transact/cards";
+        const url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/transact/cards";
         const headerData = SecureManager.generateHeadersKE(client, url, "POST");
 //        console.log(JSON.stringify(headerData));
 

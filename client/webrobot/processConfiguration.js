@@ -40,13 +40,13 @@ var processConfiguration = function (options, callback) {
 
     //var merchantConfigUrl = "http://172.16.112.4:3000/api/v1/merchant/configuration";
 
-    var merchantConfigUrl = "https://testids.interswitch.co.ke:3000/api/v1/merchant/configuration/new";
+    var merchantConfigUrl = "https://merchant.interswitch-ke.com:3000/api/v1/merchant/configuration/new";
 
-    var url = "http://testids.interswitch.co.ke:9080/api/v1/merchant/mfb/config/" + options.MID;
+    var url = "https://esb.interswitch-ke.com:18082/api/v1/merchant/mfb/config/" + options.MID;
 
     var headerConfig = {
-        clientId: "IKIAB8FA9382D1FAC6FCA2F30195029B0A1558A9FECA",
-        clientSecret: "dxdmtf12FhLVIFRz8IzhnuAJzNd6AAFVgx/3LlJHc+4="
+        clientId: "IKIA0D7BD54948CEA69B0DE715039DC1CC97CA876ED1",
+        clientSecret: "RsksI2/w4TsA3wkeptOOhOb8s6PGfFw3ZWPsGSjZXEY="
     };
     var headerClient = {
         _configuration: headerConfig
@@ -76,7 +76,7 @@ var processConfiguration = function (options, callback) {
 
                     merchantConfigs = [
                         {
-                            clienturl: 'https://testids.interswitch.co.ke:3000/api/'
+                            clienturl: 'https://merchant.interswitch-ke.com:3000/api/'
                         },
                         {
                             MID: config.merchantId,
