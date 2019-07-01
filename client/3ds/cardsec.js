@@ -1,4 +1,4 @@
-require('./songbird_v1.js');// Todo replace with node library import
+require('./songbird.js');// Todo replace with node library import
 // import $ from "jquery";
 
 const baseUrl = "https://merchant.interswitch-ke.com";
