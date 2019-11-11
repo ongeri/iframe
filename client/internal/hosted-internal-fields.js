@@ -63,6 +63,7 @@ const builder = function (conf) {
         terminalId: conf.terminalId || "",
         paymentItem: conf.paymentItem || "",
         provider: conf.provider || "",
+        reqId: conf.reqId || "",
         customerInfor: conf.customerInfor || "",
         domain: conf.domain || "",
         narration: conf.narration || "",
@@ -87,19 +88,17 @@ const builder = function (conf) {
     }, function (err, res, body) {
         if (err) {
             //find a way to throw exception message to client
-        }
-        else if (res.statusCode !== 201) {
+        } else if (res.statusCode !== 201) {
             //
-        }
-        else {
+        } else {
             console.log(JSON.stringify(body));
             const client = conf.client;
 
             const cardForm = new CreditCardForm(conf);
 
-            Object.keys(body).forEach(function (key) {
-                console.log("storing " + key + " " + body[key]);
-                cardForm.set(key + ".value", body[key]);
+            Object.keys(conf).forEach(function (key) {
+                console.log("storing " + key + " " + conf[key]);
+                cardForm.set(key + ".value", conf[key]);
             });
 
             //should save some items to the card form
@@ -122,7 +121,7 @@ const builder = function (conf) {
 
                 const payHandler = createPayHandler(client, cardForm);
 
-                options.payments = body;
+                options.payments = conf;
 
                 payHandler(options, reply);
             });
@@ -223,7 +222,7 @@ const createPayHandler = function (client, cardForm) {
         */
         secureData.paymentId = options.payments.id;
         secureData.amount = options.payments.amount;
-        secureData.transactionRef = options.payments.transactionRef;
+        secureData.transactionRef = options.payments.transactionReference;
         secureData.terminalType = options.payments.channel;
         secureData.terminalId = options.payments.terminalId;
         secureData.paymentItem = options.payments.paymentItem;
@@ -237,6 +236,7 @@ const createPayHandler = function (client, cardForm) {
         secureData.narration = options.payments.narration;
         secureData.fee = options.payments.fee;
         secureData.preauth = options.payments.preauth;
+        secureData.reqId = options.payments.reqId;
         secureData.paca = "1";
         secureData.cardvstokenradio = creditCardDetails.cardvstokenradio;
         delete secureData.mac;
