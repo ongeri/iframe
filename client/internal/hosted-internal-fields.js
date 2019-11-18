@@ -63,7 +63,8 @@ const builder = function (conf) {
         terminalId: conf.terminalId || "",
         paymentItem: conf.paymentItem || "",
         provider: conf.provider || "",
-        reqId: conf.reqId || "",
+        reqId: conf.reqId || null,
+        field1: conf.field1 || null,
         customerInfor: conf.customerInfor || "",
         domain: conf.domain || "",
         narration: conf.narration || "",
@@ -245,6 +246,7 @@ const createPayHandler = function (client, cardForm) {
         secureData.fee = options.payments.fee;
         secureData.preauth = options.payments.preauth;
         secureData.reqId = options.payments.reqId;
+        secureData.field1 = options.payments.field1;
         secureData.paca = "1";
         secureData.cardvstokenradio = creditCardDetails.cardvstokenradio;
         delete secureData.mac;
