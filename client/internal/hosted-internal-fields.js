@@ -97,9 +97,9 @@ const builder = function (conf) {
 
             const cardForm = new CreditCardForm(conf);
 
-            Object.keys(conf).forEach(function (key) {
-//                console.log("storing " + key + " " + conf[key]);
-                cardForm.set(key + ".value", conf[key]);
+            Object.keys(body).forEach(function (key) {
+//                console.log("storing " + key + " " + body[key]);
+                cardForm.set(key + ".value", body[key]);
             });
 
             //should save some items to the card form
