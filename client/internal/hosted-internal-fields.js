@@ -63,7 +63,7 @@ const builder = function (conf) {
         terminalId: conf.terminalId || "",
         paymentItem: conf.paymentItem || "",
         provider: conf.provider || "",
-        reqId: conf.reqId || null,
+        reqId: conf.reqId || "",
         field1: conf.field1 || null,
         customerInfor: conf.customerInfor || "",
         domain: conf.domain || "",
@@ -91,7 +91,8 @@ const builder = function (conf) {
             //find a way to throw exception message to client
         } else if (res.statusCode !== 201) {
             //
-        } else {
+        }
+        else {
 //            console.log(JSON.stringify(body));
             const client = conf.client;
 
