@@ -30,8 +30,8 @@ function cardInitialize(payloadParam, callbackParam) {
 
 //            console.count("/merchant/card/initialize response:", JSON.stringify(response));
         } else {
-//            console.count("card not enrolled");
-            callback("card not enrolled", null, undefined);
+            console.count("card not enrolled");
+            callback(response, null, undefined);
         }
     }).done(function () {
         // callback("second success", null, undefined);
@@ -56,8 +56,8 @@ function tokenInitialize(payloadParam, callbackParam) {
             payload = JSON.stringify(response);
 //            console.count("Response and new payload" + payload);
         } else {
-//            console.count("Token card not enrolled");
-            callback("Token card not enrolled", null, undefined);
+            console.count("Token card not enrolled");
+            callback(response, null, undefined);
         }
     }).done(function () {
         // callback("second success", null, undefined);
@@ -164,7 +164,7 @@ function authorizeAction(payload, eresp) {
 //            console.count(JSON.stringify(response));
 //            console.count("Authorization failed");
             notifyAction("Authorize", "1", JSON.stringify(response), payload);
-            callback("3D secure Authorize error", response);
+            callback(response, null, undefined);
         }
     });
 }
@@ -175,7 +175,7 @@ function notifyAction(transactionType, respStatus, resp, payload) {
 //        console.count("Notify succeeded");
         callback(null, resp, null);
     } else {
-        callback("Transaction failed");
+        callback(resp);
     }
     $.get(baseUrl + "/merchant/card/notify", {
         transactionType: transactionType,

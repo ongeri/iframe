@@ -101,8 +101,7 @@ const HostedFields = function (options) {
             throw new Error({
                 message: "The Field " + field.selector + " does not exist."
             });
-        }
-        else if (container.querySelector('iframe[name^="isw-"]')) {
+        } else if (container.querySelector('iframe[name^="isw-"]')) {
 //            console.log("Multiple container elements with id ", field.selector, " ware found for field ", key);
             throw new Error({
                 message: "Duplicate " + field.selector + " already contains an iframe."
@@ -209,11 +208,7 @@ var handlePayResponse = function (data) {
             t3dsFunction(JSON.stringify(obj)
                 , function (err, res, status) {
                     if (err) {
-
-                        const obj = {
-                            error: err
-                        };
-                        data(obj);
+                        data(err);
                     } else {
                         let resultObject = JSON.parse(res);
                         data(null, {body: resultObject});
