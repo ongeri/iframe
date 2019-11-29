@@ -24,7 +24,7 @@ const CreditCardForm = function (conf) {
         return true;
     });
 
-    console.log("Keys for fields " + JSON.stringify(this._fieldKeys) + ">>>");
+//    console.log("Keys for fields " + JSON.stringify(this._fieldKeys) + ">>>");
 
     EventedModel.apply(this, arguments);
 
@@ -128,7 +128,7 @@ CreditCardForm.prototype.emitEvent = function (fieldKey, eventType) {
         });
     }
 
-    console.log("before emitting INPUT_EVENT " + JSON.stringify(fields));
+//    console.log("before emitting INPUT_EVENT " + JSON.stringify(fields));
 
     bus.emit(events.INPUT_EVENT, {
         merchantPayload: {
@@ -151,30 +151,30 @@ CreditCardForm.prototype._onNumberChange = function (number) {
 };
 
 CreditCardForm.prototype._validateField = function (fieldKey) {
-    console.log("Validating fieldKey " + fieldKey);
+//    console.log("Validating fieldKey " + fieldKey);
     let validationResult;
 
     const value = this.get(fieldKey + '.value');
     const validate = validator[fieldKey];
 
     if (fieldKey === 'cvv') {
-        console.log("on validating cvv ");
+//        console.log("on validating cvv ");
         validationResult = this._validateCvv(value);
-        console.log(validationResult);
+//        console.log(validationResult);
     }
     else {
         //validate pan , pin, exp
         validationResult = validate(value);
     }
 
-    console.log("The validation resule::::::" + JSON.stringify(validationResult));
+//    console.log("The validation resule::::::" + JSON.stringify(validationResult));
     this.set(fieldKey + '.isValid', validationResult.isValid);
     this.set(fieldKey + '.isPotentiallyValid', validationResult.isPotentiallyValid);
 
 };
 
 CreditCardForm.prototype._validateCvv = function (value) {
-    console.log("validating cvv");
+//    console.log("validating cvv");
     return validator.cvv(value, 3);
 };
 
@@ -183,13 +183,13 @@ CreditCardForm.prototype.getCardData = function () {
     const result = {};
     let keys = [];
 
-    console.log("Original keys are ", this._fieldKeys);
+//    console.log("Original keys are ", this._fieldKeys);
     keys = this._fieldKeys.slice(0);
-    console.log("Copied keys are ", keys);
+//    console.log("Copied keys are ", keys);
 
     if (this._fieldKeys.indexOf('expirationDate') !== -1) {
         //expirationData = splitDate(this.get('expirationDate.value'));
-        console.log(expirationData);
+//        console.log(expirationData);
         //result.expirationMonth = expirationData.month;
         //result.expirationYear = expirationData.year;
     }
@@ -220,6 +220,9 @@ CreditCardForm.prototype.getInvalidFormField = function () {
             return false;
         else if (key === 'token' && tokenOrCard === 'card')
             return false;
+        if (key === 'save') {
+            return false;// Save is always valid since it is a boolean checkbox
+        }
         return !this.get(key).isValid;
     }.bind(this));
 };

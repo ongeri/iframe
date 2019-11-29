@@ -17,6 +17,7 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, '/server/public'));
 //app.enable('view cache');
 app.use(serveStatic(path.join(__dirname, 'dist')));
+app.use(express.static('public'));
 
 var hbs = exphbs.create({
 
@@ -40,7 +41,7 @@ app.use(methodOverride());
 app.use(function (req, res, next) {
     //console.log("It hit the server");
     //res.header("Access-Control-Allow-Origin", "*");
-    var allowedOrigins = ['https://testids.interswitch.co.ke:7784', 'http://localhost:7784', 'http://154.118.230.214:8006', 'https://flutterwavestagingv2.com', 'http://flutterwavestagingv2.com', 'https://testmerchant.interswitch-ke.com:7787', 'https://testmerchant.interswitch-ke.com'];
+    var allowedOrigins = ['https://testids.interswitch.co.ke:7784', 'http://localhost:7784', 'http://154.118.230.214:8006', 'http://154.118.230.18:8006', 'https://flutterwavestagingv2.com', 'http://flutterwavestagingv2.com', 'https://testmerchant.interswitch-ke.com:7787', 'https://testmerchant.interswitch-ke.com'];
     var origin = req.headers.origin;
     console.log("Request origin is : " + origin);
     if (allowedOrigins.indexOf(origin) > -1) {

@@ -12,23 +12,23 @@ var request = function (options, callback) {
     var timeout = options.timeout;
 
     url = queryString.querify(url, attrs);
-    console.log("url after firs call " + url);
+//    console.log("url after firs call " + url);
     url = queryString.querify(url, {
         _method: method,
         callback: callbackName
     });
 
-    console.log("url for jsonp is " + url);
+//    console.log("url for jsonp is " + url);
 
     script = _createScriptTag(url, callbackName);
-    console.log("script tag created " + JSON.stringify(script));
+//    console.log("script tag created " + JSON.stringify(script));
     _setupGlobalCallback(script, callback, callbackName);
     _setupTimeout(timeout, callbackName);
 
     if (!head) {
         head = document.getElementsByTagName('head')[0];
     }
-    console.log("the head element " + JSON.stringify(head) + " " + JSON.stringify(head.childNodes));
+//    console.log("the head element " + JSON.stringify(head) + " " + JSON.stringify(head.childNodes));
     head.appendChild(script);
 };
 
@@ -64,7 +64,7 @@ var _setupGlobalCallback = function (script, callback, callbackName) {
         var err = null;
         var data = null;
 
-        console.log("response is back " + status);
+//        console.log("response is back " + status);
 
         delete response.status;
 
@@ -87,7 +87,7 @@ var _setupGlobalCallback = function (script, callback, callbackName) {
 var _setupTimeout = function (timeout, callbackName) {
 
     timeouts[callbackName] = setTimeout(function () {
-        console.log("times out");
+//        console.log("times out");
         timeouts[callbackName] = null;
 
         global[callbackName]({

@@ -3,18 +3,14 @@ const constants = require('../../libs/constants');
 
 function buildElement() {
 
-//    console.info("Overriden method called");
-
-    // Create dropdopwn element
-    const element = document.createElement('select');
-    // Parse the passed token string into an array of tokens and add the parsed token array to our model
-    this.model.conf.tokens = JSON.parse(this.model.conf.cardTokensJson);
-    // For each token provided add an option
-    this.model.conf.tokens.forEach(token => {
-        element.options[element.options.length] = new Option(token.panFirst6Digits + '******' + token.panLast4Digits, token.token);
-    });
-
-    element.style.width = "100%";
+    const element = document.createElement('div');
+    const saveCheckbox = document.createElement('input');
+    saveCheckbox.type = "checkbox";
+    saveCheckbox.value = "tokenize";
+    saveCheckbox.checked = true;
+    saveCheckbox.style.width = 'auto';
+    saveCheckbox.style.verticalAlign = 'middle';
+    saveCheckbox.style.margin = '4px';
 
     const formMap = constants.formMap[this.type];
 
@@ -28,8 +24,20 @@ function buildElement() {
     };
 
     Object.keys(attributes).forEach(function (attr) {
-        element.setAttribute(attr, attributes[attr]);
+        saveCheckbox.setAttribute(attr, attributes[attr]);
     });
+
+    const label = document.createElement('label');
+    label.htmlFor = saveCheckbox.getAttribute("id");
+    label.appendChild(document.createTextNode('Save Card'));
+    label.style.verticalAlign = 'middle';
+    label.style.color = "#888";
+    label.style.fontFamily = "sans-serif";
+    label.style.fontSize = "small";
+
+    element.setAttribute('name', name);
+    element.appendChild(saveCheckbox);
+    element.appendChild(label);
 
     // Source: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     // Options for the observer (which mutations to observe)
@@ -63,20 +71,17 @@ function buildElement() {
     return element;
 }
 
-const tokenInput = function () {
+const saveInput = function () {
     // Override buildElement from BaseInput to render our dropdown input
     this.buildElement = buildElement;
 
     BaseInput.apply(this, arguments);
 
-    this.model.on("change:possibleCardTypes", function (possibleCardTypes) {
-
-    }.bind(this));
 };
 
-tokenInput.prototype = Object.create(BaseInput.prototype);
-tokenInput.constructor = tokenInput;
+saveInput.prototype = Object.create(BaseInput.prototype);
+saveInput.constructor = saveInput;
 
 module.exports = {
-    TOKEN: tokenInput
+    SAVE: saveInput
 };

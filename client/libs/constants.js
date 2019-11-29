@@ -73,6 +73,10 @@ var constants = {
         tf1: {
             name: "tf1",
             label: "TF1"
+        },
+        save: {
+            name: "save",
+            label: "Save"
         }
 
     }

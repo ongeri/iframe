@@ -17,7 +17,7 @@ var fieldComponent = function (options) {
 
     //this.element.appendChild(new LabelComponent(formMap).element);
 
-    console.log("type of input " + type);
+//    console.log("type of input " + type);
 
     var inputElem = new InputLabelComponent[type]({
         model: options.model,
@@ -42,7 +42,7 @@ var fieldComponent = function (options) {
          **/
 
         options.model.on('change:possibleCardTypes', function (data) {
-            console.log("on card type change " + JSON.stringify(data) + " " + data);
+//            console.log("on card type change " + JSON.stringify(data) + " " + data);
             if (!data) {
                 spanElement.style.display = 'none';
                 return;
@@ -60,7 +60,7 @@ var fieldComponent = function (options) {
                 var simpleName = data[0].type;
                 spanElement.style.display = 'block';
                 var urlName = "../../images/card-brands/" + simpleName + ".png";
-                console.log(urlName);
+//                console.log(urlName);
                 spanElement.style.backgroundImage = 'url(' + urlName + ')';
 
             }

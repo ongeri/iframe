@@ -53,7 +53,7 @@ var processConfiguration = function (options, callback) {
     };
     var headerData = getHeaderDataKE(headerClient, url, "GET");
 
-    console.log(JSON.stringify(headerData));
+//    console.log(JSON.stringify(headerData));
 
     request({
             url: merchantConfigUrl,
@@ -63,11 +63,11 @@ var processConfiguration = function (options, callback) {
         },
         function (err, res, status) {
             if (err) {
-                console.log("error in getting merchant configuration data " + JSON.stringify(err));
+//                console.log("error in getting merchant configuration data " + JSON.stringify(err));
                 callback(err, null);
             }
             else {
-                console.log("merchant configuration response " + JSON.stringify(res));
+//                console.log("merchant configuration response " + JSON.stringify(res));
                 var merchantConfigs = res;
 
                 if (res.responseCode === "0") {
@@ -112,8 +112,8 @@ var processConfiguration = function (options, callback) {
                         console.log(options.MID);*/
 
                         if (options.MID === obj.MID) {
-                            console.log("set clientid = " + obj.clientId);
-                            console.log("set cs = " + obj.clientSecret);
+//                            console.log("set clientid = " + obj.clientId);
+//                            console.log("set cs = " + obj.clientSecret);
                             configuration.clientId = obj.clientId;
                             configuration.clientSecret = obj.clientSecret;
                             configuration.name = obj.name;

@@ -269,7 +269,7 @@ SecureManager.authDataKE = function (options, pan, pin, expiry, cvv) {
     } else {
         authString = pan + 'D' + cvv + 'D' + expiry + 'D' + pin + "D" + options.tokenize;
     }
-    console.log("Auth-string: " + authString);
+//    console.log("Auth-string: " + authString);
     var vv = SecureManager.toHex(authString);
     //var vv = SecureManager.toHex(options.authData);
     //console.log("vv: "+vv);
@@ -291,11 +291,11 @@ SecureManager.authDataKE = function (options, pan, pin, expiry, cvv) {
     clearSecureBytes.putBytes(authDataBytes);
     var vvvv = clearSecureBytes.getBytes();
 
-    console.log("Clear secure: " + forge.util.bytesToHex(vvvv));
+//    console.log("Clear secure: " + forge.util.bytesToHex(vvvv));
 
     var authBytes = publicKey.encrypt(vvvv);
     var auth = forge.util.encode64(authBytes);
-    console.log("Auth-hex: " + auth);
+//    console.log("Auth-hex: " + auth);
 
     //var dauth = privateKey.decrypt(auth, 'RSAES-PKCS1-V1_5');
     //console.log("dauth-hex: "+dauth);
@@ -385,7 +385,7 @@ SecureManager.getSecure = function (options, app, isActivate) {
 
 
 exports.generateSecureData = function (options, pinData) {
-    console.log("generating secure data " + JSON.stringify(options) + " " + JSON.stringify(pinData));
+//    console.log("generating secure data " + JSON.stringify(options) + " " + JSON.stringify(pinData));
     var pinBlock, expiry, ttId, pinKey, secureOptions, macData, mac, secure, secureData, publicKeyModulus,
         publicKeyExponent;
     var pan, amt;
@@ -480,7 +480,7 @@ var generateSecureData2 = (options, pinData) => {
         }
     };
 
-    console.log(secureOptions);
+//    console.log(secureOptions);
 
 
     secureData = SecureManager.getSecure(secureOptions, 'createcard');
@@ -491,7 +491,7 @@ var generateSecureData2 = (options, pinData) => {
 
 
 exports.generateSecureDataKE = function (options, pinData) {
-    console.log("generating secure data " + JSON.stringify(options) + " " + JSON.stringify(pinData));
+//    console.log("generating secure data " + JSON.stringify(options) + " " + JSON.stringify(pinData));
     var pinBlock, expiry, ttId, pinKey, secureOptions, macData, mac, secure, secureData, publicKeyModulus,
         publicKeyExponent, authData;
     var pan, amt;
@@ -551,7 +551,7 @@ exports.generateSecureDataKE = function (options, pinData) {
 
 
 exports.generateHeadersKE = function (client, url, httpMethod) {
-    console.log("generating header data " + JSON.stringify(client));
+//    console.log("generating header data " + JSON.stringify(client));
 
     var timestamp, nonce, authorization, signatureCipher, signature, signatureMethod, httpMethod, headerOptions;
     var clientId, clientSecret, url, contentType;
@@ -564,9 +564,9 @@ exports.generateHeadersKE = function (client, url, httpMethod) {
     url = url.replace("http://", "https://");
     url = encodeURIComponent(url);
 
-    console.log("clientID = " + clientId);
-    console.log("clientSecret = " + clientSecret);
-    console.log("url = " + url);
+//    console.log("clientID = " + clientId);
+//    console.log("clientSecret = " + clientSecret);
+//    console.log("url = " + url);
 
 
     contentType = "application/json";
@@ -805,13 +805,13 @@ if (typeof String.prototype.utf8Decode == 'undefined') {
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 //if (typeof module != 'undefined' && module.exports) module.exports = SecureManager; // CommonJs export
 SecureManager.hexToBase64 = function (str) {
-    console.log("hexToBase64 data = " + str);
+//    console.log("hexToBase64 data = " + str);
     return btoa(String.fromCharCode.apply(null,
         str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
     );
 }
 SecureManager.b64EncodeUnicode = function (str) {
-    console.log("b64EncodeUnicode data = " + str);
+//    console.log("b64EncodeUnicode data = " + str);
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
         return String.fromCharCode('0x' + p1);
     }));

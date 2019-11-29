@@ -17,15 +17,15 @@ const createInputEventHandler = function (fields) {
         const field = eventData.merchantPayload.fields[eventData.merchantPayload.emittedBy];
         const container = fields[eventData.merchantPayload.emittedBy].containerElement;
 
-        console.log(JSON.stringify(eventData));
+//        console.log(JSON.stringify(eventData));
 
         Object.keys(eventData.merchantPayload.fields).forEach(function (key) {
             eventData.merchantPayload.fields[key].container = fields[key].containerElement;
         });
 
-        console.log("emmited by " + eventData.merchantPayload.emittedBy + " event name " + eventData.type);
+//        console.log("emmited by " + eventData.merchantPayload.emittedBy + " event name " + eventData.type);
 
-        console.log(!field.isPotentiallyValid + "-" + field.isValid);
+//        console.log(!field.isPotentiallyValid + "-" + field.isValid);
 
         //change class of elements here
         const classGroup = container.classList;
@@ -61,7 +61,7 @@ const HostedFields = function (options) {
         //throw exception because there should be fields to work with
     }
 
-    console.log("Options are ", options);
+//    console.log("Options are ", options);
 
     EventEmitter.call(this);
 
@@ -97,19 +97,18 @@ const HostedFields = function (options) {
         //console.log("associated selector "+container);
 
         if (!container) {
-            console.log("No container element with id ", field.selector, " was found for field ", key);
+//            console.log("No container element with id ", field.selector, " was found for field ", key);
             throw new Error({
                 message: "The Field " + field.selector + " does not exist."
             });
-        }
-        else if (container.querySelector('iframe[name^="isw-"]')) {
-            console.log("Multiple container elements with id ", field.selector, " ware found for field ", key);
+        } else if (container.querySelector('iframe[name^="isw-"]')) {
+//            console.log("Multiple container elements with id ", field.selector, " ware found for field ", key);
             throw new Error({
                 message: "Duplicate " + field.selector + " already contains an iframe."
             });
         }
 
-        console.log("Creating field using key and field values in container", key, field, container);
+//        console.log("Creating field using key and field values in container", key, field, container);
 
         frame = iFramer({
             type: key,
@@ -146,7 +145,7 @@ const HostedFields = function (options) {
 
     failureTimeout = setTimeout(function () {
         //notify analytics that there was a timeout
-        console.log("timeout to set up frame on time");
+//        console.log("timeout to set up frame on time");
     }, constants.INTEGRATION_TIMEOUT_MS);
 
     bus.on(events.FRAME_SET, function (args, reply) {
@@ -193,7 +192,7 @@ var handlePayResponse = function (data) {
 
     return function (obj) {
         if (obj && obj.error) {
-            console.log("error from payment " + JSON.stringify(obj));
+//            console.log("error from payment " + JSON.stringify(obj));
             var err = new Error({
                 message: obj.error,
                 detail: obj.detail
@@ -201,7 +200,7 @@ var handlePayResponse = function (data) {
             data(err);
             return;
         } else {
-            console.trace(JSON.stringify(obj));
+//            console.trace(JSON.stringify(obj));
             let t3dsFunction = cardInitialize;
             if (obj.cardvstokenradio === 'token')
                 t3dsFunction = tokenInitialize;
@@ -209,18 +208,14 @@ var handlePayResponse = function (data) {
             t3dsFunction(JSON.stringify(obj)
                 , function (err, res, status) {
                     if (err) {
-
-                        const obj = {
-                            error: err
-                        };
-                        data(obj);
+                        data(err);
                     } else {
                         let resultObject = JSON.parse(res);
                         data(null, {body: resultObject});
                     }
                 });
         }
-        console.log("response object " + JSON.stringify(obj));
+//        console.log("response object " + JSON.stringify(obj));
     };
 };
 

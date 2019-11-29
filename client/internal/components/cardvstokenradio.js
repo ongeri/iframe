@@ -3,7 +3,7 @@ const constants = require('../../libs/constants');
 
 function buildElement() {
 
-    console.info("Overriden method called");
+//    console.info("Overriden method called");
 
     const formMap = constants.formMap[this.type];
 
@@ -23,15 +23,17 @@ function buildElement() {
         radioInput.setAttribute('value', radioValue);
         radioInput.checked = true;
         radioInput.style.width = "auto";
+        radioInput.style.margin = "4px";
         radioInput.style.verticalAlign = "middle";
         const radioInputLabel = document.createElement('label');
         radioInputLabel.setAttribute('for', radioValue);
-        radioInputLabel.innerHTML = radioValue;
-        radioInputLabel.style.color = 'black';
+        radioInputLabel.innerHTML = radioValue === 'token' ? 'Saved Card' : radioValue === 'card' ? 'New Card' : radioValue;
         radioInputLabel.style.textTransform = 'capitalize';
         radioInputLabel.style.verticalAlign = "middle";
         radioInputLabel.style.color = "#888";
-        radioInputLabel.style.fontFamily = "inherit";
+        radioInputLabel.style.fontFamily = "sans-serif";
+        radioInputLabel.style.fontSize = "small";
+        radioInputLabel.style.marginRight = "10px";
         element.appendChild(radioInput);
         element.appendChild(radioInputLabel);
     });

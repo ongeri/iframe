@@ -49,7 +49,7 @@ const create = function () {
 };
 
 const builder = function (conf) {
-    console.log("builder");
+//    console.log("builder");
     const payments = {
         transactionReference: conf.transactionReference || "",
         merchantCode: conf.merchantCode || "",
@@ -73,8 +73,8 @@ const builder = function (conf) {
         tranleg: conf.tranleg || "",
     };
     //var payments = conf.payments;
-    console.log("payment call: " + JSON.stringify(payments));
-    console.log("forwarderUrl : " + forwarderUrl);
+//    console.log("payment call: " + JSON.stringify(payments));
+//    console.log("forwarderUrl : " + forwarderUrl);
     //make the payment call here
     request({
         url: forwarderUrl,
@@ -90,15 +90,16 @@ const builder = function (conf) {
             //find a way to throw exception message to client
         } else if (res.statusCode !== 201) {
             //
-        } else {
-            console.log(JSON.stringify(body));
+        }
+        else {
+//            console.log(JSON.stringify(body));
             const client = conf.client;
 
             const cardForm = new CreditCardForm(conf);
 
-            Object.keys(conf).forEach(function (key) {
-                console.log("storing " + key + " " + conf[key]);
-                cardForm.set(key + ".value", conf[key]);
+            Object.keys(body).forEach(function (key) {
+//                console.log("storing " + key + " " + body[key]);
+                cardForm.set(key + ".value", body[key]);
             });
 
             //should save some items to the card form
@@ -113,9 +114,11 @@ const builder = function (conf) {
             const cardvstokenradioContainer = cardForm.fieldComponents.find((fieldComponent) => {
                 return fieldComponent.fieldType === constants.formMap.cardvstokenradio.name;
             });
-            cardvstokenradioContainer.children.card.checked = true;
-            fireEvent(cardvstokenradioContainer, 'input');
-            fireEvent(cardvstokenradioContainer.children.card, 'change');
+            if (cardvstokenradioContainer) {
+                cardvstokenradioContainer.children.card.checked = true;
+                fireEvent(cardvstokenradioContainer, 'input');
+                fireEvent(cardvstokenradioContainer.children.card, 'change');
+            }
 
             bus.on(events.PAY_REQUEST, function (options, reply) {
 
@@ -153,7 +156,7 @@ const createPayHandler = function (client, cardForm) {
         const invalidKeyData = cardForm.getInvalidFormField();
         let isValid = invalidKeyData.length === 0 ? true : false;
 
-        console.log("isempty - isValid " + isEmpty + " " + isValid);
+//        console.log("isempty - isValid " + isEmpty + " " + isValid);
 
         if (isEmpty) {
 
@@ -175,7 +178,7 @@ const createPayHandler = function (client, cardForm) {
 
             };
 
-            console.log("error from source " + JSON.stringify(obj));
+//            console.log("error from source " + JSON.stringify(obj));
             reply(obj);
             return;
         }
@@ -186,9 +189,9 @@ const createPayHandler = function (client, cardForm) {
         options = options || {};
 
         //post response
-        console.log("credit card details is: ", JSON.stringify(client));
-        console.log(client);
-        console.log(creditCardDetails);
+//        console.log("credit card details is: ", JSON.stringify(client));
+//        console.log(client);
+//        console.log(creditCardDetails);
         const exp = creditCardDetails.exp;
 
         //creditCardDetails.exp = exp.charAt(3)+exp.charAt(2)+exp.charAt(0)+exp.charAt(1);0221
@@ -201,8 +204,14 @@ const createPayHandler = function (client, cardForm) {
 
         obj.expDate = obj.exp;
         obj.amount = options.payments.amount;
-        obj.tokenize = 1;// TODO Get this information from the user or merchant config
-        console.log("obj to pass to secure data " + JSON.stringify(obj) + " " + obj.pan);
+        if (client._configuration.tokenize == '1') {// Optional tokenization, check user's choice
+            obj.tokenize = obj.save ? '1' : '0';
+        } else if (client._configuration.tokenize == '2') {// Never tokenize
+            obj.tokenize = '0';
+        } else {// Otherwise assume tokenize
+            obj.tokenize = '1';
+        }
+//        console.log("obj to pass tlocalhost:7784o secure data " + JSON.stringify(obj) + " " + obj.pan);
         if (obj.cardvstokenradio === 'token') {
             obj.pan = obj.token;
         }
@@ -241,11 +250,11 @@ const createPayHandler = function (client, cardForm) {
         secureData.cardvstokenradio = creditCardDetails.cardvstokenradio;
         delete secureData.mac;
 
-        console.log(JSON.stringify(secureData));
+//        console.log(JSON.stringify(secureData));
 
         const url = "http://testids.interswitch.co.ke:9080/api/v1/merchant/transact/cards";
         const headerData = SecureManager.generateHeadersKE(client, url, "POST");
-        console.log(JSON.stringify(headerData));
+//        console.log(JSON.stringify(headerData));
 
         // cardInitialize("{\"country\":\"KE\",\"amount\":\"100\",\"authData\":\"U/v7WAcxI3HpVs+KXJzLAIhATiIYE+jjKgcVwHud0bBGJGPux08jQm240iGSyEmKxDJhP4FG/EGUVtBvDDGzY6xE+sM9lO9NNDA7+LwnrXTczBHsUzECQqwWRbT+7lrV4qtmZtkPb6uF+91bivIUYmU2q/5zvY8dleCc+ZzdqpfKicsgDafGYP8beuoOmi3L30ZlOZ7kap6OlCyEsgeFa8yJ/Y4e3S+3Y4LNTiFFFQmI/TVHF07/675QmJ8BsaQrMoUzbY6FdPNVjF8cdvdyQnVGFDoPC6a/op6uGisGFbuS1Hon+UOHMumG0B8N82a+VdgTKqiYUsns92gLv6PDvw==\",\"city\":\"NBI\",\"orderId\":\"kev3d7890\",\"customerInfor\":\"1002|kelvin|mwangi| kelvin.mwangi@interswitchgroup.com |0714171282|NBI|KE|00200|wstlnds|NBI\",\"fee\":\"0\",\"transactionRef\":\"kev3d7890\",\"terminalId\":\"3TLP0001\",\"terminalType\":\"WEB\",\"paymentItem\":\"CRD\",\"preauth\":\"0\",\"merchantId\":\"ISWKEN0001\",\"provider\":\"VSI\",\"narration\":\"Payment-Card\",\"currency\":\"KES\",\"domain\":\"ISWKEN\",\"paca\":\"1\"}", function (err, res, status) {
         reply(secureData);

@@ -30,7 +30,7 @@ var Pan = function (value) {
 
     potentialTypes = getCardTypes(value);
 
-    console.log("potential types " + JSON.stringify(potentialTypes));
+//    console.log("potential types " + JSON.stringify(potentialTypes));
 
     if (potentialTypes.length === 0) {
         return verification(null, false, false);
@@ -42,15 +42,15 @@ var Pan = function (value) {
     //there is just one card now
     cardType = potentialTypes[0];
 
-    console.log("value used is " + value);
+//    console.log("value used is " + value);
     //do a luhn check
     isValid = luhn(value);
 
-    console.log("luhn check: " + isValid);
+//    console.log("luhn check: " + isValid);
 
     maxLength = Math.max.apply(null, cardType.lengths);
 
-    console.log("maxLength is: " + maxLength + "----" + (value.length < maxLength));
+//    console.log("maxLength is: " + maxLength + "----" + (value.length < maxLength));
 
     for (i = 0; i < cardType.lengths.length; i++) {
         if (cardType.lengths[i] === value.length) {
