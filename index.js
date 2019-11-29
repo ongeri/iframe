@@ -41,7 +41,7 @@ app.use(methodOverride());
 app.use(function (req, res, next) {
     //console.log("It hit the server");
     //res.header("Access-Control-Allow-Origin", "*");
-    var allowedOrigins = ['https://testids.interswitch.co.ke:7784', 'http://localhost:7784', 'http://154.118.230.214:8006', 'http://154.118.230.18:8006', 'https://flutterwavestagingv2.com', 'http://flutterwavestagingv2.com', 'https://testmerchant.interswitch-ke.com:7787', 'https://testmerchant.interswitch-ke.com'];
+    var allowedOrigins = ['*virtual-pay.io','https://virtual-pay.io','http://virtual-pay.io', 'https://testids.interswitch.co.ke:7784', 'http://localhost:7784', 'http://154.118.230.214:8006', 'http://154.118.230.18:8006', 'https://flutterwavestagingv2.com', 'http://flutterwavestagingv2.com', 'https://testmerchant.interswitch-ke.com:7787', 'https://testmerchant.interswitch-ke.com'];
     var origin = req.headers.origin;
     console.log("Request origin is : " + origin);
     if (allowedOrigins.indexOf(origin) > -1) {
@@ -138,7 +138,9 @@ app.get('/api/v1/merchant/configuration/new', function (req, resp) {
     console.log("request to get config MID is " + req.query.MID);
     //console.log("header to complete pay is "+JSON.stringify(req.headers));
     //console.log("header host to complete pay is "+req.headers.host);
-    req.headers.host = "http://172.16.112.4:9080";
+    req.headers.host = "http://172.16.112.36:19082";
+    //req.headers.host = "http://172.16.112.4:9080";
+	//req.headers.host = "http://172.16.112.34:19082";
     //headers: req.headers,
     request({
         url: req.headers.host + '/api/v1/merchant/mfb/config/' + req.query.MID,

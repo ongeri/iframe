@@ -19,7 +19,7 @@ Cardinal.on("payments.validated", paymentsValidated);
 function cardInitialize(payloadParam, callbackParam) {
     payload = payloadParam;
     callback = callbackParam;
-//    console.count("cardInitialize(payload): " + payload);
+    console.count("cardInitialize(payload): " + payload);
     $.get(baseUrl + "/merchant/card/initialize", {requestStr: payload}, function (response) {
         if (response.jwt) {
 
@@ -28,7 +28,7 @@ function cardInitialize(payloadParam, callbackParam) {
                 jwt: response.jwt
             });
 
-//            console.count("/merchant/card/initialize response:", JSON.stringify(response));
+            console.count("/merchant/card/initialize response:", JSON.stringify(response));
         } else {
             console.count("card not enrolled");
             callback(response, null, undefined);
@@ -45,7 +45,7 @@ function cardInitialize(payloadParam, callbackParam) {
 function tokenInitialize(payloadParam, callbackParam) {
     payload = payloadParam;
     callback = callbackParam;
-//    console.count("cardInitialize(payload): " + payload);
+    console.count("cardInitialize(payload): " + payload);
     $.get(baseUrl + "/merchant/token/initialize", {requestStr: payload}, function (response) {
         if (response.jwt) {
 
@@ -54,7 +54,7 @@ function tokenInitialize(payloadParam, callbackParam) {
                 jwt: response.jwt
             });
             payload = JSON.stringify(response);
-//            console.count("Response and new payload" + payload);
+            console.count("Response and new payload" + payload);
         } else {
             console.count("Token card not enrolled");
             callback(response, null, undefined);
@@ -69,34 +69,34 @@ function tokenInitialize(payloadParam, callbackParam) {
 }
 
 function paymentsCompleted(setupCompleteData) {
-//    console.count("payments.setupComplete", setupCompleteData.sessionId);
+    console.count("payments.setupComplete", setupCompleteData.sessionId);
     Cardinal.trigger("bin.process", '1234567894561237');
     checkEnrollAction(payload, setupCompleteData.sessionId);
 }
 
 function paymentsValidated(data, jwt) {
-//    console.count('payments.validated', jwt);
-//    console.count('eresp: ' + eresp);
-//    console.count(JSON.stringify(data));
-//    console.log("Data action code:", data.ActionCode);
+    console.count('payments.validated', jwt);
+    console.count('eresp: ' + eresp);
+    console.count(JSON.stringify(data));
+    console.log("Data action code:", data.ActionCode);
     validateAction(payload, eresp, JSON.stringify(data), JSON.stringify(jwt));
     switch (data.ActionCode) {
         case "SUCCESS":
-//            console.count('success');
+            console.count('success');
             validateAction(payload, eresp, JSON.stringify(data), JSON.stringify(jwt));
             // Handle successful transaction, send JWT to backend to verify
             break;
         case "NOACTION":
-//            console.count("NOACTION");
+            console.count("NOACTION");
             // Handle no actionable outcome
             break;
         case "FAILURE":
-//            console.count("FAILURE");
+            console.count("FAILURE");
             // Handle failed transaction attempt
             callback(data);
             break;
         case "ERROR":
-//            console.count("ERROR");
+            console.count("ERROR");
             // Handle service level error
             callback(data);
             break;
@@ -108,7 +108,7 @@ function checkEnrollAction(payload, referenceId) {
         //document.getElementById("eresp").innerHTML = JSON.stringify(response);
         eresp = JSON.stringify(response);
         if (response.transactionRef) {
-//            console.count(JSON.stringify(response));
+            console.count(JSON.stringify(response));
             if (response.csAcsURL) {
                 Cardinal.continue('cca',
                     {
@@ -122,14 +122,14 @@ function checkEnrollAction(payload, referenceId) {
                     },
                     response.jwt
                 );
-//                console.count("continue initiated");
+                console.count("continue initiated");
             } else {
                 //var eresp = document.getElementById("eresp").innerHTML;
                 authorizeAction(payload, eresp);
             }
         } else {
-//            console.count(JSON.stringify(response));
-//            console.count("card not enrolled");
+            console.count(JSON.stringify(response));
+            console.count("card not enrolled");
             notifyAction("Check", "1", JSON.stringify(response), payload);
         }
     });
@@ -142,12 +142,12 @@ function validateAction(payload, eresp, data, jwt) {
         jwt: jwt,
         requestStr: payload
     }, function (response) {
-//        console.count("Validation response", JSON.stringify(response));
+        console.count("Validation response", JSON.stringify(response));
         if (response.transactionRef) {
-//            console.count("validation succeeded");
+            console.count("validation succeeded");
             notifyAction("Validate", "0", JSON.stringify(response), payload);
         } else {
-//            console.count("validation failed");
+            console.count("validation failed");
             notifyAction("Validate", "1", JSON.stringify(response), payload);
         }
     });
@@ -156,13 +156,13 @@ function validateAction(payload, eresp, data, jwt) {
 function authorizeAction(payload, eresp) {
     $.get(baseUrl + "/merchant/card/authorize1", {eresp: eresp, requestStr: payload}, function (response) {
         if (response.transactionRef) {
-//            console.count(JSON.stringify(response));
-//            console.count("Successfully authorized" + response);
+            console.count(JSON.stringify(response));
+            console.count("Successfully authorized" + response);
             callback(null, eresp, null);
             notifyAction("Authorize", "0", JSON.stringify(response), payload);
         } else {
-//            console.count(JSON.stringify(response));
-//            console.count("Authorization failed");
+            console.count(JSON.stringify(response));
+            console.count("Authorization failed");
             notifyAction("Authorize", "1", JSON.stringify(response), payload);
             callback(response, null, undefined);
         }
@@ -170,9 +170,9 @@ function authorizeAction(payload, eresp) {
 }
 
 function notifyAction(transactionType, respStatus, resp, payload) {
-//    console.log("Notifying outcome for " + transactionType + ", result status: " + respStatus + " response: " + resp);
+    console.log("Notifying outcome for " + transactionType + ", result status: " + respStatus + " response: " + resp);
     if (respStatus === "0") {
-//        console.count("Notify succeeded");
+        console.count("Notify succeeded");
         callback(null, resp, null);
     } else {
         callback(resp);
@@ -183,11 +183,11 @@ function notifyAction(transactionType, respStatus, resp, payload) {
         responseStr: resp,
         requestStr: payload
     }, function (response) {
-//        console.count("Notify response", JSON.stringify(response));
+        console.count("Notify response", JSON.stringify(response));
         if (response.responseCode) {
-//            console.count("Notify succeeded");
+            console.count("Notify succeeded");
         } else {
-//            console.count("Notify failed");
+            console.count("Notify failed");
         }
     });
 }
