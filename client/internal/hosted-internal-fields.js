@@ -161,6 +161,7 @@ const createPayHandler = function (client, cardForm) {
 
         if (isEmpty) {
             console.warn("Empty object!");
+            // var obj = {
             //     error: "All the fields are empty"
             // };
 
