@@ -63,6 +63,8 @@ const builder = function (conf) {
         terminalId: conf.terminalId || "",
         paymentItem: conf.paymentItem || "",
         provider: conf.provider || "",
+        reqId: conf.reqId || "",
+        field1: conf.field1 || "{}",
         customerInfor: conf.customerInfor || "",
         domain: conf.domain || "",
         narration: conf.narration || "",
@@ -87,11 +89,9 @@ const builder = function (conf) {
     }, function (err, res, body) {
         if (err) {
             //find a way to throw exception message to client
-        }
-        else if (res.statusCode !== 201) {
+        } else if (res.statusCode !== 201) {
             //
-        }
-        else {
+        } else {
 //            console.log(JSON.stringify(body));
             const client = conf.client;
 
@@ -155,36 +155,36 @@ const createPayHandler = function (client, cardForm) {
 
         const invalidKeyData = cardForm.getInvalidFormField();
         let isValid = invalidKeyData.length === 0 ? true : false;
+        const creditCardDetails = cardForm.getCardData();
 
 //        console.log("isempty - isValid " + isEmpty + " " + isValid);
 
         if (isEmpty) {
+            console.warn("Empty object!");
+            // var obj = {
+            //     error: "All the fields are empty"
+            // };
 
-            var obj = {
-                error: "All the fields are empty"
-            };
 
-
-            reply(obj);
-            return;
+            // reply(obj);
+            // return;
         }
 
         if (!isValid) {
-
-            var obj = {
-
-                error: "Some fields are Invalid",
-                detail: {data: invalidKeyData}
-
-            };
+            console.warn("Invalid object!");
+            // var obj = {
+            //
+            //     error: "Some fields are Invalid",
+            //     detail: {data: invalidKeyData}
+            //
+            // };
 
 //            console.log("error from source " + JSON.stringify(obj));
-            reply(obj);
-            return;
+//             reply(obj);
+            // return;
         }
 
 
-        const creditCardDetails = cardForm.getCardData();
 
         options = options || {};
 
