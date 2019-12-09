@@ -40,7 +40,7 @@ BaseInput.prototype.buildElement = function () {
 
     let inputType = this.getConfiguration().type || 'tel';
 
-    if (type === "pin") {
+    if (type === "pin"||type === "cvv") {
 
         inputType = 'password'
     }
