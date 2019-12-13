@@ -5,6 +5,22 @@ const baseUrl = "https://merchant.interswitch-ke.com";
 let eresp = "";
 let payload = "";
 let callback;
+let ip = "";
+
+//"https://json.geoiplookup.io/"
+function getIp() {
+    // Set the global configs to synchronous
+    $.ajaxSetup({
+        async: false
+    });
+    $.getJSON("https://jsonip.com/", function (data) {
+        ip = data.ip;
+    });
+    // Set the global configs back to asynchronous
+    $.ajaxSetup({
+        async: true
+    });
+}
 
 //configure cardinal
 Cardinal.configure({
@@ -17,9 +33,21 @@ Cardinal.on('payments.setupComplete', paymentsCompleted);
 Cardinal.on("payments.validated", paymentsValidated);
 
 function cardInitialize(payloadParam, callbackParam) {
+    getIp();
     payload = payloadParam;
     callback = callbackParam;
-    console.count("cardInitialize(payload): " + payload);
+    payload = JSON.parse(payload);
+    if (payload.customerInfor) {
+        if (payload.customerInfor.split('|').length === 10) {
+            payload.customerInfor = payload.customerInfor + '|' + ip + '|' + window.location.hostname + ' |' + getBrowserInfor();
+        } else {
+            payload.customerInfor = "| | | | | | | | | | |" + ip + '|' + window.location.hostname + ' |' + getBrowserInfor();
+        }
+    } else {
+        payload.customerInfor = "| | | | | | | | | | |" + ip + '|' + window.location.hostname + ' |' + getBrowserInfor();
+    }
+    payload = JSON.stringify(payload);
+    //    console.count("cardInitialize(payload): " + payload);
     $.get(baseUrl + "/merchant/card/initialize", {requestStr: payload}, function (response) {
         if (response.jwt) {
 
@@ -43,9 +71,21 @@ function cardInitialize(payloadParam, callbackParam) {
 }
 
 function tokenInitialize(payloadParam, callbackParam) {
+    getIp();
     payload = payloadParam;
     callback = callbackParam;
-    console.count("cardInitialize(payload): " + payload);
+    payload = JSON.parse(payload);
+    if (payload.customerInfor) {
+        if (payload.customerInfor.split('|').length === 10) {
+            payload.customerInfor = payload.customerInfor + '|' + ip + '|' + window.location.hostname + ' |' + getBrowserInfor();
+        } else {
+            payload.customerInfor = "| | | | | | | | | | |" + ip + '|' + window.location.hostname + ' |' + getBrowserInfor();
+        }
+    } else {
+        payload.customerInfor = "| | | | | | | | | | |" + ip + '|' + window.location.hostname + ' |' + getBrowserInfor();
+    }
+    payload = JSON.stringify(payload);
+    //    console.count("cardInitialize(payload): " + payload);
     $.get(baseUrl + "/merchant/token/initialize", {requestStr: payload}, function (response) {
         if (response.jwt) {
 
@@ -191,6 +231,70 @@ function notifyAction(transactionType, respStatus, resp, payload) {
         }
     });
 }
+
+function getBrowserInfor() {
+    const nAgt = navigator.userAgent;
+    let browserName = navigator.appName;
+    let fullVersion = '' + parseFloat(navigator.appVersion);
+    let majorVersion = parseInt(navigator.appVersion, 10);
+    let nameOffset, verOffset, ix;
+    // In Opera 15+, the true version is after "OPR/"
+    if ((verOffset = nAgt.indexOf("OPR/")) !== -1) {
+        browserName = "Opera";
+        fullVersion = nAgt.substring(verOffset + 4);
+    }
+    // In older Opera, the true version is after "Opera" or after "Version"
+    else if ((verOffset = nAgt.indexOf("Opera")) !== -1) {
+        browserName = "Opera";
+        fullVersion = nAgt.substring(verOffset + 6);
+        if ((verOffset = nAgt.indexOf("Version")) !== -1)
+            fullVersion = nAgt.substring(verOffset + 8);
+    }
+    // In MSIE, the true version is after "MSIE" in userAgent
+    else if ((verOffset = nAgt.indexOf("MSIE")) !== -1) {
+        browserName = "Microsoft Internet Explorer";
+        fullVersion = nAgt.substring(verOffset + 5);
+    }
+    // In Chrome, the true version is after "Chrome"
+    else if ((verOffset = nAgt.indexOf("Chrome")) !== -1) {
+        browserName = "Chrome";
+        fullVersion = nAgt.substring(verOffset + 7);
+    }
+    // In Safari, the true version is after "Safari" or after "Version"
+    else if ((verOffset = nAgt.indexOf("Safari")) !== -1) {
+        browserName = "Safari";
+        fullVersion = nAgt.substring(verOffset + 7);
+        if ((verOffset = nAgt.indexOf("Version")) !== -1)
+            fullVersion = nAgt.substring(verOffset + 8);
+    }
+    // In Firefox, the true version is after "Firefox"
+    else if ((verOffset = nAgt.indexOf("Firefox")) !== -1) {
+        browserName = "Firefox";
+        fullVersion = nAgt.substring(verOffset + 8);
+    }
+    // In most other browsers, "name/version" is at the end of userAgent
+    else if ((nameOffset = nAgt.lastIndexOf(' ') + 1) <
+        (verOffset = nAgt.lastIndexOf('/'))) {
+        browserName = nAgt.substring(nameOffset, verOffset);
+        fullVersion = nAgt.substring(verOffset + 1);
+        if (browserName.toLowerCase() === browserName.toLowerCase()) {
+            browserName = navigator.appName;
+        }
+    }
+    // trim the fullVersion string at semicolon/space if present
+    if ((ix = fullVersion.indexOf(";")) !== -1)
+        fullVersion = fullVersion.substring(0, ix);
+    if ((ix = fullVersion.indexOf(" ")) !== -1)
+        fullVersion = fullVersion.substring(0, ix);
+
+    majorVersion = parseInt('' + fullVersion, 10);
+    if (isNaN(majorVersion)) {
+        fullVersion = '' + parseFloat(navigator.appVersion);
+        majorVersion = parseInt(navigator.appVersion, 10);
+    }
+    return browserName
+}
+
 
 'use strict';
 const Sha1 = {};
