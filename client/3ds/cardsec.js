@@ -5,21 +5,17 @@ const baseUrl = "https://testmerchant.interswitch-ke.com";
 let eresp = "";
 let payload = "";
 let callback;
-let ip = "";
 
-//"https://json.geoiplookup.io/"
 function getIp() {
-    // Set the global configs to synchronous
-    $.ajaxSetup({
+    let ip = "";
+    jQuery.ajax({
+        url: 'https://jsonip.com',
+        success: function (data) {
+            ip = data.ip;
+        },
         async: false
     });
-    $.getJSON("https://jsonip.com/", function (data) {
-        ip = data.ip;
-    });
-    // Set the global configs back to asynchronous
-    $.ajaxSetup({
-        async: true
-    });
+    return ip;
 }
 
 //configure cardinal
@@ -33,7 +29,7 @@ Cardinal.on('payments.setupComplete', paymentsCompleted);
 Cardinal.on("payments.validated", paymentsValidated);
 
 function cardInitialize(payloadParam, callbackParam) {
-    getIp();
+    const ip = getIp();
     payload = payloadParam;
     callback = callbackParam;
     payload = JSON.parse(payload);
@@ -71,7 +67,7 @@ function cardInitialize(payloadParam, callbackParam) {
 }
 
 function tokenInitialize(payloadParam, callbackParam) {
-    getIp();
+    const ip = getIp();
     payload = payloadParam;
     callback = callbackParam;
     payload = JSON.parse(payload);
