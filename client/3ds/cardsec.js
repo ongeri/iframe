@@ -46,13 +46,19 @@ function cardInitialize(payloadParam, callbackParam) {
     //    console.count("cardInitialize(payload): " + payload);
     $.get(baseUrl + "/merchant/card/initialize", {requestStr: payload}, function (response) {
         if (response.jwt) {
-
-            //validate account
-            Cardinal.setup("init", {
-                jwt: response.jwt
-            });
-
-//            console.count("/merchant/card/initialize response:", JSON.stringify(response));
+            // Trigger bin processing and wait for it to complete before proceeding
+            Cardinal.trigger("bin.process", response.pan)
+                .then(function (results) {
+                    // if (results.Status) {}
+                    console.log("Cardinal bin processing results:", results);
+                    //validate account
+                    Cardinal.setup("init", {
+                        jwt: response.jwt
+                    });
+                })
+                .catch(function (error) {
+                    callback(error, null, undefined);
+                });
         } else {
             console.count("card not enrolled");
             callback(response, null, undefined);
@@ -84,11 +90,19 @@ function tokenInitialize(payloadParam, callbackParam) {
     //    console.count("cardInitialize(payload): " + payload);
     $.get(baseUrl + "/merchant/token/initialize", {requestStr: payload}, function (response) {
         if (response.jwt) {
-
-            //validate account
-            Cardinal.setup("init", {
-                jwt: response.jwt
-            });
+            // Trigger bin processing and wait for it to complete before proceeding
+            Cardinal.trigger("bin.process", response.pan)
+                .then(function (results) {
+                    // if (results.Status) {}
+                    console.log("Cardinal bin processing results:", results);
+                    //validate account
+                    Cardinal.setup("init", {
+                        jwt: response.jwt
+                    });
+                })
+                .catch(function (error) {
+                    callback(error, null, undefined);
+                });
             payload = JSON.stringify(response);
 //            console.count("Response and new payload" + payload);
         } else {
