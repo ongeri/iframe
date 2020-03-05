@@ -65,8 +65,7 @@ var processConfiguration = function (options, callback) {
             if (err) {
 //                console.log("error in getting merchant configuration data " + JSON.stringify(err));
                 callback(err, null);
-            }
-            else {
+            } else {
 //                console.log("merchant configuration response " + JSON.stringify(res));
                 var merchantConfigs = res;
 
@@ -85,9 +84,12 @@ var processConfiguration = function (options, callback) {
                             mpesa: config.mpesaStatus.toString(),
                             equitel: config.equitelStatus.toString(),
                             tkash: config.tkashStatus.toString(),
+                            pesalink: config.pesalinkStatus.toString(),
                             airtel: config.airtelStatus.toString(),
                             paycode: config.paycodeStatus.toString(),
                             mpesaPaybill: config.mpesaPaybill,
+                            airtelPaybill: config.airtelPaybill,
+                            pesalinkAccount: config.pesalinkAccount,
                             equitelPaybill: config.equitelPaybill,
                             clientId: config.clientId,
                             clientSecret: config.clientSecret,
@@ -104,8 +106,7 @@ var processConfiguration = function (options, callback) {
                     var obj = merchantConfigs[i];
                     if (i === 0) {
                         configuration.Urls = obj;
-                    }
-                    else {
+                    } else {
                         /*console.log(obj.MID);
                         console.log(obj.clientId);
                         console.log(obj.clientSecret);
@@ -124,6 +125,9 @@ var processConfiguration = function (options, callback) {
                             configuration.airtel = obj.airtel;
                             configuration.paycode = obj.paycode;
                             configuration.mpesaPaybill = obj.mpesaPaybill;
+                            configuration.airtelPaybill = obj.airtelPaybill;
+                            configuration.pesalink = obj.pesalink;
+                            configuration.pesalinkAccount = obj.pesalinkAccount;
                             configuration.equitelPaybill = obj.equitelPaybill;
                             configuration.tokenize = obj.tokenize;
                             configuration.cardauth = obj.cardauth;
