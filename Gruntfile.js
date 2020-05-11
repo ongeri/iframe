@@ -96,16 +96,28 @@ module.exports = function (grunt) {
             compile: {
                 options: {
                     //compress: true,
+                    // wrap: true,
+                    comments: false,
+                    ie8: false,
+                    // sourceMap: true,
                     verbose: true,
                     mangle: true,
                     compress: {
-                        drop_console: true
+                        drop_console: true,
+                        sequences: true,
+                        dead_code: true,
+                        conditionals: true,
+                        booleans: true,
+                        unused: true,
+                        if_return: true,
+                        join_vars: true,
                     }
                 },
-                files: [{
-                    src: 'dist/build.js',
-                    dest: 'dist/prod/build.js'
-                },
+                files: [
+                    {
+                        src: 'dist/build.js',
+                        dest: 'dist/prod/build.js'
+                    },
                     {
                         src: 'dist/client.js',
                         dest: 'dist/prod/client.js'

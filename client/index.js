@@ -7,10 +7,10 @@
  *
  *
  **/
-require('./internal/index.js');
-require('./webrobot/index.js');
+// require('./internal/index.js');
+// require('./webrobot/index.js');
 var ISWContainerFields = require('./hosted-fields/index.js');
-//var client=require('./webrobot');
+var client = require('./webrobot');
 var request = require('./request');
 // var Backbone = require('backbone');
 // var $ = require('jquery');
@@ -23,3 +23,4 @@ var request = require('./request');
 window.interswitch = window.interswitch || {};
 window.interswitch.hostedFields = ISWContainerFields;
 window.interswitch.request = request;
+window.interswitch.client = client;
